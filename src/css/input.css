@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --bg-main: #0a0f1a;
+    --bg-panel: #131b2c;
+    --bg-card: #1c263b;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent: #0ea5e9;
+    --accent-hover: #38bdf8;
+    --border: #2a3b59;
+}
+
+body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-main); }
+code, pre { font-family: 'Fira Code', monospace !important; font-size: 0.85rem !important; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-main); }
+::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+.nav-item { border-left: 2px solid transparent; transition: all 0.2s; }
+.nav-item.active { border-left-color: var(--accent); background-color: rgba(14, 165, 233, 0.1); color: var(--accent); font-weight: 600; }
+
+.math-block { background-color: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--accent); padding: 1.5rem; border-radius: 0.5rem; font-family: 'Fira Code', monospace; color: #e2e8f0; margin-bottom: 2rem; overflow-x: auto; font-size: 0.9rem; line-height: 1.6; }
+
+.hw-card { background: linear-gradient(145deg, #131b2c, #0a0f1a); border: 1px solid var(--border); transition: transform 0.2s; }
+.hw-card:hover { transform: translateY(-4px); border-color: #0ea5e9; box-shadow: 0 10px 20px -5px rgba(14, 165, 233, 0.2); }
+
+.chart-container { position: relative; width: 100%; height: 500px; margin-bottom: 2rem; }
+
+.fade-in { animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity: 0; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+h2 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.025em; margin-bottom: 1rem; color: #fff; }
+h3 { font-size: 1.75rem; font-weight: 700; margin-top: 3rem; margin-bottom: 1.25rem; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+h4 { font-size: 1.25rem; font-weight: 600; margin-top: 2rem; margin-bottom: 1rem; color: #e2e8f0; }
+p { margin-bottom: 1.5rem; line-height: 1.75; color: #cbd5e1; font-size: 1.05rem; }
+ul, ol { margin-bottom: 1.5rem; padding-left: 1.5rem; color: #cbd5e1; line-height: 1.75; }
+li { margin-bottom: 0.5rem; }
+
+.interactive-panel { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 0.75rem; padding: 2rem; margin: 2rem 0; box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
+.workflow-step { cursor: pointer; transition: all 0.3s ease; }
+.workflow-step:hover { background-color: var(--bg-card); }
+.workflow-step.active { border-color: var(--accent); background-color: rgba(14, 165, 233, 0.05); }
+
+#swarmCanvas { background-color: #05080f; border: 1px solid var(--border); border-radius: 0.5rem; width: 100%; height: 400px; cursor: crosshair; }
