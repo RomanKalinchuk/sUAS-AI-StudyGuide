@@ -1,10 +1,10 @@
 export default `
 <div class="fade-in">
-    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 11</span>
+    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 5</span>
     <h2>Perception & Visual SLAM</h2>
     <p>To act autonomously, the drone must generate a mathematical representation of its environment in real-time. This module covers the core computer vision mathematics.</p>
 
-    <h3>11.1 Camera Geometry and Calibration</h3>
+    <h3>5.1 Camera Geometry and Calibration</h3>
     <p>A camera is a mathematical transformation device that maps 3D world points (X,Y,Z) into 2D image pixels (u,v). For AI to interact with the physical world, we must mathematically reverse this process. This requires the Intrinsic Matrix (K).</p>
 
     <div class="math-block text-lg">
@@ -19,7 +19,7 @@ export default `
         </span>
     </div>
 
-    <h3>11.2 Visual Inertial Odometry (VIO) Architecture</h3>
+    <h3>5.2 Visual Inertial Odometry (VIO) Architecture</h3>
     <p>VIO is the process of fusing Camera translation with IMU acceleration to determine the drone's position in 3D space. It solves the problem of IMU drift. (An IMU alone accumulates error so fast that after 10 seconds, it might think it has moved 50 meters).</p>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700">

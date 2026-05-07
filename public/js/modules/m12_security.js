@@ -1,10 +1,10 @@
 export default `
 <div class="fade-in">
-    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 16</span>
+    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 13</span>
     <h2>Security & Counter-UAS Systems</h2>
     <p>An autonomous drone is a networked, radio-dependent, GPS-reliant embedded system. Each of those dependencies is an attack surface. This module covers the attack vectors engineers must design against, and the detection technologies used by adversaries to find and defeat AI drone systems.</p>
 
-    <h3>16.1 MAVLink Protocol Security</h3>
+    <h3>13.1 MAVLink Protocol Security</h3>
     <p>MAVLink is the dominant protocol for communication between the flight controller and ground control station (GCS) or companion computer. By default, <strong>MAVLink has no authentication</strong>. Any device that can transmit on the UART or UDP channel can send valid MAVLink messages, including <code>COMMAND_LONG</code> messages that arm motors, change flight modes, or trigger RTL.</p>
 
     <h4>MAVLink v2 Packet Signing</h4>
@@ -55,7 +55,7 @@ mavproxy.py --master /dev/ttyUSB0 --baud 57600
         </div>
     </div>
 
-    <h3>16.2 GPS Spoofing</h3>
+    <h3>13.2 GPS Spoofing</h3>
     <p>GPS spoofing is the transmission of counterfeit GPS signals at higher power than authentic satellite signals. The receiver, which locks onto the strongest signal, synchronizes to the fake signal. The attacker controls the fake signal's parameters and can therefore control what position the drone's GPS module reports — gradually steering the drone to any desired location without triggering an alert.</p>
 
     <h4>Detection Methods</h4>
@@ -80,7 +80,7 @@ mavproxy.py --master /dev/ttyUSB0 --baud 57600
         Spoofed signal (typical SDR attacker): -90 to -110 dBm (20–40 dB above authentic)
     </div>
 
-    <h3>16.3 RF Jamming, Detection, and FHSS</h3>
+    <h3>13.3 RF Jamming, Detection, and FHSS</h3>
     <p>RC link jamming involves transmitting high-power broadband noise on the control link frequency (2.4 GHz or 900 MHz), raising the noise floor until the receiver can no longer decode packets. From the drone's perspective, packet loss rises to 100% and the RC failsafe triggers.</p>
 
     <h4>ArduPilot RC Failsafe Response</h4>
@@ -100,7 +100,7 @@ mavproxy.py --master /dev/ttyUSB0 --baud 57600
         <strong>Engineering note:</strong> ELRS's FHSS does not encrypt the link. It provides resistance to <em>uncoordinated</em> jamming and accidental interference, not against a sophisticated adversary who has reverse-engineered the hopping sequence. For military applications, link-layer AES encryption (as in ATAK data links or Harris RF-7800 radios) is mandatory.
     </div>
 
-    <h3>16.4 Firmware & Companion Computer Security</h3>
+    <h3>13.4 Firmware & Companion Computer Security</h3>
 
     <h4>STM32H7 Secure Boot (Pixhawk 6X)</h4>
     <p>The STM32H7 (used in Pixhawk 6X) implements Read-Out Protection (RDP) at three levels. <strong>Level 0</strong>: no protection, full debug access via SWD, flash readable. <strong>Level 1</strong>: flash is not readable via SWD but can be erased; debug is partially restricted. <strong>Level 2</strong>: JTAG/SWD is permanently disabled, flash is locked, and the CPU only boots from internal flash. Critically, Level 2 is <strong>irreversible</strong> — there is no regression path. Setting Level 2 in the field prevents firmware extraction by an adversary who captures the hardware.</p>
@@ -134,7 +134,7 @@ sudo systemctl mask bluetooth        # Bluetooth attack surface
         </div>
     </div>
 
-    <h3>16.5 Counter-UAS Detection Technologies</h3>
+    <h3>13.5 Counter-UAS Detection Technologies</h3>
     <p>Counter-UAS (C-UAS) systems use one or more detection modalities. Each has distinct range, accuracy, and environmental dependency characteristics. Production C-UAS installations layer multiple modalities for sensor fusion.</p>
 
     <div class="interactive-panel">
@@ -175,7 +175,7 @@ sudo systemctl mask bluetooth        # Bluetooth attack surface
         </div>
     </div>
 
-    <h3>16.6 Counter-UAS Defeat Systems</h3>
+    <h3>13.6 Counter-UAS Defeat Systems</h3>
     <p>Detection identifies the threat. Defeat is the kinetic or non-kinetic neutralization of it. The legal and technical constraints on defeat systems are significant, particularly for non-government operators.</p>
 
     <div class="bg-slate-800 p-4 rounded border-l-4 border-red-500 text-sm text-slate-300 mb-6">
@@ -209,7 +209,7 @@ sudo systemctl mask bluetooth        # Bluetooth attack surface
         </div>
     </div>
 
-    <h3>16.7 Security Architecture for a Production AI Drone</h3>
+    <h3>13.7 Security Architecture for a Production AI Drone</h3>
     <p>A defense-in-depth architecture applies security controls at every layer. No single control is sufficient — the stack must assume each layer can be compromised and provide compensating controls at the next layer.</p>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700">

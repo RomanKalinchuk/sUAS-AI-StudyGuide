@@ -1,10 +1,10 @@
 export default `
 <div class="fade-in">
-    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 8</span>
+    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 4</span>
     <h2>Data Links & Topology</h2>
     <p>A high-performance brain is useless if the nervous system is slow. Drone topology dictates how sensor data flows into the AI, and how AI commands flow back to the motors.</p>
 
-    <h3>8.1 Physical Interface Standards</h3>
+    <h3>4.1 Physical Interface Standards</h3>
     <p>Understanding the hardware interfaces is critical to avoid bottlenecks.</p>
 
     <table class="w-full text-left border-collapse mt-6 mb-8 text-sm">
@@ -44,7 +44,7 @@ export default `
         </tbody>
     </table>
 
-    <h3>8.2 The MAVLink Protocol Breakdown</h3>
+    <h3>4.2 The MAVLink Protocol Breakdown</h3>
     <p>MAVLink (Micro Air Vehicle Link) is the lingua franca of drone communication. It is a lightweight, header-only message marshaling library. When your AI Python script wants to move the drone, it must construct a specific MAVLink binary packet.</p>
 
     <div class="math-block bg-[#0d1117] border-slate-700 mb-8">
@@ -67,10 +67,10 @@ export default `
         </p>
     </div>
 
-    <h3>8.3 Network Topology: DDS (Data Distribution Service)</h3>
+    <h3>4.3 Network Topology: DDS (Data Distribution Service)</h3>
     <p>Inside the Companion Computer, data does not flow sequentially. A modern AI drone runs ROS 2, which uses DDS. DDS is a decentralized pub/sub middleware. The Camera Node "publishes" images to a topic. The VIO Node and the AI Node both "subscribe" to that topic. They process data in parallel, independently.</p>
 
-    <h3>8.4 Micro XRCE-DDS — Replacing MAVROS for Flight Controller Communication</h3>
+    <h3>4.4 Micro XRCE-DDS — Replacing MAVROS for Flight Controller Communication</h3>
     <p>MAVROS was the ROS 1 bridge between a companion computer and a flight controller: it received MAVLink packets over UART and re-published them as ROS topics. It required a serialization and deserialization step for every message. With ROS 2, a better architecture is available: <strong>Micro XRCE-DDS</strong> (eXtremely Resource Constrained Environments DDS).</p>
     <p>Micro XRCE-DDS runs a lightweight client directly on the flight controller MCU (Cortex-M7). The client publishes flight state — attitude, velocity, position, battery — directly to the DDS global data space. The companion computer's ROS 2 nodes subscribe to these topics without any bridge process. The UART or UDP serial link becomes transparent middleware, not a bottleneck.</p>
 

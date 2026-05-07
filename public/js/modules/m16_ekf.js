@@ -1,10 +1,10 @@
 export default `
 <div class="fade-in">
-    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 9</span>
+    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 17</span>
     <h2>Sensor Fusion & Extended Kalman Filter Architecture</h2>
     <p>State estimation is the mathematical foundation of autonomous flight. Without knowing position, velocity, and attitude with bounded error, no control law can function correctly. This module covers the EKF architecture used in production ArduPilot systems — the mathematics, the implementation decisions, and the failure modes engineers must understand.</p>
 
-    <h3>9.1 Why EKF: The IMU Integration Problem</h3>
+    <h3>17.1 Why EKF: The IMU Integration Problem</h3>
     <p>Inertial Measurement Units (IMUs) measure acceleration and angular rate. To obtain position from acceleration, two integrations are required. Each integration accumulates error. This is not an implementation flaw — it is a consequence of the physics of differentiation and integration applied to noisy signals.</p>
 
     <div class="math-block">
@@ -28,7 +28,7 @@ export default `
 
     <p>The t^2 bias drift term is the critical insight: a pure IMU integration is adequate for fractions of a second (that is why IMUs work well for attitude hold on short time scales), but is completely unusable for position navigation beyond ~10 seconds without an external absolute reference. The EKF fuses external absolute measurements (GPS, barometer, magnetometer) to correct and bound this drift.</p>
 
-    <h3>9.2 ArduPilot Filter Evolution: DCM → EKF2 → EKF3</h3>
+    <h3>17.2 ArduPilot Filter Evolution: DCM → EKF2 → EKF3</h3>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
         <h4 class="mt-0 border-none text-white">Filter Architecture Progression</h4>
@@ -74,7 +74,7 @@ export default `
         </div>
     </div>
 
-    <h3>9.3 The EKF3 State Vector: All 24 States Explained</h3>
+    <h3>17.3 The EKF3 State Vector: All 24 States Explained</h3>
     <p>The EKF state vector x ∈ R^24 represents the complete navigational state of the vehicle. The 24×24 covariance matrix P tracks uncertainty and cross-correlations between all state pairs.</p>
 
     <div class="math-block">
@@ -103,7 +103,7 @@ export default `
         <li><strong>3-axis vs Z-only accel bias (EKF3 vs EKF2):</strong> EKF2 only estimated the Z-axis accelerometer bias under the assumption that the vehicle spends most time near-horizontal. EKF3 estimating all three axes is required for tailsitters that operate at ±90° pitch continuously.</li>
     </ul>
 
-    <h3>9.4 The EKF Predict-Update Cycle</h3>
+    <h3>17.4 The EKF Predict-Update Cycle</h3>
     <p>The EKF operates as a two-phase cycle. The prediction step runs continuously at the IMU rate. The update step runs asynchronously, triggered by each sensor at its own rate.</p>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
@@ -158,7 +158,7 @@ P(k|k) = (I - K*H) * P(k|k-1) * (I - K*H)^T + K*R*K^T
     </ol>
     <p>This is why the EKF can correctly fuse sensors with wildly different latencies (GPS at 100ms, barometer at 50ms, optical flow at 20ms, IMU at 2.5ms) without introducing timing artifacts.</p>
 
-    <h3>9.5 Measurement Updates: Sensor Fusion Details</h3>
+    <h3>17.5 Measurement Updates: Sensor Fusion Details</h3>
 
     <h4>GPS Position and Velocity Update</h4>
     <p>GPS provides 3D position (lat/lon/alt converted to NED meters from the EKF origin) and 3D velocity. Both are fused in separate update steps. The observation model is linear for position (direct measurement of states 0–2) and velocity (states 3–5). The key non-trivial element is <strong>innovation gating</strong>:</p>
@@ -196,7 +196,7 @@ P(k|k) = (I - K*H) * P(k|k-1) * (I - K*H)^T + K*R*K^T
         <li>EKF3 fuses the VIO position estimate using the same innovation gating as GPS — if VIO jumps (tracking failure), it gets rejected</li>
     </ol>
 
-    <h3>9.6 EKF Health Monitoring and Failsafe</h3>
+    <h3>17.6 EKF Health Monitoring and Failsafe</h3>
     <p>ArduPilot continuously evaluates EKF health and can trigger failsafe actions when confidence in the state estimate falls below acceptable thresholds.</p>
 
     <h4>EKF_STATUS_REPORT MAVLink Message (MSG #193)</h4>
@@ -242,7 +242,7 @@ P(k|k) = (I - K*H) * P(k|k-1) * (I - K*H)^T + K*R*K^T
 
     <p>Log analysis: dataflash log fields <code>NKF4.SP</code> (position innovation test ratio), <code>NKF4.SV</code> (velocity innovation test ratio), <code>NKF4.SM</code> (magnetic innovation test ratio). Any of these sustained above 1.0 indicates the EKF is rejecting that sensor — the cause must be identified before autonomous flight.</p>
 
-    <h3>9.7 Multi-EKF Architecture: Redundancy and Fault Tolerance</h3>
+    <h3>17.7 Multi-EKF Architecture: Redundancy and Fault Tolerance</h3>
     <p>ArduPilot can run multiple simultaneous EKF instances, one per IMU. With a triple-redundant IMU platform (e.g., Cube Orange+), three EKF3 instances run simultaneously, each using a different physical IMU but sharing the same GPS, barometer, and magnetometer data.</p>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
@@ -267,7 +267,7 @@ P(k|k) = (I - K*H) * P(k|k-1) * (I - K*H)^T + K*R*K^T
     <h4>EKF Source Switching (GPS ↔ Optical Flow ↔ VIO)</h4>
     <p>EKF3 supports three independent source parameter sets (SRC1, SRC2, SRC3). A hardware RC switch (AUX function 90: EKF Source Set) or MAVLink command <code>MAV_CMD_SET_EKF_SOURCE_SET</code> selects the active set. This enables in-flight transitions between GPS navigation (outdoors) and optical flow / VIO (indoors) without rebooting. The transition maintains EKF continuity — the position state does not jump — because the EKF momentarily fuses both sources simultaneously during the handover period (<code>EK3_SRC_OPTIONS</code> bit 1).</p>
 
-    <h3>9.8 Complementary Filter vs EKF: Frequency Domain Argument</h3>
+    <h3>17.8 Complementary Filter vs EKF: Frequency Domain Argument</h3>
     <p>The complementary filter is the predecessor to EKF-based attitude estimation. Understanding its limitations precisely explains why EKF is necessary for GPS-denied navigation.</p>
 
     <h4>Complementary Filter Architecture (DCM)</h4>

@@ -1,10 +1,10 @@
 export default `
 <div class="fade-in">
-    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 12</span>
+    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 15</span>
     <h2>Depth Sensing &amp; 3D Mapping for Drone Navigation</h2>
     <p>A drone that cannot build a 3D model of its environment is blind to obstacles. This module covers the sensor physics, algorithms, and software stacks that turn raw depth measurements into navigable 3D maps.</p>
 
-    <h3>12.1 Stereo Depth Estimation</h3>
+    <h3>15.1 Stereo Depth Estimation</h3>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-6">
         <h4 class="mt-0 border-none text-sky-400">Semi-Global Matching (SGM) Algorithm</h4>
@@ -98,7 +98,7 @@ finally:
         </div>
     </div>
 
-    <h3>12.2 Time-of-Flight (ToF) Sensors</h3>
+    <h3>15.2 Time-of-Flight (ToF) Sensors</h3>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div class="interactive-panel bg-[#0d1320] border-slate-700">
@@ -130,7 +130,7 @@ finally:
         </div>
     </div>
 
-    <h3>12.3 LiDAR for Drones</h3>
+    <h3>15.3 LiDAR for Drones</h3>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-4">
         <h4 class="mt-0 border-none text-white text-sm">LiDAR Sensor Comparison Matrix</h4>
@@ -191,7 +191,7 @@ def cloud_callback(msg):
         </div>
     </div>
 
-    <h3>12.4 3D Mapping Frameworks</h3>
+    <h3>15.4 3D Mapping Frameworks</h3>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-4">
         <h4 class="mt-0 border-none text-sky-400">OctoMap — Probabilistic 3D Occupancy Grid</h4>
@@ -278,7 +278,7 @@ o3d.io.write_triangle_mesh("reconstruction.ply", mesh)</code></pre>
         </div>
     </div>
 
-    <h3>12.5 Terrain Following</h3>
+    <h3>15.5 Terrain Following</h3>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-6">
         <h4 class="mt-0 border-none text-amber-400 text-sm">ArduPilot Terrain Following — TERRAIN_ENABLE</h4>
@@ -309,7 +309,7 @@ WP_RFND_USE      = 1     # Use rangefinder instead of terrain DB during RTL
         </div>
     </div>
 
-    <h3>12.6 Depth Image to Point Cloud: The Math</h3>
+    <h3>15.6 Depth Image to Point Cloud: The Math</h3>
     <p class="text-slate-300 text-sm">Converting a 2D depth image to a 3D point cloud requires inverting the pinhole camera projection. Given camera intrinsic matrix K:</p>
 
     <div class="math-block text-sm">

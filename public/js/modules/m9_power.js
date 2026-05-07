@@ -1,10 +1,10 @@
 export default `
 <div class="fade-in">
-    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 3</span>
+    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 10</span>
     <h2>Power Electronics & Circuit Design for AI Drones</h2>
     <p>Power architecture is the unglamorous foundation that everything else depends on. A poorly designed power tree will cause brownouts that corrupt flight controller state, reboot the companion computer mid-flight, or silently introduce noise into IMU readings. This module covers every layer from the main battery bus down to the load capacitors at the Jetson's VDD rail.</p>
 
-    <h3>3.1 Power Distribution Architecture</h3>
+    <h3>10.1 Power Distribution Architecture</h3>
     <p>The main Power Distribution Board (PDB) is the high-current switching matrix of the drone. On a 6S (22.2V nominal) quad carrying a 25W AI payload, peak current can exceed 200A during an aggressive pitch maneuver. This is not a place for off-the-shelf PCBs with 2oz copper pours.</p>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -51,7 +51,7 @@ export default `
         supplemented by the battery's own low-impedance source at lower frequencies.
     </div>
 
-    <h3>3.2 BEC (Battery Elimination Circuit) Design</h3>
+    <h3>10.2 BEC (Battery Elimination Circuit) Design</h3>
     <p>A BEC converts the high-voltage LiPo bus down to regulated 5V and 12V rails for flight controller, GPS modules, telemetry radios, RC receivers, and servos. On a 6S system (up to 25.2V in), a <strong>linear regulator is strictly forbidden</strong> for anything above a few milliamps: a linear regulator dropping 25.2V → 5V at 1A dissipates (25.2 - 5) × 1 = 20.2W as heat. That is physically impossible to manage on a drone airframe.</p>
 
     <div class="space-y-6 mb-8">
@@ -132,7 +132,7 @@ export default `
         <strong>6S System BEC Rule:</strong> On a 6S LiPo (22.2V nominal), always use a <strong>synchronous buck converter with integrated MOSFETs</strong> (TPS54560 class or better). The input voltage exceeds the absolute maximum rating of many cheap linear regulators. Verify the converter's absolute maximum Vin rating — most are 60V, but some budget ICs are 28V and will be destroyed by a freshly charged 6S (25.2V) if any voltage spike occurs.
     </div>
 
-    <h3>3.3 Companion Computer Power Delivery (Jetson Orin NX)</h3>
+    <h3>10.3 Companion Computer Power Delivery (Jetson Orin NX)</h3>
     <p>The Jetson Orin NX at 25W peak requires a <strong>dedicated, high-quality power rail</strong> — it must never share a BEC with any ESC, servo, or motor. The reason: motor PWM switching creates enormous current transients that couple as voltage spikes onto shared rails. Even a 50mV glitch can cause LPDDR5 memory errors or trigger the Jetson's hardware undervoltage protection (UVLO), causing an instantaneous power-off.</p>
 
     <div class="math-block">
@@ -170,7 +170,7 @@ export default `
         </div>
     </div>
 
-    <h3>3.4 ESC Architecture and Digital Protocols</h3>
+    <h3>10.4 ESC Architecture and Digital Protocols</h3>
     <p>Electronic Speed Controllers (ESCs) convert the power bus voltage into variable 3-phase AC for brushless motors. The firmware defines the feature set and protocol capabilities.</p>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -218,7 +218,7 @@ export default `
         dramatically improving noise rejection without manual filter tuning.
     </div>
 
-    <h3>3.5 Current Sensing: INA219, INA226, INA3221</h3>
+    <h3>10.5 Current Sensing: INA219, INA226, INA3221</h3>
     <p>Accurate current sensing enables ArduPilot's battery failsafe and gives the operator real-time mAh consumed. All three Texas Instruments devices use an external shunt resistor and an I2C interface.</p>
 
     <div class="space-y-4 mb-8">
@@ -265,7 +265,7 @@ export default `
         </div>
     </div>
 
-    <h3>3.6 Motor KV Rating and Propeller Selection</h3>
+    <h3>10.6 Motor KV Rating and Propeller Selection</h3>
     <p>KV (not kilovolts — the unit is RPM/V) is the motor's velocity constant: the no-load RPM increase per additional Volt applied to the terminals.</p>
 
     <div class="math-block">
@@ -291,7 +291,7 @@ export default `
         AI payload drones typically: <strong>920KV motors, 6S, 13" props</strong> — balancing flight time and payload capacity.
     </div>
 
-    <h3>3.7 Brownout Protection: Capacitor Bank Design</h3>
+    <h3>10.7 Brownout Protection: Capacitor Bank Design</h3>
     <p>A brownout occurs when the battery voltage sags below the BEC's minimum operating input voltage during peak current draw. The energy stored in a capacitor bank bridges this transient. The Rubycon ZLH and Panasonic FR series are the industry standard for this application because they combine very low ESR with high ripple current rating and long life at elevated temperatures.</p>
 
     <div class="math-block">

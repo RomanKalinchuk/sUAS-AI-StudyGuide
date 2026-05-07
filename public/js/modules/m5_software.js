@@ -1,10 +1,10 @@
 export default `
 <div class="fade-in">
-    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 7</span>
+    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 6</span>
     <h2>Edge Software Toolchains</h2>
     <p>Writing code for a drone is unlike web or backend development. Memory leaks or high garbage collection pauses don't just crash an app; they crash physical hardware. This module explores the enterprise edge software stack.</p>
 
-    <h3>7.1 TensorRT & Model Quantization</h3>
+    <h3>6.1 TensorRT & Model Quantization</h3>
     <p>You cannot deploy a raw PyTorch <code>.pt</code> model to an edge drone and expect real-time performance. Neural networks are essentially massive arrays of 32-bit floating-point (FP32) numbers. Edge processors struggle with FP32 math. The solution is Quantization.</p>
     <p>NVIDIA TensorRT takes a trained model and optimizes it for the exact physical architecture of the GPU it is running on. It performs layer fusion and, critically, quantizes the weights from FP32 down to FP16 or INT8 (8-bit integer).</p>
 
@@ -51,11 +51,11 @@ context = engine.create_execution_context()</code></pre>
         </div>
     </div>
 
-    <h3>7.2 ROS 2 Quality of Service (QoS)</h3>
+    <h3>6.2 ROS 2 Quality of Service (QoS)</h3>
     <p>In standard TCP/IP networking, if a packet is lost, it is resent. This guarantees delivery but introduces unpredictable latency. In drone robotics, stale data is dangerous data. If an image frame is delayed by 500ms, the drone should drop it entirely and process the newest frame, rather than waiting.</p>
     <p>ROS 2 solves this via QoS profiles. For sensor data (cameras, IMU), engineers use the <strong>"Sensor Data" QoS profile</strong>: <code>Reliability = Best Effort</code>, <code>Durability = Volatile</code>, <code>Depth = 5</code>. It drops packets to prioritize lowest-latency delivery of the most recent state. (A depth of 5 is the value defined by <code>rmw_qos_profile_sensor_data</code> in the rclcpp source — not 1, which is a common misconception.)</p>
 
-    <h3>7.3 NVIDIA Isaac ROS — Hardware-Accelerated Perception</h3>
+    <h3>6.3 NVIDIA Isaac ROS — Hardware-Accelerated Perception</h3>
     <p>Standard ROS 2 nodes process data on the CPU. On a Jetson Orin, this is a bottleneck: the 6-core ARM CPU is shared with the OS, ROS 2 DDS middleware, and application logic. NVIDIA Isaac ROS is a collection of drop-in ROS 2 packages that offload perception pipelines to dedicated Orin hardware accelerators: the GPU (CUDA), Vision Accelerator (PVA), and Deep Learning Accelerator (DLA). The CPU is freed for mission logic.</p>
 
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-8">

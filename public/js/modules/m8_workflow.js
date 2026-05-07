@@ -1,6 +1,6 @@
 export default `
 <div class="fade-in">
-    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 17</span>
+    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 9</span>
     <h2>Implementation Workflow</h2>
     <p>A step-by-step interactive checklist for engineering a new AI sUAS platform from scratch. Click through the phases to understand the deployment pipeline.</p>
 
