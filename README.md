@@ -2,7 +2,7 @@
 
 An interactive, self-paced study guide for engineers building AI-powered small Unmanned Aircraft Systems (sUAS). The curriculum covers the full stack: from the physics of flight and embedded silicon, through perception and sensor fusion, to swarm coordination and counter-UAS security.
 
-**Live site:** https://romankalin.github.io/sUAS-AI-StudyGuide
+**Live site:** https://romankalinchuk.github.io/sUAS-AI-StudyGuide
 
 ---
 
