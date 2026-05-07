@@ -80,6 +80,15 @@ window.loadModule = function (id) {
     const container = document.getElementById('content-container');
     container.innerHTML = contentDB[id] ?? '<p class="text-white">Content loading error.</p>';
 
+    const navIdx = modules.findIndex(m => m.id === id);
+    if (navIdx >= 0) {
+        container.querySelectorAll('.text-sky-500.font-mono').forEach(el => {
+            if (/^Module\s+\d+$/i.test(el.textContent.trim())) {
+                el.textContent = `Module ${navIdx + 1}`;
+            }
+        });
+    }
+
     document.getElementById('main-scroll').scrollTop = 0;
 
     if (id === 'm1_physics')  runThermalSim();
