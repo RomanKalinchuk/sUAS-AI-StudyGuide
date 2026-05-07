@@ -6,6 +6,25 @@ export default `
         <p class="text-xl text-slate-400 max-w-3xl mx-auto">Before writing a single line of code or soldering a carrier board, engineers must understand the theoretical framework of unmanned autonomy and the strict constraints of the environment.</p>
     </div>
 
+    <div class="bg-slate-800/60 border border-sky-700/60 rounded-xl p-6 mb-10">
+        <h3 class="mt-0 text-sky-400 border-none text-lg">State of the Industry — 2026</h3>
+        <p class="text-slate-300 text-sm mb-4">This guide targets the current engineering standard. Three platform transitions are complete and engineers must operate on the new stack — not legacy tutorials.</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div class="bg-slate-900 p-4 rounded border-l-4 border-emerald-500">
+                <strong class="text-emerald-400 block mb-2">Compute: Orin Architecture</strong>
+                <p class="text-slate-400 text-xs">The NVIDIA Jetson Orin Nano (40 TOPS, 5W–15W) is the current SWaP-C standard for sub-5kg AI drones. The original Jetson Nano is obsolete for generative edge AI. The Google Coral TPU ecosystem has stagnated. High-end systems now target the Jetson Thor (Blackwell, 1200+ FP4 TFLOPS) for multi-modal foundation model inference.</p>
+            </div>
+            <div class="bg-slate-900 p-4 rounded border-l-4 border-amber-500">
+                <strong class="text-amber-400 block mb-2">Middleware: ROS 2 + DDS</strong>
+                <p class="text-slate-400 text-xs">ROS 1 (Noetic) reached End-of-Life in May 2025. All new development uses ROS 2 Humble (Ubuntu 22.04) or Jazzy (Ubuntu 24.04). The flight controller communication bridge has transitioned from MAVROS (ROS 1 serial bridge) to Micro XRCE-DDS — PX4 and ArduPilot now publish flight state directly to ROS 2 topics via DDS with substantially lower latency.</p>
+            </div>
+            <div class="bg-slate-900 p-4 rounded border-l-4 border-purple-500">
+                <strong class="text-purple-400 block mb-2">Simulation: Isaac Sim / Isaac Lab</strong>
+                <p class="text-slate-400 text-xs">Microsoft AirSim was deprecated in 2023 (community fork: Colosseum). NVIDIA Isaac Sim (Omniverse) is the current standard for photorealistic synthetic data generation and sim-to-real reinforcement learning. Domain randomization in Isaac Sim enables zero-shot policy transfer — models trained entirely in simulation deploy directly to real hardware without fine-tuning.</p>
+            </div>
+        </div>
+    </div>
+
     <h3>1.1 The Evolution of sUAS Autonomy</h3>
     <p>Historically, Unmanned Aircraft Systems (UAS) were purely remote-controlled vehicles. The operator provided all cognitive input—stabilization, navigation, and targeting. The introduction of MEMS (Micro-Electro-Mechanical Systems) IMUs allowed for auto-leveling. The integration of GPS allowed for waypoint navigation.</p>
     <p>However, modern mission requirements—such as navigating inside collapsed buildings, flying under dense forest canopies, or operating in electronic warfare environments where GPS is actively jammed—render traditional navigation useless. <strong>Edge AI is not a luxury feature; it is an operational mandate for survivability and mission success in GPS-denied environments.</strong></p>

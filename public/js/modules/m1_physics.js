@@ -27,7 +27,33 @@ export default `
         <strong>Result:</strong> Adding 300g increased hover power by ~31%.
     </div>
 
-    <p>But we must also add the electrical power consumed by the AI processor itself (e.g., 20W). Therefore, total power jumps from 80.5W to 125.4W. If your battery holds 100 Wh of energy, your flight time drops from 74 minutes to 47 minutes. <strong>This is the brutal reality of SWaP.</strong></p>
+    <p>But we must also add the electrical power consumed by the AI processor itself. <strong>This is the brutal reality of SWaP.</strong> The Jetson Orin Nano has two configurable power modes (set via <code>nvpmodel</code>) that the engineer should exploit dynamically during flight:</p>
+
+    <div class="math-block">
+        <strong>Jetson Orin Nano — Dynamic Power Mode SWaP Impact</strong><br><br>
+        Mode A: 7W (efficiency) — CPU runs at 729MHz, GPU at 306MHz, DLA active<br>
+        Mode B: 15W (performance) — CPU at 1510MHz, GPU at 624MHz<br><br>
+
+        Flight Phase: Transit/Loiter (no active AI inference required)<br>
+        → Use Mode A: P_ai = 7W<br>
+        → Total hover power = 105.4W (aero) + 7W (AI) = 112.4W<br>
+        → Flight time (100 Wh battery) = 100 / 112.4 = <strong>53.4 min</strong><br><br>
+
+        Flight Phase: Active Search/Targeting (YOLO + VSLAM running concurrently)<br>
+        → Switch to Mode B: P_ai = 15W<br>
+        → Total hover power = 105.4W + 15W = 120.4W<br>
+        → Flight time at this phase rate = 100 / 120.4 = <strong>49.8 min equivalent</strong><br><br>
+
+        Mixed mission (60% transit at 7W, 40% active at 15W):<br>
+        P_avg_ai = 0.6 × 7W + 0.4 × 15W = 4.2 + 6.0 = 10.2W<br>
+        Total avg power = 105.4W + 10.2W = 115.6W<br>
+        Flight time = 100 / 115.6 = <strong>51.9 min</strong> vs. 49.8 min at constant 15W<br><br>
+
+        <strong>Switching command (run on Jetson via companion computer ROS 2 node):</strong><br>
+        sudo nvpmodel -m 0    # Mode 0 = 15W (MAXN performance)<br>
+        sudo nvpmodel -m 1    # Mode 1 = 7W (efficiency)<br>
+        sudo nvpmodel -q      # Query current mode
+    </div>
 
     <h3>2.2 Lithium Battery Discharge & Brownouts</h3>
     <p>Drones utilize Lithium Polymer (LiPo) or Lithium-Ion (Li-ion, e.g., 21700 cells) batteries. Their voltage is not constant. A 6-cell (6S) LiPo drops from 25.2V fully charged (4.2V/cell) to ~19.2V at its hard discharge cutoff (3.2V/cell). A resting voltage of ~19.8V (3.3V/cell) is often used as a practical low-battery warning threshold, while 21V (3.5V/cell) is a conservative in-flight limit that preserves cell longevity.</p>

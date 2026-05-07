@@ -3,10 +3,11 @@ export const workflowContent = {
         <h3 class="mt-0 text-sky-400 border-none mb-2">Phase 1: SITL Simulation</h3>
         <p class="text-slate-300 text-sm mb-4">Never fly untested AI code on physical hardware. The first step is to build the software stack in simulation.</p>
         <ul class="list-disc pl-5 space-y-2 text-sm text-slate-400 mb-6">
-            <li>Launch <strong>Gazebo</strong> or <strong>Unreal Engine (AirSim/Isaac Sim)</strong>. Load a 3D environment and spawn a virtual quadcopter model equipped with a virtual stereo camera.</li>
-            <li>Launch <strong>ArduPilot SITL</strong>. This runs the exact Flight Controller C++ code on your desktop, acting as the drone's brain.</li>
-            <li>Write your ROS 2 AI Python/C++ node. Have it subscribe to the virtual camera feed, run inference, and send MAVLink commands back to the SITL instance.</li>
-            <li><em>Goal:</em> Verify the mathematical control loop works perfectly before risking thousands of dollars of hardware.</li>
+            <li>Launch <strong>NVIDIA Isaac Sim</strong> (recommended) or Gazebo Harmonic. Isaac Sim provides photorealistic RTX rendering and physics-accurate aerodynamics via the Omniverse platform — critical for training visual navigation policies that transfer zero-shot to real hardware. <em>Note: Microsoft AirSim was deprecated in 2023; use Isaac Sim or the community fork Colosseum for Unreal Engine workflows.</em></li>
+            <li>Launch <strong>ArduPilot SITL</strong>. This runs the exact Flight Controller C++ code on your desktop, acting as the drone's brain. Connect via the MAVLink TCP bridge exposed by the SITL process.</li>
+            <li>Write your ROS 2 AI Python/C++ node. Have it subscribe to the virtual camera feed (published via Isaac Sim's ROS 2 bridge), run inference, and send MAVLink commands back to the SITL instance.</li>
+            <li><strong>Domain Randomization:</strong> Before declaring SITL complete, run at least 50 simulation episodes with randomized lighting (dawn, overcast, harsh noon), randomized target textures, and ±10% wind disturbances. This is what produces sim-to-real transfer — a model trained on one lighting condition will fail in the field.</li>
+            <li><em>Goal:</em> Verify the mathematical control loop works perfectly and that the AI model generalizes before risking thousands of dollars of hardware.</li>
         </ul>
     `,
     2: `

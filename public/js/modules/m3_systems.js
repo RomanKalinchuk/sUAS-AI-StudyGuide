@@ -27,13 +27,13 @@ export default `
                 <td class="p-3 border border-slate-700 text-white font-bold">USB 3.x</td>
                 <td class="p-3 border border-slate-700">5 - 10 Gbps</td>
                 <td class="p-3 border border-slate-700 text-amber-400">Milliseconds (1-5ms)</td>
-                <td class="p-3 border border-slate-700">Connecting smart cameras (OAK-D), SDRs (Software Defined Radios), or external AI accelerators (Coral USB).</td>
+                <td class="p-3 border border-slate-700">Connecting smart cameras (OAK-D), SDRs (Software Defined Radios), or external AI accelerators (Hailo-8 USB).</td>
             </tr>
             <tr class="bg-slate-900/50">
                 <td class="p-3 border border-slate-700 text-white font-bold">UART (Serial)</td>
                 <td class="p-3 border border-slate-700">~1 Mbps (e.g. 921600 baud)</td>
                 <td class="p-3 border border-slate-700 text-amber-400">Low (Byte-level)</td>
-                <td class="p-3 border border-slate-700">The lifeline between the Companion Computer (AI) and Flight Controller (RTOS). Carries MAVLink telemetry and commands.</td>
+                <td class="p-3 border border-slate-700">Legacy bridge between the Companion Computer and Flight Controller carrying MAVLink. Being supplanted by <strong>Micro XRCE-DDS</strong> on PX4 v1.14+ and ArduPilot 4.5+, which publishes flight state directly to ROS 2 topics via UDP — lower latency and no serialization overhead. UART MAVLink remains common for ArduPilot GUIDED mode integration.</td>
             </tr>
             <tr>
                 <td class="p-3 border border-slate-700 text-white font-bold">CAN Bus</td>
@@ -69,5 +69,58 @@ export default `
 
     <h3>8.3 Network Topology: DDS (Data Distribution Service)</h3>
     <p>Inside the Companion Computer, data does not flow sequentially. A modern AI drone runs ROS 2, which uses DDS. DDS is a decentralized pub/sub middleware. The Camera Node "publishes" images to a topic. The VIO Node and the AI Node both "subscribe" to that topic. They process data in parallel, independently.</p>
+
+    <h3>8.4 Micro XRCE-DDS — Replacing MAVROS for Flight Controller Communication</h3>
+    <p>MAVROS was the ROS 1 bridge between a companion computer and a flight controller: it received MAVLink packets over UART and re-published them as ROS topics. It required a serialization and deserialization step for every message. With ROS 2, a better architecture is available: <strong>Micro XRCE-DDS</strong> (eXtremely Resource Constrained Environments DDS).</p>
+    <p>Micro XRCE-DDS runs a lightweight client directly on the flight controller MCU (Cortex-M7). The client publishes flight state — attitude, velocity, position, battery — directly to the DDS global data space. The companion computer's ROS 2 nodes subscribe to these topics without any bridge process. The UART or UDP serial link becomes transparent middleware, not a bottleneck.</p>
+
+    <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-8">
+        <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">
+            Bash: PX4 + Micro XRCE-DDS Agent on Jetson Orin (ROS 2 Humble)
+        </div>
+        <div class="p-4 overflow-x-auto">
+<pre><code class="language-bash"># Install the Micro XRCE-DDS Agent on the companion computer:
+sudo apt install ros-humble-micro-ros-agent
+
+# Launch the agent — bridges PX4 flight controller DDS client to ROS 2
+# The flight controller connects over UDP (preferred) or serial
+MicroXRCEAgent udp4 -p 8888 &
+
+# PX4 v1.14+ automatically starts the DDS client on boot.
+# Flight state is now available as native ROS 2 topics:
+ros2 topic list
+# /fmu/out/vehicle_attitude
+# /fmu/out/vehicle_local_position
+# /fmu/out/vehicle_status
+# /fmu/out/battery_status
+
+# Subscribe to attitude directly — no MAVROS, no bridge process:
+ros2 topic echo /fmu/out/vehicle_attitude
+
+# Send position setpoints to PX4 via DDS (replaces SET_POSITION_TARGET_LOCAL_NED):
+# Publish to /fmu/in/trajectory_setpoint with TrajectorySetpoint message type</code></pre>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm mb-6">
+        <div class="bg-slate-900 p-5 rounded border border-slate-700">
+            <strong class="text-amber-400 block mb-2">MAVROS (Legacy)</strong>
+            <ul class="space-y-1 font-mono text-xs text-slate-300">
+                <li>> Flight controller → UART MAVLink → MAVROS bridge → ROS 1/2 topics</li>
+                <li>> Latency: ~5–15ms per message (UART baud + serialization)</li>
+                <li>> ROS 1 native; ROS 2 port (mavros2) exists but is maintained by community</li>
+                <li>> Still required for ArduPilot GUIDED mode on most builds as of 2026</li>
+            </ul>
+        </div>
+        <div class="bg-slate-900 p-5 rounded border border-emerald-800">
+            <strong class="text-emerald-400 block mb-2">Micro XRCE-DDS (Current Standard)</strong>
+            <ul class="space-y-1 font-mono text-xs text-slate-300">
+                <li>> Flight controller → UDP/serial → XRCE-DDS agent → ROS 2 topics natively</li>
+                <li>> Latency: &lt;2ms per message over UDP loopback</li>
+                <li>> Supported by PX4 v1.14+ and ArduPilot 4.5+ out of the box</li>
+                <li>> No bridge process — flight state is first-class ROS 2 citizen</li>
+            </ul>
+        </div>
+    </div>
 </div>
 `;

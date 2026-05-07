@@ -281,6 +281,95 @@ model.export(format="rknn", imgsz=640)
         </div>
     </div>
 
+    <h3>10.7 Vision-Language Models (VLMs) at the Edge</h3>
+    <p>YOLO-class CNNs draw bounding boxes around pre-defined object classes — they answer "Is there a car here?" Traditional navigation is then: "fly to bounding box." VLMs break this constraint by enabling <strong>semantic scene understanding</strong>: "navigate to the red truck near the damaged building." The drone can reason about novel objects and spatial relationships without retraining.</p>
+
+    <div class="bg-amber-900/20 border border-amber-500/50 p-4 rounded mb-6 text-amber-200 text-sm">
+        <strong>Architectural difference:</strong> A CNN extracts spatial feature maps and passes them through detection heads. A VLM encodes both an image and a natural-language query into a shared embedding space and outputs grounded predictions. The language component acts as a zero-shot class specification — any concept the language model understands becomes a detectable category.
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 text-sm">
+        <div class="hw-card p-5 rounded-xl">
+            <h4 class="text-white mt-0 text-base">Edge-Deployable VLM Architectures (2025–2026)</h4>
+            <ul class="space-y-3 text-slate-300 text-xs font-mono">
+                <li>
+                    <strong class="text-sky-400 block">LLaVA-1.6 / LLaVA-Phi-3 Mini (3B)</strong>
+                    CLIP ViT vision encoder + small language model (Phi-3 Mini 3.8B). Fits in 8GB LPDDR5 on Jetson Orin Nano at FP16. ~2–4 inference/sec at 336px input. Use for semantic scene description when real-time rate is not required (e.g., mission planning queries, pre-flight area assessment).
+                </li>
+                <li>
+                    <strong class="text-sky-400 block">NVIDIA GR00T N1 (foundation model)</strong>
+                    NVIDIA's robotics foundation model. Uses a dual-system architecture: a diffusion transformer for low-level motor control + a VLM for high-level goal interpretation. Requires Jetson Thor or AGX Orin for real-time inference. Primary use: mapping natural language mission goals to multi-step motor primitives.
+                </li>
+                <li>
+                    <strong class="text-sky-400 block">Grounding DINO + SAM2 (open vocabulary detection)</strong>
+                    Grounding DINO takes a text prompt ("red truck") and outputs bounding boxes for any object matching the description — zero-shot. SAM2 then produces instance masks. Combined pipeline: ~8–15 fps on Orin NX 16GB with TensorRT optimization. The practical solution for semantic target detection on current hardware.
+                </li>
+            </ul>
+        </div>
+        <div class="hw-card p-5 rounded-xl">
+            <h4 class="text-white mt-0 text-base">Practical Integration Pattern</h4>
+            <p class="text-slate-300 text-xs mb-3">VLMs are too slow for 30 fps closed-loop control. The production architecture is a two-tier pipeline:</p>
+            <div class="bg-slate-900 p-3 rounded border border-slate-700 text-xs font-mono text-slate-300 space-y-2">
+                <p><strong class="text-sky-400">Tier 1 — Fast loop (30 fps):</strong> YOLO11 tracks the target bounding box and feeds pixel coordinates to the MAVLink control loop. Runs continuously.</p>
+                <p><strong class="text-sky-400">Tier 2 — Slow loop (1–2 fps):</strong> Grounding DINO or LLaVA processes the full scene against the mission goal ("find the red truck"). When it detects a match, it seeds the YOLO tracker with a new target ROI. The fast loop then takes over tracking.</p>
+                <p><strong class="text-emerald-400">Result:</strong> Semantic understanding from the VLM + real-time control from the CNN detector. Neither runs alone.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
+        <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">
+            Python: Grounding DINO open-vocabulary detection on Jetson Orin
+        </div>
+        <div class="p-4 overflow-x-auto">
+<pre><code class="language-python">from groundingdino.util.inference import load_model, load_image, predict, annotate
+import torch
+
+model = load_model(
+    "groundingdino/config/GroundingDINO_SwinT_OGC.py",
+    "weights/groundingdino_swint_ogc.pth"
+)
+
+# Query from mission planner — natural language target specification
+TEXT_PROMPT = "red truck . damaged building . person on rooftop"
+BOX_THRESHOLD = 0.35
+TEXT_THRESHOLD = 0.25
+
+image_source, image = load_image("frame.jpg")
+
+boxes, logits, phrases = predict(
+    model=model,
+    image=image,
+    caption=TEXT_PROMPT,
+    box_threshold=BOX_THRESHOLD,
+    text_threshold=TEXT_THRESHOLD,
+    device="cuda"  # TensorRT-optimized on Orin NX at ~8 fps
+)
+
+# boxes are cx,cy,w,h normalized — convert to pixel coords for MAVLink targeting
+# phrases: list of matched text tokens per box (e.g., ["red truck", "person"])
+print(f"Detected: {phrases} at boxes {boxes}")</code></pre>
+        </div>
+    </div>
+
+    <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 text-sm mb-8">
+        <strong class="text-sky-400 block mb-2">VLM Hardware Requirements — Current State (2026)</strong>
+        <table class="w-full text-xs font-mono text-slate-300">
+            <thead><tr class="text-slate-400 border-b border-slate-700">
+                <th class="text-left pb-2 pr-4">Model</th>
+                <th class="text-left pb-2 pr-4">Min. Hardware</th>
+                <th class="text-left pb-2 pr-4">Inference Rate</th>
+                <th class="text-left pb-2">Use Case</th>
+            </tr></thead>
+            <tbody>
+                <tr class="border-b border-slate-800"><td class="py-1 pr-4">Grounding DINO (SwinT)</td><td class="py-1 pr-4">Orin NX 8GB</td><td class="py-1 pr-4 text-emerald-400">8–15 fps</td><td class="py-1">Open-vocab target detection (production-ready)</td></tr>
+                <tr class="border-b border-slate-800"><td class="py-1 pr-4">LLaVA-Phi-3 Mini (3.8B)</td><td class="py-1 pr-4">Orin Nano (15W)</td><td class="py-1 pr-4 text-amber-400">2–4 fps</td><td class="py-1">Scene description, mission planning queries</td></tr>
+                <tr class="border-b border-slate-800"><td class="py-1 pr-4">LLaVA-1.6 (7B)</td><td class="py-1 pr-4">AGX Orin 32GB</td><td class="py-1 pr-4 text-amber-400">1–2 fps</td><td class="py-1">Complex reasoning, multi-object semantic analysis</td></tr>
+                <tr><td class="py-1 pr-4">GR00T N1</td><td class="py-1 pr-4">Jetson Thor</td><td class="py-1 pr-4 text-amber-400">~10 Hz control</td><td class="py-1">End-to-end language→motor policy (2026+ hardware)</td></tr>
+            </tbody>
+        </table>
+    </div>
+
     <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-4">
         <h4 class="mt-0 border-none text-amber-400 text-sm">Quantization Validation — Acceptable mAP Drop Thresholds</h4>
         <p class="text-slate-300 text-sm">Always measure mAP before and after quantization on the test split at native resolution. Community and research-validated thresholds:</p>
