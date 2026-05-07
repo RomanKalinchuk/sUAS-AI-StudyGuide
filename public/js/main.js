@@ -1,20 +1,20 @@
-import m0_intro    from './modules/m0_intro.js';
-import m1_physics  from './modules/m1_physics.js';
-import m2_hardware from './modules/m2_hardware.js';
-import m3_systems  from './modules/m3_systems.js';
-import m4_vision   from './modules/m4_vision.js';
-import m5_software from './modules/m5_software.js';
-import m6_targeting from './modules/m6_targeting.js';
-import m7_swarms   from './modules/m7_swarms.js';
-import m8_workflow from './modules/m8_workflow.js';
-import m9_power    from './modules/m9_power.js';
-import m10_flightcontrol from './modules/m10_flightcontrol.js';
-import m11_navigation from './modules/m11_navigation.js';
-import m12_security  from './modules/m12_security.js';
-import m13_ml_pipeline   from './modules/m13_ml_pipeline.js';
-import m14_depth_mapping from './modules/m14_depth_mapping.js';
-import m15_rf_comms  from './modules/m15_rf_comms.js';
-import m16_ekf       from './modules/m16_ekf.js';
+import m1_intro        from './modules/m1_intro.js';
+import m2_physics      from './modules/m2_physics.js';
+import m3_power        from './modules/m3_power.js';
+import m4_hardware     from './modules/m4_hardware.js';
+import m5_flightcontrol from './modules/m5_flightcontrol.js';
+import m6_rf_comms     from './modules/m6_rf_comms.js';
+import m7_software     from './modules/m7_software.js';
+import m8_systems      from './modules/m8_systems.js';
+import m9_ekf          from './modules/m9_ekf.js';
+import m10_ml_pipeline from './modules/m10_ml_pipeline.js';
+import m11_vision      from './modules/m11_vision.js';
+import m12_depth_mapping from './modules/m12_depth_mapping.js';
+import m13_navigation  from './modules/m13_navigation.js';
+import m14_targeting   from './modules/m14_targeting.js';
+import m15_swarms      from './modules/m15_swarms.js';
+import m16_security    from './modules/m16_security.js';
+import m17_workflow    from './modules/m17_workflow.js';
 
 import { runThermalSim }    from './interactive/thermal.js';
 import { initHardwareChart } from './interactive/hwChart.js';
@@ -27,30 +27,30 @@ window.initSwarm      = initSwarm;
 window.updateWorkflow = updateWorkflow;
 
 const modules = [
-    { id: 'm0_intro',          title: '1.  Fundamentals & Autonomy',          short: 'Intro to Autonomy'      },
-    { id: 'm1_physics',        title: '2.  SWaP-C Physics & Math',            short: 'Physics & SWaP-C'       },
-    { id: 'm9_power',          title: '3.  Power Electronics & Circuits',      short: 'Power Electronics'      },
-    { id: 'm2_hardware',       title: '4.  Compute Silicon Matrix',            short: 'Hardware Architecture'  },
-    { id: 'm10_flightcontrol', title: '5.  Flight Controller Architecture',    short: 'Flight Controller'      },
-    { id: 'm15_rf_comms',      title: '6.  RF Communications & Link Mgmt',    short: 'RF & Link Management'   },
-    { id: 'm5_software',       title: '7.  Edge Software Toolchains',          short: 'Software Stack'         },
-    { id: 'm3_systems',        title: '8.  Data Links & Topology',             short: 'System Topology'        },
-    { id: 'm16_ekf',           title: '9.  Sensor Fusion & EKF Architecture', short: 'EKF & Sensor Fusion'    },
-    { id: 'm13_ml_pipeline',   title: '10. AI Training & Dataset Pipeline',    short: 'ML Pipeline'            },
-    { id: 'm4_vision',         title: '11. Perception & VSLAM',               short: 'Vision & VSLAM'         },
-    { id: 'm14_depth_mapping', title: '12. Depth Sensing & 3D Mapping',        short: 'Depth & 3D Mapping'     },
-    { id: 'm11_navigation',    title: '13. Path Planning & Navigation',        short: 'Path Planning'          },
-    { id: 'm6_targeting',      title: '14. AI Targeting & Kinematics',        short: 'AI Targeting'           },
-    { id: 'm7_swarms',         title: '15. Swarm Intelligence',                short: 'Swarm Networks'         },
-    { id: 'm12_security',      title: '16. Security & Counter-UAS',            short: 'Security & C-UAS'       },
-    { id: 'm8_workflow',       title: '17. Implementation Workflow',           short: 'Interactive Workflow'   },
+    { id: 'm1_intro',          title: '1.  Fundamentals & Autonomy',          short: 'Intro to Autonomy'      },
+    { id: 'm2_physics',        title: '2.  SWaP-C Physics & Math',            short: 'Physics & SWaP-C'       },
+    { id: 'm3_power',          title: '3.  Power Electronics & Circuits',      short: 'Power Electronics'      },
+    { id: 'm4_hardware',       title: '4.  Compute Silicon Matrix',            short: 'Hardware Architecture'  },
+    { id: 'm5_flightcontrol',  title: '5.  Flight Controller Architecture',    short: 'Flight Controller'      },
+    { id: 'm6_rf_comms',       title: '6.  RF Communications & Link Mgmt',    short: 'RF & Link Management'   },
+    { id: 'm7_software',       title: '7.  Edge Software Toolchains',          short: 'Software Stack'         },
+    { id: 'm8_systems',        title: '8.  Data Links & Topology',             short: 'System Topology'        },
+    { id: 'm9_ekf',            title: '9.  Sensor Fusion & EKF Architecture', short: 'EKF & Sensor Fusion'    },
+    { id: 'm10_ml_pipeline',   title: '10. AI Training & Dataset Pipeline',    short: 'ML Pipeline'            },
+    { id: 'm11_vision',        title: '11. Perception & VSLAM',               short: 'Vision & VSLAM'         },
+    { id: 'm12_depth_mapping', title: '12. Depth Sensing & 3D Mapping',        short: 'Depth & 3D Mapping'     },
+    { id: 'm13_navigation',    title: '13. Path Planning & Navigation',        short: 'Path Planning'          },
+    { id: 'm14_targeting',     title: '14. AI Targeting & Kinematics',        short: 'AI Targeting'           },
+    { id: 'm15_swarms',        title: '15. Swarm Intelligence',                short: 'Swarm Networks'         },
+    { id: 'm16_security',      title: '16. Security & Counter-UAS',            short: 'Security & C-UAS'       },
+    { id: 'm17_workflow',      title: '17. Implementation Workflow',           short: 'Interactive Workflow'   },
 ];
 
 const contentDB = {
-    m0_intro, m1_physics, m2_hardware, m3_systems, m4_vision,
-    m5_software, m6_targeting, m7_swarms, m8_workflow,
-    m9_power, m10_flightcontrol, m11_navigation, m12_security,
-    m13_ml_pipeline, m14_depth_mapping, m15_rf_comms, m16_ekf
+    m1_intro, m2_physics, m3_power, m4_hardware, m5_flightcontrol,
+    m6_rf_comms, m7_software, m8_systems, m9_ekf, m10_ml_pipeline,
+    m11_vision, m12_depth_mapping, m13_navigation, m14_targeting,
+    m15_swarms, m16_security, m17_workflow
 };
 
 function buildNav() {
@@ -98,10 +98,10 @@ window.loadModule = function (id) {
 
     document.getElementById('main-scroll').scrollTop = 0;
 
-    if (id === 'm1_physics')  runThermalSim();
-    if (id === 'm2_hardware') setTimeout(initHardwareChart, 100);
-    if (id === 'm7_swarms')   setTimeout(initSwarm, 100);
-    if (id === 'm8_workflow') updateWorkflow(null, 1);
+    if (id === 'm2_physics')  runThermalSim();
+    if (id === 'm4_hardware') setTimeout(initHardwareChart, 100);
+    if (id === 'm15_swarms')  setTimeout(initSwarm, 100);
+    if (id === 'm17_workflow') updateWorkflow(null, 1);
 
     if (window.Prism) setTimeout(() => Prism.highlightAll(), 50);
     updateProgress();
@@ -117,10 +117,10 @@ window.updateProgress = function () {
 
 document.addEventListener('DOMContentLoaded', () => {
     buildNav();
-    loadModule('m0_intro');
+    loadModule('m1_intro');
 
     window.addEventListener('resize', () => {
-        if (document.querySelector('.nav-item.active')?.id === 'nav-m7_swarms') {
+        if (document.querySelector('.nav-item.active')?.id === 'nav-m15_swarms') {
             initSwarm();
         }
     });
