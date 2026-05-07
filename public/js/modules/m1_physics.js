@@ -1,10 +1,10 @@
 export default `
 <div class="fade-in">
-    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 1</span>
+    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 2</span>
     <h2>SWaP-C Physics & Mathematical Modeling</h2>
     <p>Size, Weight, Power, and Cost. Engineering an AI drone is an optimization problem where every variable fights against the others. This module breaks down the physics.</p>
 
-    <h3>1.1 Advanced Weight Penalties & Momentum Theory</h3>
+    <h3>2.1 Advanced Weight Penalties & Momentum Theory</h3>
     <p>We previously established that Power required to hover is P_hover = (T^1.5) / sqrt(2 * rho * A). Let's expand this to understand actual flight time reduction when adding an AI payload.</p>
     <p>A battery holds a finite amount of Energy (E), usually measured in Watt-hours (Wh). Flight time (t) is simply E / P_average.</p>
 
@@ -29,15 +29,15 @@ export default `
 
     <p>But we must also add the electrical power consumed by the AI processor itself (e.g., 20W). Therefore, total power jumps from 80.5W to 125.4W. If your battery holds 100 Wh of energy, your flight time drops from 74 minutes to 47 minutes. <strong>This is the brutal reality of SWaP.</strong></p>
 
-    <h3>1.2 Lithium Battery Discharge & Brownouts</h3>
-    <p>Drones utilize Lithium Polymer (LiPo) or Lithium-Ion (Li-ion, e.g., 21700 cells) batteries. Their voltage is not constant. A 6-cell (6S) LiPo drops from 25.2V fully charged to ~19.8V when empty.</p>
+    <h3>2.2 Lithium Battery Discharge & Brownouts</h3>
+    <p>Drones utilize Lithium Polymer (LiPo) or Lithium-Ion (Li-ion, e.g., 21700 cells) batteries. Their voltage is not constant. A 6-cell (6S) LiPo drops from 25.2V fully charged (4.2V/cell) to ~19.2V at its hard discharge cutoff (3.2V/cell). A resting voltage of ~19.8V (3.3V/cell) is often used as a practical low-battery warning threshold, while 21V (3.5V/cell) is a conservative in-flight limit that preserves cell longevity.</p>
     <p>AI processors require highly stable 5V or 12V rails. If the drone performs an aggressive maneuver (e.g., full throttle punch-out), the motors can draw 150 Amps instantly. Due to internal battery resistance (V_drop = I * R_internal), the battery voltage can briefly sag by several volts. This is called a "Brownout".</p>
     <div class="bg-red-900/20 border border-red-500/50 p-4 rounded mb-6 text-red-200">
         <strong>CRITICAL FAILURE MODE:</strong> If the voltage reaching the Companion Computer sags below its operating threshold for even a millisecond, the Linux OS will hard-reset. The drone will lose all AI capabilities mid-flight, potentially leading to a fly-away or crash.
     </div>
     <p><strong>Engineering Solution:</strong> Engineers implement Buck-Boost regulators with massive Low-ESR (Equivalent Series Resistance) capacitor banks (e.g., 2200µF, 35V Rubycon ZLH series) placed immediately before the AI processor to act as a localized power reserve during transient load spikes.</p>
 
-    <h3>1.3 Thermal Dynamics: Forced vs Natural Convection</h3>
+    <h3>2.3 Thermal Dynamics: Forced vs Natural Convection</h3>
     <p>We established the base Thermal Resistance equation. In an enclosed drone, natural convection (air rising as it heats) is insufficient for 15W+ processors. Engineers must utilize forced convection, but adding a fan introduces a moving part that can fail.</p>
 
     <div class="interactive-panel">

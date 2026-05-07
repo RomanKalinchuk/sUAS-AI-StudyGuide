@@ -1,10 +1,10 @@
 export default `
 <div class="fade-in">
-    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 3</span>
+    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 8</span>
     <h2>Data Links & Topology</h2>
     <p>A high-performance brain is useless if the nervous system is slow. Drone topology dictates how sensor data flows into the AI, and how AI commands flow back to the motors.</p>
 
-    <h3>3.1 Physical Interface Standards</h3>
+    <h3>8.1 Physical Interface Standards</h3>
     <p>Understanding the hardware interfaces is critical to avoid bottlenecks.</p>
 
     <table class="w-full text-left border-collapse mt-6 mb-8 text-sm">
@@ -19,7 +19,7 @@ export default `
         <tbody class="text-slate-300 font-mono">
             <tr class="bg-slate-900/50">
                 <td class="p-3 border border-slate-700 text-white font-bold">MIPI CSI-2</td>
-                <td class="p-3 border border-slate-700">Up to 10 Gbps (4-lane)</td>
+                <td class="p-3 border border-slate-700">Up to 10 Gbps (4-lane, D-PHY v1.2)</td>
                 <td class="p-3 border border-slate-700 text-emerald-400">Microseconds</td>
                 <td class="p-3 border border-slate-700">Direct camera-to-SoC connection. Bypasses USB overhead. Mandatory for high-speed VSLAM. Max cable length ~15cm.</td>
             </tr>
@@ -44,7 +44,7 @@ export default `
         </tbody>
     </table>
 
-    <h3>3.2 The MAVLink Protocol Breakdown</h3>
+    <h3>8.2 The MAVLink Protocol Breakdown</h3>
     <p>MAVLink (Micro Air Vehicle Link) is the lingua franca of drone communication. It is a lightweight, header-only message marshaling library. When your AI Python script wants to move the drone, it must construct a specific MAVLink binary packet.</p>
 
     <div class="math-block bg-[#0d1117] border-slate-700 mb-8">
@@ -67,7 +67,7 @@ export default `
         </p>
     </div>
 
-    <h3>3.3 Network Topology: DDS (Data Distribution Service)</h3>
+    <h3>8.3 Network Topology: DDS (Data Distribution Service)</h3>
     <p>Inside the Companion Computer, data does not flow sequentially. A modern AI drone runs ROS 2, which uses DDS. DDS is a decentralized pub/sub middleware. The Camera Node "publishes" images to a topic. The VIO Node and the AI Node both "subscribe" to that topic. They process data in parallel, independently.</p>
 </div>
 `;

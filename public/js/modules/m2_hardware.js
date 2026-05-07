@@ -1,10 +1,10 @@
 export default `
 <div class="fade-in">
-    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 2</span>
+    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 4</span>
     <h2>Compute Silicon Matrix</h2>
     <p>The landscape of Edge AI processors is vast. Selecting the correct System on Module (SoM) is the most consequential decision in the engineering lifecycle. We must look beyond raw TOPS and analyze memory bandwidth, framework support, and physical footprint.</p>
 
-    <h3>2.1 The AI Silicon Landscape Visualization</h3>
+    <h3>4.1 The AI Silicon Landscape Visualization</h3>
     <p>This chart maps the current market. Cost is plotted logarithmically. Notice how newer NPUs (Neural Processing Units) are drastically pulling down the cost-to-performance ratio compared to traditional GPUs.</p>
 
     <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-6 mb-10 shadow-lg">
@@ -13,7 +13,7 @@ export default `
         </div>
     </div>
 
-    <h3>2.2 Exhaustive Hardware Profiles</h3>
+    <h3>4.2 Exhaustive Hardware Profiles</h3>
 
     <div class="space-y-8">
         <!-- NVIDIA Family -->
@@ -94,7 +94,7 @@ export default `
                 <ul class="space-y-1 font-mono text-slate-300">
                     <li>> CPU: Quad Cortex-A76 + Quad Cortex-A55</li>
                     <li>> NPU: 6 TOPS</li>
-                    <li>> Reality Check: Unbeatable price. However, the software toolchain (RKNN) is notoriously difficult to use, poorly documented, and lacks the smooth PyTorch-to-Edge pipeline found in NVIDIA/Hailo ecosystems.</li>
+                    <li>> Reality Check: Unbeatable price. The RKNN Toolkit2 toolchain has improved significantly — v2.3.2 (April 2025) is pip-installable and supports ARM64 native execution on the RK3588 itself. However, operator coverage and documentation still lag behind NVIDIA/Hailo ecosystems. Expect additional debugging effort compared to TensorRT or the Hailo Dataflow Compiler.</li>
                 </ul>
             </div>
         </div>

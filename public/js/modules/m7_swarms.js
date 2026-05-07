@@ -1,10 +1,10 @@
 export default `
 <div class="fade-in">
-    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 7</span>
+    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 15</span>
     <h2>Swarm Intelligence & Networks</h2>
     <p>Swarms operate without centralized command. They rely on local observations and decentralized communication to achieve emergent global behavior.</p>
 
-    <h3>7.1 The Boids Algorithm (Emergent Flocking)</h3>
+    <h3>15.1 The Boids Algorithm (Emergent Flocking)</h3>
     <p>Swarm navigation is fundamentally based on the Boids model developed by Craig Reynolds. Drones constantly calculate their velocity vectors by averaging three rules applied to their immediate neighbors within sensor range.</p>
 
     <div class="interactive-panel">
@@ -34,7 +34,7 @@ export default `
         </div>
     </div>
 
-    <h3>7.2 Mesh Networking (BATMAN-adv)</h3>
+    <h3>15.2 Mesh Networking (BATMAN-adv)</h3>
     <p>To calculate the Boids algorithms, drones must share their GPS/VIO coordinates. They utilize B.A.T.M.A.N. (Better Approach To Mobile Ad-hoc Networking), a routing protocol that operates at Layer 2 (Data Link Layer). It dynamically routes packets through the swarm mesh. If Drone A wants to tell Drone Z its position, the packet will automatically hop through Drones B, C, and D based on which links currently have the best signal strength, entirely bypassing the need for a central router.</p>
 </div>
 `;

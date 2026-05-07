@@ -1,12 +1,12 @@
 export default `
 <div class="fade-in">
     <div class="mb-10 text-center">
-        <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 0</span>
+        <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 1</span>
         <h2 class="text-5xl font-extrabold text-white mt-2 mb-6">Fundamentals of Autonomous sUAS</h2>
         <p class="text-xl text-slate-400 max-w-3xl mx-auto">Before writing a single line of code or soldering a carrier board, engineers must understand the theoretical framework of unmanned autonomy and the strict constraints of the environment.</p>
     </div>
 
-    <h3>0.1 The Evolution of sUAS Autonomy</h3>
+    <h3>1.1 The Evolution of sUAS Autonomy</h3>
     <p>Historically, Unmanned Aircraft Systems (UAS) were purely remote-controlled vehicles. The operator provided all cognitive input—stabilization, navigation, and targeting. The introduction of MEMS (Micro-Electro-Mechanical Systems) IMUs allowed for auto-leveling. The integration of GPS allowed for waypoint navigation.</p>
     <p>However, modern mission requirements—such as navigating inside collapsed buildings, flying under dense forest canopies, or operating in electronic warfare environments where GPS is actively jammed—render traditional navigation useless. <strong>Edge AI is not a luxury feature; it is an operational mandate for survivability and mission success in GPS-denied environments.</strong></p>
 
@@ -33,7 +33,7 @@ export default `
         </div>
     </div>
 
-    <h3>0.2 The Aerial OODA Loop</h3>
+    <h3>1.2 The Aerial OODA Loop</h3>
     <p>The OODA loop (Observe, Orient, Decide, Act), originally developed by military strategist John Boyd, is the perfect architectural model for an AI drone software stack. Every millisecond, the drone's processors must execute this loop.</p>
     <ul class="space-y-4">
         <li><strong>Observe:</strong> High-bandwidth data ingestion. Stereo cameras capture 60 FPS uncompressed video. LiDAR spins at 10Hz. The IMU samples at 400Hz. This requires immense data bus bandwidth (MIPI CSI, PCIe).</li>
@@ -42,7 +42,7 @@ export default `
         <li><strong>Act:</strong> The high-level PC translates the trajectory into a MAVLink command, sends it to the real-time Flight Controller, which calculates the complex motor mixing matrix and sends PWM signals to the ESCs.</li>
     </ul>
 
-    <h3>0.3 The Edge vs. Cloud Paradigm</h3>
+    <h3>1.3 The Edge vs. Cloud Paradigm</h3>
     <p>Why put a heavy, hot, power-hungry GPU on a flying battery? Why not stream the video to the cloud, process it on an AWS server, and send commands back? The answer is <strong>Latency and Reliability</strong>.</p>
     <div class="math-block">
         Total Cloud Loop Latency = t_encode + t_tx + t_network + t_inference + t_rx + t_decode<br><br>

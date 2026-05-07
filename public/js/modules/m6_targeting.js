@@ -1,10 +1,10 @@
 export default `
 <div class="fade-in">
-    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 6</span>
+    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 14</span>
     <h2>AI Targeting & Kinematics</h2>
     <p>Detecting an object in a frame is merely computer vision. Tracking it through 3D space, predicting its movement, and controlling a drone to intercept it is autonomous robotics.</p>
 
-    <h3>6.1 Multi-Object Tracking (DeepSORT)</h3>
+    <h3>14.1 Multi-Object Tracking (DeepSORT)</h3>
     <p>YOLO only tells you "There is a car here in this specific frame." It does not know if it's the same car from the previous frame. DeepSORT (Simple Online and Realtime Tracking with a Deep Association Metric) assigns persistent IDs to objects.</p>
 
     <ul class="space-y-4">
@@ -17,7 +17,7 @@ export default `
         </li>
     </ul>
 
-    <h3>6.2 Gimbal & Airframe Kinematic Control (PID)</h3>
+    <h3>14.2 Gimbal & Airframe Kinematic Control (PID)</h3>
     <p>Once the target pixel coordinates are known and stabilized by DeepSORT, the drone must physically move to keep the target in the center of the frame (Pixel coordinate u_center, v_center). This is achieved via a PID (Proportional-Integral-Derivative) controller.</p>
 
     <div class="math-block">

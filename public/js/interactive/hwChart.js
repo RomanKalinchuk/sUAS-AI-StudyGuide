@@ -16,7 +16,7 @@ export function initHardwareChart() {
         { x: 120,  y: 6,   r: 10, label: 'Orange Pi 5 (RK3588)',   cat: 'SoC',    color: 'rgba(245, 158, 11, 0.7)'  },
         { x: 100,  y: 4,   r: 8,  label: 'Coral Edge TPU',         cat: 'NPU',    color: 'rgba(168, 85, 247, 0.7)' },
         { x: 450,  y: 15,  r: 15, label: 'Qualcomm RB5',           cat: 'DSP',    color: 'rgba(14, 165, 233, 0.7)'  },
-        { x: 400,  y: 1.4,  r: 7,  label: 'AMD Kria KR260',         cat: 'FPGA',   color: 'rgba(56, 189, 248, 0.7)'  }
+        { x: 349,  y: 1.4,  r: 7,  label: 'AMD Kria KR260',         cat: 'FPGA',   color: 'rgba(56, 189, 248, 0.7)'  }
     ];
 
     hwChartInst = new Chart(ctx, {
