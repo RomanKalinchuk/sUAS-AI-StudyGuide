@@ -82,11 +82,18 @@ window.loadModule = function (id) {
 
     const navIdx = modules.findIndex(m => m.id === id);
     if (navIdx >= 0) {
+        const newNum = navIdx + 1;
+        let oldNum = null;
         container.querySelectorAll('.text-sky-500.font-mono').forEach(el => {
-            if (/^Module\s+\d+$/i.test(el.textContent.trim())) {
-                el.textContent = `Module ${navIdx + 1}`;
-            }
+            const m = el.textContent.trim().match(/^Module\s+(\d+)$/i);
+            if (m) { oldNum = parseInt(m[1]); el.textContent = `Module ${newNum}`; }
         });
+        if (oldNum !== null && oldNum !== newNum) {
+            const re = new RegExp(`^${oldNum}\\.(\\d)`);
+            container.querySelectorAll('h2, h3, h4, h5').forEach(h => {
+                h.textContent = h.textContent.replace(re, `${newNum}.$1`);
+            });
+        }
     }
 
     document.getElementById('main-scroll').scrollTop = 0;
