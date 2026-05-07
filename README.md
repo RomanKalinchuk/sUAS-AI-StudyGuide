@@ -8,7 +8,7 @@ An interactive, self-paced study guide for engineers building AI-powered small U
 
 ## What's inside
 
-17 modules, roughly 80 hours of material:
+17 modules, roughly 40 hours of material:
 
 | # | Module | Topics |
 |---|--------|--------|
