@@ -19,12 +19,14 @@ import m17_workflow    from './modules/m17_workflow.js';
 import { runThermalSim }    from './interactive/thermal.js';
 import { initHardwareChart } from './interactive/hwChart.js';
 import { initSwarm }        from './interactive/swarm.js';
-import { updateWorkflow }   from './interactive/workflow.js';
+import { updateWorkflow }     from './interactive/workflow.js';
+import { calcDataBandwidth }  from './interactive/dataBandwidth.js';
 
 // Expose to global scope for onclick handlers embedded in module HTML strings
-window.runThermalSim  = runThermalSim;
-window.initSwarm      = initSwarm;
-window.updateWorkflow = updateWorkflow;
+window.runThermalSim     = runThermalSim;
+window.initSwarm         = initSwarm;
+window.updateWorkflow    = updateWorkflow;
+window.calcDataBandwidth = calcDataBandwidth;
 
 const modules = [
     { id: 'm1_intro',          title: '1.  Fundamentals & Autonomy',          short: 'Intro to Autonomy'      },
@@ -100,6 +102,7 @@ window.loadModule = function (id) {
 
     if (id === 'm2_physics')  runThermalSim();
     if (id === 'm4_hardware') setTimeout(initHardwareChart, 100);
+    if (id === 'm8_systems')  calcDataBandwidth();
     if (id === 'm15_swarms')  setTimeout(initSwarm, 100);
     if (id === 'm17_workflow') updateWorkflow(null, 1);
 
