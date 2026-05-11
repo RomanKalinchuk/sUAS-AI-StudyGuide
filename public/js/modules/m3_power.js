@@ -34,21 +34,9 @@ export default `
         </div>
     </div>
 
-    <div class="math-block">
-        <strong>Why 2000–4700µF? — Transient Current Demand Calculation</strong><br><br>
-        When all 4 motors simultaneously step from 50% to 100% throttle (e.g., a full-pitch crash avoidance maneuver),
-        peak current draw spikes by ~ΔI = 80A in ~ΔT = 500µs (the DSHOT command response time + motor electrical time constant).<br><br>
-
-        Voltage droop (ΔV) = (ΔI × ΔT) / C<br>
-        Target ΔV ≤ 0.5V (to keep downstream BECs in regulation)<br><br>
-
-        C ≥ (80A × 500×10⁻⁶ s) / 0.5V<br>
-        C ≥ 0.04 / 0.5 = <strong>80,000µF</strong> for an ideal capacitor<br><br>
-
-        In practice, the battery's own internal capacitance + wiring inductance limits the frequency of concern to ~1–10kHz.
-        At 1kHz, the ESC's internal gate capacitance and switching node caps handle the high-frequency noise.
-        The PDB bus capacitors target the 1–50kHz range: <strong>470µF × 4 = 1880µF is the practical engineering value</strong>,
-        supplemented by the battery's own low-impedance source at lower frequencies.
+    <div class="insight-box mb-6">
+        <div class="insight-label">Why 2000–4700µF?</div>
+        <p class="text-slate-200 text-sm mt-1">When all 4 motors snap from 50% to 100% throttle in a crash-avoidance maneuver, current spikes ~80A in 500µs. Without bus capacitors, this causes a voltage droop that knocks downstream BECs out of regulation. The theoretical ideal would be 80,000µF, but in practice the battery's own source impedance handles the low-frequency bulk — PDB capacitors only need to cover the <strong>1–50kHz transient range: 470µF × 4 = 1,880µF practical minimum</strong>.</p>
     </div>
 
     <h3>10.2 BEC (Battery Elimination Circuit) Design</h3>
@@ -135,15 +123,31 @@ export default `
     <h3>10.3 Companion Computer Power Delivery (Jetson Orin NX)</h3>
     <p>The Jetson Orin NX at 25W peak requires a <strong>dedicated, high-quality power rail</strong> — it must never share a BEC with any ESC, servo, or motor. The reason: motor PWM switching creates enormous current transients that couple as voltage spikes onto shared rails. Even a 50mV glitch can cause LPDDR5 memory errors or trigger the Jetson's hardware undervoltage protection (UVLO), causing an instantaneous power-off.</p>
 
-    <div class="math-block">
-        <strong>Jetson Orin NX Power Requirements</strong><br><br>
-        Nominal input: 5V–20V (carrier board dependent; most use 12V or 19V input)<br>
-        Peak current (25W @ 12V input): 25W / 12V = 2.08A + ~15% margin = <strong>2.4A minimum regulator rating</strong><br>
-        Surge current (GPU inference burst): up to 3.5A for &lt;50ms<br><br>
-
-        Recommended regulator: Synchronous buck (e.g., TPS54560 configured for 12V/5A output)<br>
-        — Synchronous (not diode rectified): efficiency ~94–96% vs ~82% for non-sync at this current level<br>
-        — This matters: at 5A, a 12% efficiency difference = 0.72W extra heat inside the airframe
+    <div class="bg-slate-900 p-4 rounded border border-slate-700 mb-6 text-xs font-mono">
+        <strong class="text-sky-400 block mb-3 text-sm font-sans">Jetson Orin NX Power Rail Requirements</strong>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+            <div class="bg-slate-800 p-3 rounded">
+                <div class="text-slate-400 text-[10px] uppercase mb-1">Input Voltage</div>
+                <div class="text-white font-bold">5V – 20V</div>
+                <div class="text-slate-500 text-[10px]">typically 12V</div>
+            </div>
+            <div class="bg-slate-800 p-3 rounded">
+                <div class="text-slate-400 text-[10px] uppercase mb-1">Continuous</div>
+                <div class="text-amber-400 font-bold">2.4A</div>
+                <div class="text-slate-500 text-[10px]">25W ÷ 12V + 15% margin</div>
+            </div>
+            <div class="bg-slate-800 p-3 rounded">
+                <div class="text-slate-400 text-[10px] uppercase mb-1">GPU Burst</div>
+                <div class="text-rose-400 font-bold">3.5A</div>
+                <div class="text-slate-500 text-[10px">for &lt;50ms</div>
+            </div>
+            <div class="bg-emerald-900/30 border border-emerald-700/50 p-3 rounded">
+                <div class="text-emerald-400 text-[10px] uppercase mb-1">Recommended</div>
+                <div class="text-white font-bold">TPS54560</div>
+                <div class="text-slate-400 text-[10px]">12V/5A sync buck</div>
+            </div>
+        </div>
+        <p class="text-slate-400 mt-3 text-xs font-sans">Use a synchronous buck (not diode-rectified): 94–96% vs ~82% efficiency. At 5A, that 12% difference equals 0.72W of extra heat inside the airframe.</p>
     </div>
 
     <div class="bg-slate-900 p-6 rounded border border-slate-700 text-sm mb-8">
@@ -201,21 +205,53 @@ export default `
         </div>
     </div>
 
-    <div class="math-block">
-        <strong>DSHOT Speed Variants — Bit Rate and Frame Timing</strong><br><br>
-        DSHOT150:   150 kbit/s  — bit period 6.67µs  — full frame (16 bits) = 106µs
-        DSHOT300:   300 kbit/s  — bit period 3.33µs  — full frame = 53µs
-        DSHOT600:   600 kbit/s  — bit period 1.67µs  — full frame = 26.7µs   ← Standard for high-performance quads
-        DSHOT1200: 1200 kbit/s  — bit period 0.83µs  — full frame = 13.3µs   ← Requires short, shielded wiring (&lt;30cm)<br><br>
-
-        At 400Hz control loop rate, the flight controller sends a new DSHOT frame every 2500µs.
-        DSHOT600 frame completes in 26.7µs — only 1.07% of the loop period, leaving 98.9% for computation.
-        DSHOT150 at 400Hz works but consumes 4.24% of the frame time — adequate but wasteful on a fast CPU.<br><br>
-
-        <strong>Bidirectional DSHOT (DSHOT Bidir / RPM Telemetry):</strong>
-        After each throttle frame, the ESC responds on the same wire (half-duplex) with an eRPM packet.
-        The flight controller uses this for RPM-based notch filter frequencies in the gyro pipeline,
-        dramatically improving noise rejection without manual filter tuning.
+    <div class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden mb-6">
+        <div class="px-4 py-3 bg-slate-800 text-xs font-mono text-slate-400 uppercase tracking-widest">DSHOT Speed Variants</div>
+        <table class="w-full text-xs font-mono">
+            <thead>
+                <tr class="bg-slate-800/50 text-slate-400">
+                    <th class="p-3 text-left">Protocol</th>
+                    <th class="p-3 text-left">Bit Rate</th>
+                    <th class="p-3 text-left">Frame Time</th>
+                    <th class="p-3 text-left">% of 400Hz Loop</th>
+                    <th class="p-3 text-left">Notes</th>
+                </tr>
+            </thead>
+            <tbody class="text-slate-300">
+                <tr class="border-t border-slate-800">
+                    <td class="p-3 text-white">DSHOT150</td>
+                    <td class="p-3">150 kbit/s</td>
+                    <td class="p-3">106 µs</td>
+                    <td class="p-3 text-amber-400">4.24%</td>
+                    <td class="p-3 text-slate-400">Adequate but slow; legacy</td>
+                </tr>
+                <tr class="border-t border-slate-800 bg-slate-900/50">
+                    <td class="p-3 text-white">DSHOT300</td>
+                    <td class="p-3">300 kbit/s</td>
+                    <td class="p-3">53 µs</td>
+                    <td class="p-3 text-emerald-400">2.12%</td>
+                    <td class="p-3 text-slate-400">Good balance</td>
+                </tr>
+                <tr class="border-t border-slate-800">
+                    <td class="p-3 text-emerald-300 font-bold">DSHOT600 ★</td>
+                    <td class="p-3">600 kbit/s</td>
+                    <td class="p-3">26.7 µs</td>
+                    <td class="p-3 text-emerald-400">1.07%</td>
+                    <td class="p-3 text-emerald-400">Standard for high-performance quads</td>
+                </tr>
+                <tr class="border-t border-slate-800 bg-slate-900/50">
+                    <td class="p-3 text-white">DSHOT1200</td>
+                    <td class="p-3">1200 kbit/s</td>
+                    <td class="p-3">13.3 µs</td>
+                    <td class="p-3 text-emerald-400">0.53%</td>
+                    <td class="p-3 text-amber-400">Requires short shielded wire (&lt;30cm)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="insight-box mb-6">
+        <div class="insight-label">Bidirectional DSHOT</div>
+        <p class="text-slate-200 text-sm mt-1">After each throttle command frame, the ESC responds on the same wire (half-duplex) with an eRPM telemetry packet. The flight controller uses this real RPM data to set dynamic notch filter frequencies in the gyro processing pipeline — dramatically improving noise rejection without manual filter tuning.</p>
     </div>
 
     <h3>10.5 Current Sensing: INA219, INA226, INA3221</h3>
@@ -268,53 +304,66 @@ export default `
     <h3>10.6 Motor KV Rating and Propeller Selection</h3>
     <p>KV (not kilovolts — the unit is RPM/V) is the motor's velocity constant: the no-load RPM increase per additional Volt applied to the terminals.</p>
 
-    <div class="math-block">
-        <strong>KV, Voltage, and RPM Relationship</strong><br><br>
-        RPM_no_load = KV × V_applied<br><br>
-        Example: 920KV motor on 6S (22.2V nominal):<br>
-        RPM_no_load = 920 × 22.2 = <strong>20,424 RPM</strong><br><br>
-        Under load (prop drag), actual RPM drops ~10–20%. Loaded RPM ≈ 16,000–18,000 RPM.<br><br>
-
-        <strong>Propeller Thrust and Efficiency:</strong><br>
-        Thrust ∝ ρ × A × v² (momentum theory)  where A = disk area = π × (d/2)²<br><br>
-        Larger diameter (d) = larger A = more thrust at same RPM = more efficiency (lower disk loading).<br>
-        Higher pitch = more thrust per revolution, but requires more torque (higher current draw).<br><br>
-
-        Prop notation — "1345" means: 13 inch diameter, 4.5 inch pitch<br>
-        Prop notation — "5140" means: 5.1 inch diameter, 4.0 inch pitch<br><br>
-
-        <strong>KV Selection Rule of Thumb:</strong><br>
-        High KV (1800–2700) + small props (3"–5") → Racing/freestyle (fast, inefficient)<br>
-        Mid KV (500–1000) + large props (10"–15") → Cargo/AI payload quads (efficient, more torque)<br>
-        Low KV (200–400) + very large props (18"–30") → Heavy-lift hexacopters/octocopters<br><br>
-
-        AI payload drones typically: <strong>920KV motors, 6S, 13" props</strong> — balancing flight time and payload capacity.
+    <div class="insight-box mb-4">
+        <div class="insight-label">KV Explained</div>
+        <p class="text-slate-200 text-sm mt-1">KV = RPM per Volt applied (at no load). A 920KV motor on 6S (22.2V) spins at ~20,400 RPM unloaded; with a propeller attached it drops to ~16,000–18,000 RPM. Larger props need lower KV to avoid overloading the motor.</p>
     </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-rose-900/20 border border-rose-700/50 p-4 rounded text-sm">
+            <strong class="text-rose-400 block mb-2">High KV — Racing</strong>
+            <div class="font-mono text-xs text-slate-300 space-y-1">
+                <div>KV: <span class="text-white">1800–2700</span></div>
+                <div>Props: <span class="text-white">3"–5"</span></div>
+                <div>Use: <span class="text-white">FPV racing, freestyle</span></div>
+                <div class="text-rose-400 mt-1">Fast ↑ — Efficient ↓</div>
+            </div>
+        </div>
+        <div class="bg-emerald-900/20 border border-emerald-700/50 p-4 rounded text-sm">
+            <strong class="text-emerald-400 block mb-2">Mid KV — AI Payload ★</strong>
+            <div class="font-mono text-xs text-slate-300 space-y-1">
+                <div>KV: <span class="text-white">500–1000</span></div>
+                <div>Props: <span class="text-white">10"–15"</span></div>
+                <div>Use: <span class="text-white">Cargo, inspection, AI</span></div>
+                <div class="text-emerald-400 mt-1">Typical: <strong>920KV, 6S, 13"</strong></div>
+            </div>
+        </div>
+        <div class="bg-sky-900/20 border border-sky-700/50 p-4 rounded text-sm">
+            <strong class="text-sky-400 block mb-2">Low KV — Heavy Lift</strong>
+            <div class="font-mono text-xs text-slate-300 space-y-1">
+                <div>KV: <span class="text-white">200–400</span></div>
+                <div>Props: <span class="text-white">18"–30"</span></div>
+                <div>Use: <span class="text-white">Hex/octo heavy-lift</span></div>
+                <div class="text-sky-400 mt-1">Efficient ↑ — Torque ↑↑</div>
+            </div>
+        </div>
+    </div>
+    <p class="text-sm text-slate-300 mb-6">Prop notation: "1345" = 13 inch diameter, 4.5 inch pitch. Larger diameter = larger disk area = more efficient thrust at the same RPM. Higher pitch = more thrust per revolution but requires more torque (higher current).</p>
 
     <h3>10.7 Brownout Protection: Capacitor Bank Design</h3>
     <p>A brownout occurs when the battery voltage sags below the BEC's minimum operating input voltage during peak current draw. The energy stored in a capacitor bank bridges this transient. The Rubycon ZLH and Panasonic FR series are the industry standard for this application because they combine very low ESR with high ripple current rating and long life at elevated temperatures.</p>
 
-    <div class="math-block">
-        <strong>Capacitor Bank Sizing for Brownout Protection</strong><br><br>
-        Load: Jetson Orin NX at 25W, 12V input = 2.08A nominal, 3.5A surge<br>
-        BEC input minimum: 15V (for a 12V synchronous buck with 3V headroom)<br>
-        Battery nominal: 22.2V (6S). Under 150A load spike, worst-case voltage sag: down to 18V for 20ms.<br><br>
-
-        Energy needed from capacitor bank:<br>
-        Voltage drops from 18V to 15V over 20ms while sourcing 3.5A to the BEC.<br>
-        ΔV = 3V, I = 3.5A, t = 20ms<br>
-        C = I × t / ΔV = 3.5 × 0.020 / 3.0 = <strong>23.3mF = 23,300µF</strong><br><br>
-
-        Practical implementation: 4× Rubycon ZLH 6800µF 35V (total: 27,200µF)<br>
-        Or: 6× Panasonic FR 3900µF 35V (total: 23,400µF)<br><br>
-
-        <strong>Why Low-ESR Matters Here:</strong><br>
-        During the 3.5A discharge, voltage across ESR = I × ESR<br>
-        Standard electrolytic ESR at 100Hz: ~300mΩ → voltage drop = 3.5A × 0.3Ω = <strong>1.05V</strong> wasted in ESR alone.<br>
-        Rubycon ZLH ESR at 100kHz: ~15mΩ → voltage drop = 3.5A × 0.015Ω = <strong>0.05V</strong> — essentially zero.<br><br>
-
-        Rubycon ZLH 6800µF 35V: ESR = 12–18mΩ, ripple current = 3.78A rms at 105°C<br>
-        Panasonic FR 3900µF 35V: ESR = 15–22mΩ, ripple current = 2.6A rms at 105°C
+    <div class="insight-box mb-4">
+        <div class="insight-label">Why ~23,000µF?</div>
+        <p class="text-slate-200 text-sm mt-1">Under a full-throttle motor spike, battery voltage can sag from 22V to 18V for ~20ms. The capacitor bank must supply 3.5A to the Jetson's BEC during that 20ms window while voltage only drops 3V more. Working backwards: <strong>C = I × t / ΔV = 3.5A × 0.020s / 3V ≈ 23,300µF</strong>. Use low-ESR caps — standard electrolytics waste 1.05V across their internal resistance; Rubycon ZLH wastes only 0.05V.</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-xs font-mono">
+        <div class="bg-slate-900 p-4 rounded border border-emerald-700/50">
+            <strong class="text-emerald-400 block mb-2 font-sans">Option A: Rubycon ZLH</strong>
+            <div class="text-slate-300 space-y-1">
+                <div>4× 6800µF 35V = <span class="text-white font-bold">27,200µF total</span></div>
+                <div>ESR: 12–18 mΩ</div>
+                <div>Ripple: 3.78A rms @ 105°C</div>
+            </div>
+        </div>
+        <div class="bg-slate-900 p-4 rounded border border-sky-700/50">
+            <strong class="text-sky-400 block mb-2 font-sans">Option B: Panasonic FR</strong>
+            <div class="text-slate-300 space-y-1">
+                <div>6× 3900µF 35V = <span class="text-white font-bold">23,400µF total</span></div>
+                <div>ESR: 15–22 mΩ</div>
+                <div>Ripple: 2.6A rms @ 105°C</div>
+            </div>
+        </div>
     </div>
 
     <div class="bg-red-900/20 border border-red-500/50 p-4 rounded text-red-200 text-sm">

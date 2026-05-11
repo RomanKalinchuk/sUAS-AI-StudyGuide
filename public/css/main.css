@@ -1666,6 +1666,103 @@ code, pre {
   line-height: 1.6;
 }
 
+/* Collapsible code blocks */
+.code-expand {
+  margin-bottom: 1.5rem;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.code-expand summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  background-color: #0d1320;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-family: 'Fira Code', monospace;
+  cursor: pointer;
+  user-select: none;
+  letter-spacing: 0.05em;
+  list-style: none;
+}
+
+.code-expand summary::-webkit-details-marker { display: none; }
+
+.code-expand summary::before {
+  content: '▶';
+  font-size: 0.6rem;
+  color: #0ea5e9;
+  transition: transform 0.2s;
+}
+
+.code-expand[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.code-expand summary:hover {
+  color: #e2e8f0;
+  background-color: #111827;
+}
+
+.code-expand pre {
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* Math-block inside details — remove bottom margin and radius */
+.code-expand .math-block {
+  margin-bottom: 0;
+  border-radius: 0;
+  border-left-color: #6366f1;
+}
+
+/* Key insight callout */
+.insight-box {
+  background: linear-gradient(135deg, #0c1a2e 0%, #0a1628 100%);
+  border: 1px solid #1e3a5f;
+  border-left: 4px solid #38bdf8;
+  border-radius: 0.5rem;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.insight-box .insight-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: #38bdf8;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+/* Visual formula cards */
+.formula-card {
+  background-color: #0d1320;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1rem 1.25rem;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.formula-card .formula-main {
+  font-size: 1.1rem;
+  color: #e2e8f0;
+  margin: 0.5rem 0;
+}
+
+.formula-card .formula-label {
+  font-size: 0.7rem;
+  color: #64748b;
+  font-family: inherit;
+}
+
 .hw-card {
   background: linear-gradient(145deg, #131b2c, #0a0f1a);
   border: 1px solid var(--border);

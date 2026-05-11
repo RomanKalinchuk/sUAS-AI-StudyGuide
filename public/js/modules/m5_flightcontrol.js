@@ -106,50 +106,72 @@ export default `
     <h3>11.2 The Full Cascaded PID Control Loop</h3>
     <p>The flight control stack is a cascade of nested PID loops. Each outer loop's output becomes the setpoint (reference) for the next inner loop. This architecture is why a drone can hold GPS position while simultaneously maintaining attitude stability in wind — different loops handle different physical variables at different frequencies.</p>
 
-    <div class="math-block">
-        <strong>Full PID Cascade — Position to Motor Output</strong><br><br>
-
-        LAYER 1: Position Controller (50Hz)
-        ─────────────────────────────────────────────────────────────────
-        Input:   GPS position error (meters North/East/Down in NED frame)
-        Process: P controller only (I and D destabilize at this level)
-        Output:  Velocity setpoint (m/s) → fed to Velocity Controller
-        Param:   PSC_POSXY_P (default ~1.0), PSC_POSZ_P<br><br>
-
-        LAYER 2: Velocity Controller (50Hz)
-        ─────────────────────────────────────────────────────────────────
-        Input:   Velocity error = velocity_setpoint − current_velocity (from EKF)
-        Process: PID — I term accumulates steady-state wind drift error
-        Output:  Acceleration setpoint (m/s²) → converted to lean angle (attitude) setpoint
-        Math:    lean_angle = atan2(acc_setpoint, GRAVITY). Capped at ATC_ANGLE_MAX (default 30°)
-        Param:   PSC_VELXY_P, PSC_VELXY_I, PSC_VELXY_D<br><br>
-
-        LAYER 3: Attitude Controller (400Hz)
-        ─────────────────────────────────────────────────────────────────
-        Input:   Attitude error = desired_quaternion × inverse(current_quaternion)
-        Process: P controller on attitude quaternion error (Slerp-based)
-        Output:  Angular rate setpoint (deg/s) → fed to Rate Controller
-        Note:    Uses quaternion math to avoid gimbal lock issues with Euler angles
-        Param:   ATC_ANG_RLL_P, ATC_ANG_PIT_P, ATC_ANG_YAW_P (defaults ~4.5)<br><br>
-
-        LAYER 4: Rate Controller (400Hz) ← The innermost, most critical loop
-        ─────────────────────────────────────────────────────────────────
-        Input:   Rate error = desired_rate − gyro_rate (direct IMU reading)
-        Process: Full PID + D-term low-pass filter (to suppress gyro noise)
-        Output:  Motor mixing matrix inputs (roll, pitch, yaw torque + throttle)
-        Param:   ATC_RAT_RLL_P, ATC_RAT_RLL_I, ATC_RAT_RLL_D (most tuning effort here)
-        D-filter: ATC_RAT_RLL_FLTD (default 20Hz cutoff on D term)<br><br>
-
-        LAYER 5: Motor Mixer → ESC Output
-        ─────────────────────────────────────────────────────────────────
-        Input:   [Roll, Pitch, Yaw, Throttle] torque/thrust commands
-        Process: Motor mixing matrix (geometry-dependent, e.g., X-frame quad)
-          Motor1(FL) = Throttle + Roll - Pitch + Yaw
-          Motor2(FR) = Throttle - Roll - Pitch - Yaw
-          Motor3(BL) = Throttle + Roll + Pitch - Yaw
-          Motor4(BR) = Throttle - Roll + Pitch + Yaw
-        Output:  Per-motor PWM duty cycle or DSHOT value (0–2047)
-        Scaling: Linear mapping, clamped to [MOT_SPIN_MIN, MOT_SPIN_MAX]
+    <div class="space-y-2 mb-6">
+        <div class="bg-slate-900 p-4 rounded border-l-4 border-sky-500 text-sm">
+            <div class="flex items-center justify-between mb-2">
+                <strong class="text-sky-400">Layer 1 — Position Controller</strong>
+                <span class="text-xs font-mono text-slate-500 bg-slate-800 px-2 py-1 rounded">50 Hz</span>
+            </div>
+            <div class="grid grid-cols-3 gap-3 text-xs font-mono text-slate-300">
+                <div><span class="text-slate-500">In:</span> GPS position error (m)</div>
+                <div><span class="text-slate-500">Logic:</span> P-only controller</div>
+                <div><span class="text-slate-500">Out:</span> Velocity setpoint (m/s)</div>
+            </div>
+            <div class="text-xs text-slate-500 mt-1">Params: PSC_POSXY_P, PSC_POSZ_P</div>
+        </div>
+        <div class="flex justify-center text-slate-600 text-lg">↓</div>
+        <div class="bg-slate-900 p-4 rounded border-l-4 border-sky-400 text-sm">
+            <div class="flex items-center justify-between mb-2">
+                <strong class="text-sky-300">Layer 2 — Velocity Controller</strong>
+                <span class="text-xs font-mono text-slate-500 bg-slate-800 px-2 py-1 rounded">50 Hz</span>
+            </div>
+            <div class="grid grid-cols-3 gap-3 text-xs font-mono text-slate-300">
+                <div><span class="text-slate-500">In:</span> Velocity error (m/s)</div>
+                <div><span class="text-slate-500">Logic:</span> Full PID — I term absorbs wind drift</div>
+                <div><span class="text-slate-500">Out:</span> Lean angle setpoint (°, max 30°)</div>
+            </div>
+            <div class="text-xs text-slate-500 mt-1">Params: PSC_VELXY_P/I/D</div>
+        </div>
+        <div class="flex justify-center text-slate-600 text-lg">↓</div>
+        <div class="bg-slate-900 p-4 rounded border-l-4 border-emerald-500 text-sm">
+            <div class="flex items-center justify-between mb-2">
+                <strong class="text-emerald-400">Layer 3 — Attitude Controller</strong>
+                <span class="text-xs font-mono text-slate-500 bg-slate-800 px-2 py-1 rounded">400 Hz</span>
+            </div>
+            <div class="grid grid-cols-3 gap-3 text-xs font-mono text-slate-300">
+                <div><span class="text-slate-500">In:</span> Attitude quaternion error</div>
+                <div><span class="text-slate-500">Logic:</span> P-only on quaternion (no gimbal lock)</div>
+                <div><span class="text-slate-500">Out:</span> Angular rate setpoint (°/s)</div>
+            </div>
+            <div class="text-xs text-slate-500 mt-1">Params: ATC_ANG_RLL/PIT/YAW_P (~4.5)</div>
+        </div>
+        <div class="flex justify-center text-slate-600 text-lg">↓</div>
+        <div class="bg-slate-900 p-4 rounded border-l-4 border-amber-500 text-sm">
+            <div class="flex items-center justify-between mb-2">
+                <strong class="text-amber-400">Layer 4 — Rate Controller ← Most tuning effort here</strong>
+                <span class="text-xs font-mono text-slate-500 bg-slate-800 px-2 py-1 rounded">400 Hz</span>
+            </div>
+            <div class="grid grid-cols-3 gap-3 text-xs font-mono text-slate-300">
+                <div><span class="text-slate-500">In:</span> Rate error (gyro vs setpoint)</div>
+                <div><span class="text-slate-500">Logic:</span> Full PID + D-term LPF (20Hz cutoff)</div>
+                <div><span class="text-slate-500">Out:</span> Roll/Pitch/Yaw torque + Throttle</div>
+            </div>
+            <div class="text-xs text-slate-500 mt-1">Params: ATC_RAT_RLL/PIT/YAW_P/I/D</div>
+        </div>
+        <div class="flex justify-center text-slate-600 text-lg">↓</div>
+        <div class="bg-slate-900 p-4 rounded border-l-4 border-violet-500 text-sm">
+            <div class="flex items-center justify-between mb-2">
+                <strong class="text-violet-400">Layer 5 — Motor Mixer → ESC</strong>
+                <span class="text-xs font-mono text-slate-500 bg-slate-800 px-2 py-1 rounded">400 Hz</span>
+            </div>
+            <div class="text-xs font-mono text-slate-300 grid grid-cols-2 gap-x-6 gap-y-1 mt-1">
+                <div>Motor FL = Throttle + Roll − Pitch + Yaw</div>
+                <div>Motor FR = Throttle − Roll − Pitch − Yaw</div>
+                <div>Motor BL = Throttle + Roll + Pitch − Yaw</div>
+                <div>Motor BR = Throttle − Roll + Pitch + Yaw</div>
+            </div>
+            <div class="text-xs text-slate-500 mt-2">Output: DSHOT value 0–2047 per motor, clamped to MOT_SPIN_MIN / MOT_SPIN_MAX</div>
+        </div>
     </div>
 
     <div class="bg-slate-900 p-6 rounded border border-slate-700 mb-8 text-sm">
@@ -335,25 +357,34 @@ export default `
     <h3>11.5 Pre-Arm Checks</h3>
     <p>ArduPilot will refuse to arm the motors until all pre-arm checks pass. These are not arbitrary gates — each check prevents a specific class of inflight failure. The ARMING_CHECK bitmask parameter controls which checks are active (default: all enabled = 1).</p>
 
-    <div class="math-block">
-        <strong>ARMING_CHECK Bitmask — Full Breakdown</strong><br><br>
-        Bit 0  (value 1):    Board voltage check — internal 5V supply within ±0.3V of nominal
-        Bit 1  (value 2):    Parameter EEPROM integrity — CRC check on all stored params
-        Bit 2  (value 4):    RC calibration — all RC channels within their calibrated range
-        Bit 3  (value 8):    GPS lock — must have 3D fix with HDOP &lt; GPS_HDOP_GOOD (default 140 = 1.40)
-        Bit 4  (value 16):   MAG (compass) — calibration CRC valid, no large variance between compass readings
-        Bit 5  (value 32):   INS (IMU) — all IMUs agree on static state, no high vibration pre-arm
-        Bit 6  (value 64):   RC failsafe — verify FS_THR_VALUE actually triggers failsafe
-        Bit 7  (value 128):  Fence — verify GeoFence polygon is valid and loaded
-        Bit 8  (value 256):  Flight plan — verify mission is loaded if AUTO mode is selected
-        Bit 9  (value 512):  Logging — SD card present and writable (refuse to fly without logging for safety review post-crash)
-        Bit 10 (value 1024): Battery — BATT_ARMING_MIN voltage check (refuse if voltage too low to complete mission)
-        Bit 15 (value 32768): all checks<br><br>
-
-        <strong>EKF-specific arming gate:</strong>
-        EK3_CHECK_SCALE controls the EKF variance threshold. Before arming, the EKF must have converged:
-        all state variances below the threshold for at least 10 seconds. This ensures the filter has enough
-        data to have a valid position estimate before handing control to position-hold modes.
+    <div class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden mb-6">
+        <div class="px-4 py-3 bg-slate-800 text-xs font-mono text-slate-400 uppercase tracking-widest">ARMING_CHECK Bitmask</div>
+        <table class="w-full text-xs">
+            <thead>
+                <tr class="bg-slate-800/50 text-slate-400">
+                    <th class="p-2 text-left">Bit</th>
+                    <th class="p-2 text-left">Check</th>
+                    <th class="p-2 text-left">What It Verifies</th>
+                </tr>
+            </thead>
+            <tbody class="text-slate-300 font-mono">
+                <tr class="border-t border-slate-800"><td class="p-2 text-slate-500">0 (1)</td><td class="p-2 text-white">Board voltage</td><td class="p-2">Internal 5V within ±0.3V of nominal</td></tr>
+                <tr class="border-t border-slate-800 bg-slate-900/50"><td class="p-2 text-slate-500">1 (2)</td><td class="p-2 text-white">EEPROM CRC</td><td class="p-2">Parameter storage not corrupted</td></tr>
+                <tr class="border-t border-slate-800"><td class="p-2 text-slate-500">2 (4)</td><td class="p-2 text-white">RC calibration</td><td class="p-2">All channels within calibrated range</td></tr>
+                <tr class="border-t border-slate-800 bg-slate-900/50"><td class="p-2 text-slate-500">3 (8)</td><td class="p-2 text-rose-300">GPS lock</td><td class="p-2">3D fix, HDOP &lt; GPS_HDOP_GOOD (default 1.40)</td></tr>
+                <tr class="border-t border-slate-800"><td class="p-2 text-slate-500">4 (16)</td><td class="p-2 text-rose-300">Compass</td><td class="p-2">Calibration CRC valid, low variance between readings</td></tr>
+                <tr class="border-t border-slate-800 bg-slate-900/50"><td class="p-2 text-slate-500">5 (32)</td><td class="p-2 text-rose-300">IMU (INS)</td><td class="p-2">All IMUs agree, no high vibration pre-arm</td></tr>
+                <tr class="border-t border-slate-800"><td class="p-2 text-slate-500">6 (64)</td><td class="p-2 text-rose-300">RC failsafe</td><td class="p-2">Verifies FS_THR_VALUE actually triggers failsafe</td></tr>
+                <tr class="border-t border-slate-800 bg-slate-900/50"><td class="p-2 text-slate-500">7 (128)</td><td class="p-2 text-white">Fence</td><td class="p-2">GeoFence polygon valid and loaded</td></tr>
+                <tr class="border-t border-slate-800"><td class="p-2 text-slate-500">8 (256)</td><td class="p-2 text-white">Flight plan</td><td class="p-2">Mission loaded if AUTO mode selected</td></tr>
+                <tr class="border-t border-slate-800 bg-slate-900/50"><td class="p-2 text-slate-500">9 (512)</td><td class="p-2 text-amber-300">Logging</td><td class="p-2">SD card present and writable</td></tr>
+                <tr class="border-t border-slate-800"><td class="p-2 text-slate-500">10 (1024)</td><td class="p-2 text-amber-300">Battery</td><td class="p-2">BATT_ARMING_MIN voltage — enough charge to complete mission</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="insight-box mb-6">
+        <div class="insight-label">EKF Arming Gate</div>
+        <p class="text-slate-200 text-sm mt-1"><code>EK3_CHECK_SCALE</code> controls the EKF variance threshold. Before arming, all 24 state variances must remain below this threshold for at least 10 seconds — ensuring the filter has converged on a valid position estimate before handing control to position-hold modes.</p>
     </div>
 
     <div class="bg-slate-900 p-6 rounded border border-slate-700 mb-8 text-sm">
@@ -395,24 +426,22 @@ export default `
         </div>
     </div>
 
-    <div class="math-block">
-        <strong>GUIDED_NOGPS — Enabling and Using</strong><br><br>
-        To enter GUIDED_NOGPS mode, the Companion Computer sends a MAVLink COMMAND_LONG (MSG #76):
-        command = MAV_CMD_NAV_GUIDED_ENABLE (92)
-        param1 = 1 (enable)
-
-        Or set via RC: add GUIDED_NOGPS to FLTMODE slots.
-        Note: GUIDED_NOGPS is the flight mode number 20 in ArduPilot Copter (not 4).
-        Verified against ArduCopter/mode.h: COPTER_MODE enum { GUIDED_NOGPS = 20 }.<br><br>
-
-        Once in GUIDED_NOGPS, the CC sends SET_ATTITUDE_TARGET (MSG #82) directly:
-        — 4-component quaternion (q[0..3]) sets desired attitude
-        — body_roll_rate, body_pitch_rate, body_yaw_rate: rate feedforward (rad/s)
-        — thrust: collective thrust 0.0–1.0 (maps to MOT_SPIN_MIN to MOT_THST_HOVER to max)<br><br>
-
-        This bypasses position and velocity loops entirely — the CC is responsible for all position control.
-        The FC provides only attitude control (Layers 3 and 4) and motor mixing (Layer 5).
-        This is the architecture used by custom VIO-based navigation systems where the CC runs its own position PID loop.
+    <div class="bg-slate-900 p-5 rounded border border-slate-700 mb-6 text-sm">
+        <strong class="text-sky-400 block mb-3">GUIDED_NOGPS Command Flow</strong>
+        <div class="space-y-3 font-mono text-xs text-slate-300">
+            <div class="flex gap-3 items-start">
+                <span class="text-sky-400 shrink-0">Step 1</span>
+                <div>Send <code class="text-white">COMMAND_LONG (MSG #76)</code> with <code class="text-white">MAV_CMD_NAV_GUIDED_ENABLE (92), param1=1</code> — or assign flight mode 20 to an RC slot</div>
+            </div>
+            <div class="flex gap-3 items-start">
+                <span class="text-sky-400 shrink-0">Step 2</span>
+                <div>Companion Computer continuously sends <code class="text-white">SET_ATTITUDE_TARGET (MSG #82)</code>: 4-component quaternion (desired attitude) + body rate feedforward + thrust 0.0–1.0</div>
+            </div>
+            <div class="flex gap-3 items-start">
+                <span class="text-sky-400 shrink-0">Result</span>
+                <div class="text-emerald-300">Position and velocity loops are bypassed entirely — FC handles only attitude (Layers 3–4) and motor mixing. The CC runs its own position PID loop using VIO as feedback.</div>
+            </div>
+        </div>
     </div>
 
     <div class="bg-emerald-900/20 border border-emerald-500/50 p-4 rounded text-emerald-200 text-sm">

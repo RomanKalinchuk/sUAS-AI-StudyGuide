@@ -10,12 +10,19 @@ export default `
     <h4>MAVLink v2 Packet Signing</h4>
     <p>MAVLink v2 introduced an optional signing mechanism. When enabled, 13 bytes are appended to each packet: a <strong>link ID</strong> (1 byte, identifies the connection), a <strong>timestamp</strong> (6 bytes, 1/10th milliseconds since epoch, strictly monotonically increasing), and a <strong>signature</strong> (6 bytes, first 6 bytes of SHA-256 HMAC over key + header + payload + link_id + timestamp). The signing key is 32 bytes, shared between the GCS and vehicle.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">Packet Signing = 13 Bytes of Authentication</div>
+        <p class="text-slate-200 text-sm mt-1">Link ID (1B) + monotonic timestamp (6B) + 6-byte SHA-256 HMAC signature = 13 bytes appended per packet. The monotonic timestamp blocks replay attacks: old packets are rejected because their timestamp is before the receiver's last seen value. Expand below for the binary packet layout.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Packet Structure ▼</summary>
+<div class="math-block">
         MAVLink v2 signed packet structure:<br><br>
         [magic][len][incompat_flags|SIGNED=0x01][compat_flags][seq][sysid][compid][msgid:3][payload:len][crc:2][link_id:1][timestamp:6][sig:6]<br><br>
         Signature = SHA256( secret_key + header + payload + crc + link_id + timestamp )[0:6]<br><br>
         Total signing overhead: 13 bytes per packet.
     </div>
+</details>
 
     <p>The monotonic timestamp prevents <strong>replay attacks</strong>: recording valid signed packets and re-transmitting them will be rejected because the timestamp in the replayed packet is older than the highest timestamp the receiver has seen. To enable in ArduPilot: set <code>SYSID_MYGCS</code> to match the GCS system ID, upload the 32-byte signing key via <code>mavproxy.py</code> using the <code>signing</code> command, and set <code>MAV_FLTMODE_6</code> to reject unsigned packets.</p>
 
@@ -24,6 +31,8 @@ export default `
             Bash: Enabling MAVLink v2 signing via MAVProxy
         </div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Shell Code Example</summary>
 <pre><code class="language-bash"># Generate a 32-byte signing key (hex-encoded)
 python3 -c "import os; print(os.urandom(32).hex())" > signing.key
 
@@ -34,6 +43,7 @@ mavproxy.py --master /dev/ttyUSB0 --baud 57600
 # signing enable                        # enables signing on this link
 # param set SYSID_MYGCS 255             # only accept commands from sysid 255
 # (requires restart to take effect on vehicle side)</code></pre>
+</details>
         </div>
     </div>
 
@@ -71,13 +81,25 @@ mavproxy.py --master /dev/ttyUSB0 --baud 57600
         </li>
     </ul>
 
-    <div class="math-block">
-        EKF Innovation check (velocity domain):<br><br>
-        innovation_v = v_GPS - v_IMU_predicted<br>
-        test_ratio   = innovation_v^2 / innovation_variance<br><br>
-        if test_ratio > EK3_CHECK_SCALE: flag GPS as faulty<br><br>
-        Authentic L1 signal power at receiver: ~ -130 dBm<br>
-        Spoofed signal (typical SDR attacker): -90 to -110 dBm (20–40 dB above authentic)
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-xs font-mono">
+        <div class="bg-slate-900 p-4 rounded border border-slate-700">
+            <strong class="text-sky-400 block mb-2 font-sans text-sm">EKF IMU Cross-Check</strong>
+            <p class="text-slate-400 font-sans text-xs mb-2">Compares GPS velocity against IMU-integrated velocity prediction:</p>
+            <div class="text-slate-300 space-y-1">
+                <div>Innovation = GPS_velocity − IMU_predicted</div>
+                <div>Test ratio = Innovation² ÷ variance</div>
+                <div class="text-emerald-400 mt-2">If ratio &gt; EK3_CHECK_SCALE → flag GPS spoofed</div>
+            </div>
+        </div>
+        <div class="bg-slate-900 p-4 rounded border border-slate-700">
+            <strong class="text-amber-400 block mb-2 font-sans text-sm">Signal Power Anomaly</strong>
+            <p class="text-slate-400 font-sans text-xs mb-2">Real satellites are 20,000 km away. Spoofed signals come from meters away:</p>
+            <div class="text-slate-300 space-y-1">
+                <div>Authentic GPS L1: <span class="text-emerald-400">~−130 dBm</span></div>
+                <div>Spoofed (SDR attack): <span class="text-rose-400">−90 to −110 dBm</span></div>
+                <div class="text-amber-400 mt-2">20–40 dB above authentic → AGC / C/N0 flag</div>
+            </div>
+        </div>
     </div>
 
     <h3>13.3 RF Jamming, Detection, and FHSS</h3>
@@ -110,6 +132,8 @@ mavproxy.py --master /dev/ttyUSB0 --baud 57600
             Bash: Ubuntu companion computer hardening (Jetson Orin)
         </div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Shell Code Example</summary>
 <pre><code class="language-bash"># 1. Disable SSH password authentication (keys only)
 sudo sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
 sudo sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/'  /etc/ssh/sshd_config
@@ -131,6 +155,7 @@ sudo systemctl mask bluetooth        # Bluetooth attack surface
 # Flash the fused PKC key via UEFI/SecureBoot in Jetson Linux BSP
 # odmfuse.sh -i <chip_id> --PKC <public_key.pem> --target-board <board>
 # After fusing, only signed images will boot on this specific Jetson.</code></pre>
+</details>
         </div>
     </div>
 

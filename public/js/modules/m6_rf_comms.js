@@ -48,14 +48,28 @@ export default `
     <h4>ELRS Packet Rates & Link Latency</h4>
     <p>Packet rate directly defines link latency. At 500Hz, the packet interval is 1/500 = 2ms. This is the fundamental link update period — not round-trip latency to the flight controller, but the interval between successive RC command packets reaching the receiver.</p>
 
-    <div class="math-block">
-        Packet interval = 1 / packet_rate<br><br>
-        At 500 Hz:  interval = 1/500 = 2.0 ms<br>
-        At 250 Hz:  interval = 1/250 = 4.0 ms<br>
-        At 150 Hz:  interval = 1/150 = 6.7 ms  (Crossfire max in Shot mode)<br>
-        At 100 Hz:  interval = 1/100 = 10.0 ms<br>
-        At  50 Hz:  interval = 1/50  = 20.0 ms<br>
-        At  25 Hz:  interval = 1/25  = 40.0 ms  (maximum range mode)
+    <div class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden mb-6">
+        <div class="px-4 py-3 bg-slate-800 text-xs font-mono text-slate-400 uppercase tracking-widest">Packet Rate vs Link Latency</div>
+        <div class="flex text-xs font-mono">
+            <div class="flex-1 p-3 text-center border-r border-slate-800">
+                <div class="text-emerald-400 font-bold text-base">500 Hz</div><div class="text-slate-400">2.0 ms</div>
+            </div>
+            <div class="flex-1 p-3 text-center border-r border-slate-800">
+                <div class="text-emerald-300 font-bold text-base">250 Hz</div><div class="text-slate-400">4.0 ms</div>
+            </div>
+            <div class="flex-1 p-3 text-center border-r border-slate-800">
+                <div class="text-amber-400 font-bold text-base">150 Hz</div><div class="text-slate-400">6.7 ms</div>
+            </div>
+            <div class="flex-1 p-3 text-center border-r border-slate-800">
+                <div class="text-amber-300 font-bold text-base">100 Hz</div><div class="text-slate-400">10 ms</div>
+            </div>
+            <div class="flex-1 p-3 text-center border-r border-slate-800">
+                <div class="text-rose-400 font-bold text-base">50 Hz</div><div class="text-slate-400">20 ms</div>
+            </div>
+            <div class="flex-1 p-3 text-center">
+                <div class="text-rose-500 font-bold text-base">25 Hz</div><div class="text-slate-400">40 ms</div>
+            </div>
+        </div>
     </div>
 
     <p>Total system latency from stick input to motor response includes: stick ADC sampling (~1ms) + transmitter processing (~0.5ms) + air packet interval (2ms at 500Hz) + receiver UART output (~0.5ms) + flight controller loop (~2.5ms at 400Hz) = ~6.5ms total at 500Hz. Crossfire at 150Hz contributes ~6.7ms for the RF interval alone.</p>
@@ -176,16 +190,20 @@ export default `
         </div>
     </div>
 
-    <div class="math-block">
-        Friis Transmission Equation (link budget):<br><br>
-        P_r = P_t + G_t + G_r - L_fs - L_misc<br><br>
-        Free-space path loss: L_fs (dB) = 20*log10(d) + 20*log10(f) + 20*log10(4*pi/c)<br><br>
-        At d=1000m, f=900MHz:  L_fs = 91.5 dB<br>
-        At d=1000m, f=2.4GHz:  L_fs = 100.0 dB<br>
-        At d=1000m, f=5.8GHz:  L_fs = 107.7 dB<br><br>
-        ELRS 900MHz example: P_t = 30dBm, G_t = 2dBi, G_r = 2dBi, L_fs = 91.5dB<br>
-        P_r = 30 + 2 + 2 - 91.5 = -57.5 dBm >> sensitivity floor of -123dBm (25Hz)<br>
-        Link margin = 65.5 dB — extraordinary for a 900MHz system at 1km
+    <div class="insight-box mb-4">
+        <div class="insight-label">Link Budget Basics</div>
+        <p class="text-slate-200 text-sm mt-1">Link budget = TX power + TX antenna gain + RX antenna gain − free-space path loss. Higher frequency = higher path loss at the same distance. ELRS 900MHz at 1km has a 65.5 dB link margin above its receiver sensitivity floor — enough headroom to punch through most real-world obstructions.</p>
+    </div>
+    <div class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden mb-6">
+        <div class="px-4 py-3 bg-slate-800 text-xs font-mono text-slate-400 uppercase tracking-widest">Free-Space Path Loss at 1km</div>
+        <table class="w-full text-xs font-mono">
+            <thead><tr class="bg-slate-800/50 text-slate-400"><th class="p-3 text-left">Frequency</th><th class="p-3 text-left">Path Loss @ 1km</th><th class="p-3 text-left">ELRS Link Margin (30dBm TX)</th><th class="p-3 text-left">Notes</th></tr></thead>
+            <tbody class="text-slate-300">
+                <tr class="border-t border-slate-800"><td class="p-3 text-white">900 MHz</td><td class="p-3 text-emerald-400">91.5 dB</td><td class="p-3 text-emerald-300 font-bold">65.5 dB</td><td class="p-3 text-slate-400">Best penetration, longest range</td></tr>
+                <tr class="border-t border-slate-800 bg-slate-900/50"><td class="p-3 text-white">2.4 GHz</td><td class="p-3 text-amber-400">100.0 dB</td><td class="p-3 text-amber-300 font-bold">~57 dB</td><td class="p-3 text-slate-400">Balanced — 1000Hz FLRC available</td></tr>
+                <tr class="border-t border-slate-800"><td class="p-3 text-white">5.8 GHz</td><td class="p-3 text-rose-400">107.7 dB</td><td class="p-3 text-rose-300 font-bold">~49 dB</td><td class="p-3 text-slate-400">Video-only; 22dB worse than 900MHz</td></tr>
+            </tbody>
+        </table>
     </div>
 
     <h3>16.3 FPV Video Links: Analog vs Digital</h3>
@@ -279,20 +297,25 @@ export default `
     <h4>MAVLink Telemetry Bandwidth Requirements</h4>
     <p>Sizing the telemetry link requires understanding the MAVLink message stream. A standard ArduPilot telemetry stream contains:</p>
 
-    <div class="math-block">
-        MAVLink Bandwidth Budget (typical GCS stream):<br><br>
-        HEARTBEAT          (MSG #0)   — 1 Hz    — 9 bytes/msg   — 9 B/s<br>
-        SYS_STATUS         (MSG #1)   — 1 Hz    — 31 bytes/msg  — 31 B/s<br>
-        GLOBAL_POSITION_INT(MSG #33)  — 10 Hz   — 28 bytes/msg  — 280 B/s<br>
-        ATTITUDE           (MSG #30)  — 10 Hz   — 28 bytes/msg  — 280 B/s (50Hz for full telemetry)<br>
-        GPS_RAW_INT        (MSG #24)  — 5 Hz    — 30 bytes/msg  — 150 B/s<br>
-        VFR_HUD            (MSG #74)  — 4 Hz    — 20 bytes/msg  — 80 B/s<br>
-        RC_CHANNELS        (MSG #65)  — 2 Hz    — 42 bytes/msg  — 84 B/s<br><br>
-        Minimum viable stream (1Hz position/attitude): ~2400 baud (300 B/s)<br>
-        Standard GCS stream (10Hz position, 10Hz attitude): ~9600 baud minimum<br>
-        Full logging stream (50Hz attitude): ~57600 baud recommended<br><br>
-        SiK default: 57600 baud — sufficient for full GCS stream with margin<br>
-        RFD900x at 64kbps air rate: ~8000 B/s — handles all streams simultaneously
+    <div class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden mb-6">
+        <div class="px-4 py-3 bg-slate-800 text-xs font-mono text-slate-400 uppercase tracking-widest">MAVLink Bandwidth Budget — Typical GCS Stream</div>
+        <table class="w-full text-xs font-mono">
+            <thead><tr class="bg-slate-800/50 text-slate-400"><th class="p-3 text-left">Message</th><th class="p-3 text-left">Rate</th><th class="p-3 text-left">Size</th><th class="p-3 text-left">Bandwidth</th></tr></thead>
+            <tbody class="text-slate-300">
+                <tr class="border-t border-slate-800"><td class="p-3 text-white">HEARTBEAT (#0)</td><td class="p-3">1 Hz</td><td class="p-3">9 B</td><td class="p-3">9 B/s</td></tr>
+                <tr class="border-t border-slate-800 bg-slate-900/50"><td class="p-3 text-white">SYS_STATUS (#1)</td><td class="p-3">1 Hz</td><td class="p-3">31 B</td><td class="p-3">31 B/s</td></tr>
+                <tr class="border-t border-slate-800"><td class="p-3 text-white">GLOBAL_POSITION_INT (#33)</td><td class="p-3">10 Hz</td><td class="p-3">28 B</td><td class="p-3 text-amber-400">280 B/s</td></tr>
+                <tr class="border-t border-slate-800 bg-slate-900/50"><td class="p-3 text-white">ATTITUDE (#30)</td><td class="p-3">10 Hz</td><td class="p-3">28 B</td><td class="p-3 text-amber-400">280 B/s</td></tr>
+                <tr class="border-t border-slate-800"><td class="p-3 text-white">GPS_RAW_INT (#24)</td><td class="p-3">5 Hz</td><td class="p-3">30 B</td><td class="p-3">150 B/s</td></tr>
+                <tr class="border-t border-slate-800 bg-slate-900/50"><td class="p-3 text-white">VFR_HUD (#74)</td><td class="p-3">4 Hz</td><td class="p-3">20 B</td><td class="p-3">80 B/s</td></tr>
+                <tr class="border-t border-slate-800"><td class="p-3 text-white">RC_CHANNELS (#65)</td><td class="p-3">2 Hz</td><td class="p-3">42 B</td><td class="p-3">84 B/s</td></tr>
+            </tbody>
+        </table>
+        <div class="p-3 bg-slate-800/30 text-xs font-mono text-slate-400 border-t border-slate-700 grid grid-cols-3 gap-3">
+            <div><span class="text-white">Minimum viable:</span> ~2400 baud (1Hz streams)</div>
+            <div><span class="text-white">Standard GCS:</span> ~9600 baud (10Hz pos/att)</div>
+            <div><span class="text-emerald-400">Recommended:</span> 57600 baud (full logging)</div>
+        </div>
     </div>
 
     <h3>16.5 Encrypted and Secure RF Links</h3>
@@ -311,15 +334,9 @@ export default `
     <h4>FHSS for Jam Resistance</h4>
     <p>Frequency Hopping Spread Spectrum (FHSS) pseudo-randomly hops the carrier frequency across a pre-agreed channel list on each packet. A narrowband jammer on a single frequency can only block the fraction of time spent on that frequency. A broadband noise jammer must spread power across the entire hop bandwidth, dramatically reducing effective jamming power spectral density (PSD).</p>
 
-    <div class="math-block">
-        FHSS Jam Resistance (Processing Gain):<br><br>
-        Processing Gain (PG) = 10 * log10(Hop Bandwidth / Channel Bandwidth)<br><br>
-        Example: SiK radio hopping across 50 channels of 125kHz bandwidth<br>
-        Total hop bandwidth = 50 * 125kHz = 6.25 MHz<br>
-        PG = 10 * log10(6.25MHz / 125kHz) = 10 * log10(50) = 17 dB<br><br>
-        A jammer must be 17 dB stronger than its equivalent narrowband power to<br>
-        achieve the same disruption. FHSS does NOT prevent detection or decoding<br>
-        by a sophisticated adversary with a wideband receiver.
+    <div class="insight-box mb-6">
+        <div class="insight-label">FHSS Jam Resistance</div>
+        <p class="text-slate-200 text-sm mt-1">A SiK radio hopping across 50 × 125kHz channels spreads its signal over 6.25MHz. A narrowband jammer on a single channel only disrupts 1/50th of the packets. A broadband jammer must spread its power across all 6.25MHz, gaining only 17 dB of processing gain advantage against it. <strong>Important caveat:</strong> FHSS reduces but does not eliminate jamming effectiveness, and does not prevent detection or decoding by a sophisticated adversary with a wideband receiver.</p>
     </div>
 
     <h3>16.6 Software Defined Radio (SDR) for RF Awareness</h3>

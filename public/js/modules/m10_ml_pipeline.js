@@ -165,6 +165,8 @@ export default `
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Bash: Ultralytics YOLO11 Training Commands</div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Shell Code Example</summary>
 <pre><code class="language-bash"># Fine-tune YOLO11s on VisDrone — recommended baseline
 # imgsz=1280 is critical for small objects. batch=-1 auto-scales to VRAM.
 # multi_scale=True trains at [0.5, 1.5]x imgsz range, simulating altitude variation.
@@ -208,6 +210,7 @@ yolo detect val \\
     data=VisDrone.yaml \\
     imgsz=1280 \\
     split=test</code></pre>
+</details>
         </div>
     </div>
 
@@ -236,6 +239,8 @@ yolo detect val \\
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Python/Bash: Complete Edge Export Workflows</div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Python Code Example</summary>
 <pre><code class="language-python">from ultralytics import YOLO
 
 model = YOLO("runs/aerial/visdrone_yolo11s/weights/best.pt")
@@ -278,6 +283,7 @@ model.export(format="rknn", imgsz=640)
 #   rknn.build(do_quantization=True, dataset='./dataset.txt')
 #   rknn.export_rknn('best.rknn')
 </code></pre>
+</details>
         </div>
     </div>
 
@@ -322,6 +328,8 @@ model.export(format="rknn", imgsz=640)
             Python: Grounding DINO open-vocabulary detection on Jetson Orin
         </div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Python Code Example</summary>
 <pre><code class="language-python">from groundingdino.util.inference import load_model, load_image, predict, annotate
 import torch
 
@@ -349,6 +357,7 @@ boxes, logits, phrases = predict(
 # boxes are cx,cy,w,h normalized — convert to pixel coords for MAVLink targeting
 # phrases: list of matched text tokens per box (e.g., ["red truck", "person"])
 print(f"Detected: {phrases} at boxes {boxes}")</code></pre>
+</details>
         </div>
     </div>
 

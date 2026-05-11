@@ -40,6 +40,8 @@ export default `
             Python · TensorRT 10.x — Build Phase (ONNX → Serialized Engine)
         </div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Python Code Example</summary>
 <pre><code class="language-python">import tensorrt as trt
 import os
 
@@ -92,6 +94,7 @@ def build_engine(onnx_path: str, engine_path: str, fp16: bool = True, int8: bool
     print(f"Engine saved: {engine_path} ({os.path.getsize(engine_path) // 1024} KB)")
 
 build_engine("yolo11s.onnx", "yolo11s_int8.engine", fp16=True, int8=True)</code></pre>
+</details>
         </div>
     </div>
 
@@ -100,6 +103,8 @@ build_engine("yolo11s.onnx", "yolo11s_int8.engine", fp16=True, int8=True)</code>
             Python · TensorRT 10.x — Inference Phase (Load Engine, Run Context)
         </div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Python Code Example</summary>
 <pre><code class="language-python">import tensorrt as trt
 import numpy as np
 import pycuda.driver as cuda
@@ -141,6 +146,7 @@ def infer(frame_np: np.ndarray) -> np.ndarray:
     cuda.memcpy_dtoh_async(h_output, d_output, stream)
     stream.synchronize()
     return h_output.copy()</code></pre>
+</details>
         </div>
     </div>
 
@@ -216,6 +222,8 @@ def infer(frame_np: np.ndarray) -> np.ndarray:
             Python · ONNX Runtime 1.19+ — Jetson Orin with TensorRT EP + CUDA EP fallback
         </div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Python Code Example</summary>
 <pre><code class="language-python">import onnxruntime as ort
 import numpy as np
 
@@ -258,6 +266,7 @@ session = ort.InferenceSession(
 dummy = np.random.randn(1, 3, 640, 640).astype(np.float32)
 outputs = session.run(None, {"images": dummy})
 print(f"Output shape: {outputs[0].shape}")  # e.g. (1, 84, 8400) for YOLO11s</code></pre>
+</details>
         </div>
     </div>
 
@@ -267,6 +276,8 @@ print(f"Output shape: {outputs[0].shape}")  # e.g. (1, 84, 8400) for YOLO11s</co
             Python · ONNX Runtime Quantization API — Static INT8 with QDQ format
         </div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Python Code Example</summary>
 <pre><code class="language-python">from onnxruntime.quantization import (
     quantize_static, QuantType, QuantFormat, CalibrationDataReader
 )
@@ -302,6 +313,7 @@ quantize_static(
         "WeightSymmetric": True,
     }
 )</code></pre>
+</details>
         </div>
     </div>
 
@@ -358,6 +370,8 @@ quantize_static(
             C++ · ROS 2 Jazzy — Callback Groups + Multithreaded Executor for drone sensor pipeline
         </div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>C++ Code Example</summary>
 <pre><code class="language-cpp">#include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
 #include "sensor_msgs/msg/imu.hpp"
@@ -411,6 +425,7 @@ int main(int argc, char** argv) {
     executor.spin();
     rclcpp::shutdown();
 }</code></pre>
+</details>
         </div>
     </div>
 
@@ -500,6 +515,8 @@ int main(int argc, char** argv) {
             Bash · Isaac ROS 3.x — Install and launch on Jetson Orin (JetPack 6.2, ROS 2 Humble)
         </div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Shell Code Example</summary>
 <pre><code class="language-bash"># Isaac ROS 3.x requires JetPack 6.0+ (L4T 36.x, CUDA 12.2+)
 # Recommended: use the Isaac ROS Docker container rather than apt-get
 
@@ -527,6 +544,7 @@ ros2 launch isaac_ros_yolov8 isaac_ros_yolov8_visualize.launch.py \\
     input_binding_names:=['images'] \\
     output_binding_names:=['output0'] \\
     network_image_width:=640 network_image_height:=640</code></pre>
+</details>
         </div>
     </div>
 
@@ -542,6 +560,8 @@ ros2 launch isaac_ros_yolov8 isaac_ros_yolov8_visualize.launch.py \\
             C++ · PX4 NuttX module — uORB publish/subscribe pattern
         </div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>C++ Code Example</summary>
 <pre><code class="language-cpp">// PX4 NuttX module: read IMU, publish to vehicle_acceleration
 #include &lt;uORB/uORB.h&gt;
 #include &lt;uORB/topics/sensor_accel.h&gt;
@@ -573,6 +593,7 @@ private:
     uORB::SubscriptionCallbackWorkItem _sensor_sub{this, ORB_ID(sensor_accel)};
     uORB::Publication&lt;vehicle_acceleration_s&gt; _accel_pub{ORB_ID(vehicle_acceleration)};
 };</code></pre>
+</details>
         </div>
     </div>
 
@@ -602,6 +623,8 @@ private:
             Bash · PX4 v1.15 — Start uXRCE-DDS agent + verify ROS 2 topics
         </div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Shell Code Example</summary>
 <pre><code class="language-bash"># On companion computer: install Micro-XRCE-DDS Agent (v2.4.2 recommended)
 pip install --user -U micro-xrce-dds-agent
 
@@ -621,6 +644,7 @@ ros2 topic list | grep /fmu
 
 ros2 topic hz /fmu/out/sensor_combined
 # Expected: ~250 Hz (IMU rate)</code></pre>
+</details>
         </div>
     </div>
 
@@ -629,6 +653,8 @@ ros2 topic hz /fmu/out/sensor_combined
             Bash · PX4 v1.15 SITL with Gazebo (replaces jMAVSim in v1.15)
         </div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Shell Code Example</summary>
 <pre><code class="language-bash"># PX4 v1.15: Gazebo is the default simulator (jMAVSim retired)
 # Requires Ubuntu 22.04, Gazebo Harmonic (or Garden)
 
@@ -651,6 +677,7 @@ make px4_sitl gz_x500 ros2
 
 # Multi-vehicle: spawn 3 drones with unique namespaces
 PX4_SIM_MODEL=gz_x500 Tools/simulation/gazebo-classic/sitl_multiple_run.sh 3</code></pre>
+</details>
         </div>
     </div>
 
@@ -686,6 +713,8 @@ PX4_SIM_MODEL=gz_x500 Tools/simulation/gazebo-classic/sitl_multiple_run.sh 3</co
             Python · MAVSDK 3.x — Upload and execute a waypoint mission
         </div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Python Code Example</summary>
 <pre><code class="language-python">import asyncio
 from mavsdk import System
 from mavsdk.mission import MissionItem, MissionPlan
@@ -753,6 +782,7 @@ async def run_mission():
             break
 
 asyncio.run(run_mission())</code></pre>
+</details>
         </div>
     </div>
 
@@ -790,6 +820,8 @@ asyncio.run(run_mission())</code></pre>
             Bash · PREEMPT_RT on Jetson Orin — install, verify, configure
         </div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Shell Code Example</summary>
 <pre><code class="language-bash"># Check if RT kernel is available for your JetPack version
 apt-cache search linux-image-rt
 
@@ -812,6 +844,7 @@ sudo cyclictest -m -p 99 -i 200 -l 100000 --smp
 
 # Pin a ROS 2 node to isolated CPU with RT priority
 taskset -c 2 chrt -f 80 ros2 run my_pkg control_node</code></pre>
+</details>
         </div>
     </div>
 
@@ -824,6 +857,8 @@ taskset -c 2 chrt -f 80 ros2 run my_pkg control_node</code></pre>
             XML · CycloneDDS real-time profile for drone companion computer
         </div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>XML Code Example</summary>
 <pre><code class="language-xml">&lt;!-- /opt/drone/cyclonedds_rt.xml --&gt;
 &lt;CycloneDDS&gt;
     &lt;Domain&gt;
@@ -855,6 +890,7 @@ taskset -c 2 chrt -f 80 ros2 run my_pkg control_node</code></pre>
 
 &lt;!-- Set before launching ROS 2 nodes: --&gt;
 &lt;!-- export CYCLONEDDS_URI=file:///opt/drone/cyclonedds_rt.xml --&gt;</code></pre>
+</details>
         </div>
     </div>
 
@@ -883,6 +919,8 @@ taskset -c 2 chrt -f 80 ros2 run my_pkg control_node</code></pre>
             Dockerfile · Multi-stage build — ROS 2 Humble + TensorRT 10 + ONNX Runtime on Jetson Orin (L4T r36)
         </div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Shell Code Example</summary>
 <pre><code class="language-bash">### Stage 1: Build TRT engine (heavy — not in final image)
 FROM nvcr.io/nvidia/l4t-tensorrt:10.3.0-runtime AS trt-builder
 WORKDIR /build
@@ -924,6 +962,7 @@ RUN cd /ros2_ws && . /opt/ros/humble/setup.sh && colcon build --merge-install
 ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 ENV CYCLONEDDS_URI=file:///config/cyclonedds_rt.xml
 ENTRYPOINT ["/ros2_ws/install/setup.sh", "ros2", "launch", "drone_perception", "perception.launch.py"]</code></pre>
+</details>
         </div>
     </div>
 
@@ -932,6 +971,8 @@ ENTRYPOINT ["/ros2_ws/install/setup.sh", "ros2", "launch", "drone_perception", "
             Bash · Running containers on Jetson with GPU + hardware device access
         </div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Shell Code Example</summary>
 <pre><code class="language-bash"># Verify NVIDIA Container Toolkit is installed (JetPack 6 ships it pre-installed)
 nvidia-ctk --version    # nvidia-ctk 1.14.x
 
@@ -951,6 +992,7 @@ docker run --rm -it \
 jetson-containers run \
     --name perception \
     $(autotag ros:humble-ros-base-l4t-r36.2.0)</code></pre>
+</details>
         </div>
     </div>
 
@@ -962,7 +1004,9 @@ jetson-containers run \
         <div class="bg-slate-900 p-4 rounded border border-slate-700">
             <strong class="text-emerald-400 block mb-2">MLflow Model Registry</strong>
             <p class="text-slate-300 mb-2">MLflow tracks experiments, logs ONNX artifacts, and manages model lifecycle stages (Staging → Production). Each registered model version includes: ONNX file, quantization config, mAP@50 on validation set, FPS benchmark on target hardware, and git SHA.</p>
-            <pre class="bg-slate-800 p-2 rounded text-[10px] text-slate-300 overflow-x-auto"><code>import mlflow
+            <details class="code-expand">
+    <summary>Code Example</summary>
+<pre class="bg-slate-800 p-2 rounded text-[10px] text-slate-300 overflow-x-auto"><code>import mlflow
 import mlflow.onnx
 
 with mlflow.start_run():
@@ -977,11 +1021,14 @@ with mlflow.start_run():
         "runs:/{run_id}/yolo11s_int8",
         "drone-detector"
     )</code></pre>
+</details>
         </div>
         <div class="bg-slate-900 p-4 rounded border border-slate-700">
             <strong class="text-sky-400 block mb-2">Mender OTA — A/B Partition Updates</strong>
             <p class="text-slate-300 mb-2">Mender provides dual A/B root filesystem OTA for embedded Linux. If the new deployment fails its health check (e.g., FPS drops below threshold), Mender automatically reverts to the previous partition. The mender-artifact tool packages the model container update:</p>
-            <pre class="bg-slate-800 p-2 rounded text-[10px] text-slate-300 overflow-x-auto"><code># Create a Mender artifact for model update
+            <details class="code-expand">
+    <summary>Code Example</summary>
+<pre class="bg-slate-800 p-2 rounded text-[10px] text-slate-300 overflow-x-auto"><code># Create a Mender artifact for model update
 mender-artifact write rootfs-image \
   --type rootfs-image \
   --artifact-name drone-detector-v2.1 \
@@ -991,6 +1038,7 @@ mender-artifact write rootfs-image \
 # Upload to Mender server and deploy to "staging" group
 mender-cli artifacts upload drone-detector-v2.1.mender
 # Then promote from staging to 10% canary, monitor, then 100%</code></pre>
+</details>
         </div>
     </div>
 
@@ -999,6 +1047,8 @@ mender-cli artifacts upload drone-detector-v2.1.mender
             YAML · GitHub Actions CI/CD — Train → Quantize → Validate → Push to Jetson
         </div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Shell Code Example</summary>
 <pre><code class="language-bash">## .github/workflows/deploy_model.yml  (simplified)
 # name: Deploy Model to Drone Fleet
 # on: push to main with changes in models/
@@ -1037,6 +1087,7 @@ mender-cli artifacts upload drone-detector-v2.1.mender
 #         run: mender-cli deploy --artifact drone-v$GITHUB_SHA --group canary
 #       - name: Wait 30min and check telemetry (FPS, accuracy metrics from drone logs)
 #       - name: Promote to 100% or rollback</code></pre>
+</details>
         </div>
     </div>
 
@@ -1070,6 +1121,8 @@ mender-cli artifacts upload drone-detector-v2.1.mender
             C++ · ROS 2 intra-process zero-copy + mlockall for real-time drone node
         </div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>C++ Code Example</summary>
 <pre><code class="language-cpp">#include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
 #include &lt;sys/mman.h&gt;   // mlockall
@@ -1128,6 +1181,7 @@ int main(int argc, char** argv) {
     executor.spin();
     rclcpp::shutdown();
 }</code></pre>
+</details>
         </div>
     </div>
 
@@ -1163,7 +1217,9 @@ int main(int argc, char** argv) {
         <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 text-xs font-mono">
             <strong class="text-amber-400 block mb-3">Hailo-8 Toolchain: ONNX → HEF</strong>
             <p class="text-slate-300 mb-3">The Hailo Dataflow Compiler (DFC 3.30, 2024) takes ONNX or TF models and compiles to HEF binaries. The compiler inserts quantization and maps dataflow operations to Hailo's on-chip scratchpad memory. Unlike TensorRT, HEF files are portable across all Hailo-8 devices (architecture-level, not chip-specific).</p>
-            <pre class="bg-slate-800 p-3 rounded text-[10px] text-slate-300 overflow-x-auto"><code># Install Hailo SDK (requires registration at hailo.ai)
+            <details class="code-expand">
+    <summary>Code Example</summary>
+<pre class="bg-slate-800 p-3 rounded text-[10px] text-slate-300 overflow-x-auto"><code># Install Hailo SDK (requires registration at hailo.ai)
 pip install hailo-sdk-client hailo-sdk-common
 
 # Parse ONNX model
@@ -1195,13 +1251,16 @@ with VDevice() as target:
         bindings.input().set_buffer(input_frame)
         configured.run(bindings)
         output = bindings.output().get_buffer()</code></pre>
+</details>
             <p class="text-emerald-400 mt-2">YOLOv8s on Hailo-8: ~218 FPS at 2.5W (vs ~52 FPS at 10W for TRT FP16 on Orin NX). Hailo-8 wins on FPS/W; Orin wins on flexibility and concurrent workloads.</p>
         </div>
 
         <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 text-xs font-mono">
             <strong class="text-red-400 block mb-3">Google Coral Edge TPU: TFLite INT8 → .tflite</strong>
             <p class="text-slate-300 mb-3">The Edge TPU has a 4 TOPS INT8 engine and 8 MB on-chip SRAM parameter cache. Models must be INT8 (full quantization — not just weights). The compiler maps as many ops to the Edge TPU as possible; unsupported ops fall back to CPU. Any op that runs on CPU breaks the execution pipeline — minimize CPU fallback ops.</p>
-            <pre class="bg-slate-800 p-3 rounded text-[10px] text-slate-300 overflow-x-auto"><code># Step 1: Full INT8 quantization (TFLite converter)
+            <details class="code-expand">
+    <summary>Code Example</summary>
+<pre class="bg-slate-800 p-3 rounded text-[10px] text-slate-300 overflow-x-auto"><code># Step 1: Full INT8 quantization (TFLite converter)
 import tensorflow as tf
 converter = tf.lite.TFLiteConverter.from_saved_model("yolo_saved_model")
 converter.optimizations = [tf.lite.Optimize.DEFAULT]
@@ -1229,6 +1288,7 @@ input_details = interpreter.get_input_details()
 common.set_input(interpreter, frame_rgb)
 interpreter.invoke()
 # 4 TOPS INT8: ~60 FPS for MobileNet-SSD, ~12 FPS for YOLOv5n at 416px</code></pre>
+</details>
             <p class="text-amber-400 mt-2">Toolchain caveat (2024): edgetpu_compiler ARM64 support dropped after v2.1. Must compile on x86-64 Linux. Cross-compilation in CI via Docker is standard practice.</p>
         </div>
     </div>
@@ -1244,7 +1304,9 @@ interpreter.invoke()
                     <li><span class="text-amber-400">FastCV:</span> Computer vision primitives (Harris corners, optical flow, warp) optimized for Hexagon DSP. Pairs with VIO algorithms for GPS-denied navigation.</li>
                 </ul>
             </div>
-            <pre class="bg-slate-800 p-3 rounded text-[10px] text-slate-300 overflow-x-auto"><code># Convert ONNX to QNN context binary
+            <details class="code-expand">
+    <summary>Code Example</summary>
+<pre class="bg-slate-800 p-3 rounded text-[10px] text-slate-300 overflow-x-auto"><code># Convert ONNX to QNN context binary
 # Requires Qualcomm AI Hub or on-device compilation
 
 # Using snpe-onnx-to-dlc (SNPE SDK)
@@ -1265,6 +1327,7 @@ snpe-net-run \
   --container yolo11s_int8.dlc \
   --input_list input_list.txt \
   --use_dsp       # Route to Hexagon DSP NPU</code></pre>
+</details>
         </div>
     </div>
 

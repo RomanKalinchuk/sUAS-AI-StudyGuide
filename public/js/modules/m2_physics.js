@@ -8,52 +8,71 @@ export default `
     <p>We previously established that Power required to hover is P_hover = (T^1.5) / sqrt(2 * rho * A). Let's expand this to understand actual flight time reduction when adding an AI payload.</p>
     <p>A battery holds a finite amount of Energy (E), usually measured in Watt-hours (Wh). Flight time (t) is simply E / P_average.</p>
 
-    <div class="math-block">
-        <strong>Calculating the AI Payload Penalty:</strong><br><br>
-        Drone Base Mass (m_base) = 1.5 kg<br>
-        AI Payload Mass (m_ai) = 0.3 kg (Jetson Orin + Carrier + Cam)<br>
-        Total Mass (m_total) = 1.8 kg<br><br>
-
-        Thrust required (T) = m * g (9.81)<br>
-        T_base = 14.7 N<br>
-        T_total = 17.6 N<br><br>
-
-        Assuming standard props (Area A = 0.2 m²) and sea level air (ρ = 1.225 kg/m³):<br>
-        Denominator = √(2 * 1.225 * 0.2) = 0.70<br><br>
-
-        P_hover_base = (14.7 ^ 1.5) / 0.70 = 56.4 / 0.70 = 80.5 Watts<br>
-        P_hover_total = (17.6 ^ 1.5) / 0.70 = 73.8 / 0.70 = 105.4 Watts<br><br>
-
-        <strong>Result:</strong> Adding 300g increased hover power by ~31%.
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-slate-900 p-4 rounded border border-slate-700 text-center text-sm">
+            <div class="text-slate-400 text-xs uppercase tracking-wider mb-2">Base Drone (no AI)</div>
+            <div class="text-2xl font-bold text-white font-mono">1.5 kg</div>
+            <div class="text-emerald-400 font-mono mt-2 text-lg">80.5 W</div>
+            <div class="text-slate-500 text-xs mt-1">to hover</div>
+        </div>
+        <div class="bg-sky-900/30 p-4 rounded border border-sky-600 text-center text-sm">
+            <div class="text-sky-400 text-xs uppercase tracking-wider mb-2">AI Payload Added</div>
+            <div class="text-2xl font-bold text-white font-mono">+300 g</div>
+            <div class="text-sky-300 font-mono mt-2 text-lg">+24.9 W</div>
+            <div class="text-slate-400 text-xs mt-1">extra hover power</div>
+        </div>
+        <div class="bg-rose-900/20 p-4 rounded border border-rose-700/50 text-center text-sm">
+            <div class="text-rose-400 text-xs uppercase tracking-wider mb-2">With AI (1.8 kg total)</div>
+            <div class="text-2xl font-bold text-white font-mono">1.8 kg</div>
+            <div class="text-rose-400 font-mono mt-2 text-lg">105.4 W</div>
+            <div class="text-slate-400 text-xs mt-1">to hover (+31% more)</div>
+        </div>
+    </div>
+    <div class="insight-box mb-6">
+        <div class="insight-label">Key Takeaway</div>
+        <p class="text-slate-200 text-sm mt-1">Adding just 300g of AI hardware increases hover power draw by <strong>31%</strong>. Because hover power scales with thrust raised to the 3/2 power, small weight increases cause disproportionately large power penalties. This is the "SWaP trap" — every gram of AI processor steals multiple grams worth of battery flight time.</p>
     </div>
 
     <p>But we must also add the electrical power consumed by the AI processor itself. <strong>This is the brutal reality of SWaP.</strong> The Jetson Orin Nano has two configurable power modes (set via <code>nvpmodel</code>) that the engineer should exploit dynamically during flight:</p>
 
-    <div class="math-block">
-        <strong>Jetson Orin Nano — Dynamic Power Mode SWaP Impact</strong><br><br>
-        Mode A: 7W (efficiency) — CPU runs at 729MHz, GPU at 306MHz, DLA active<br>
-        Mode B: 15W (performance) — CPU at 1510MHz, GPU at 624MHz<br><br>
-
-        Flight Phase: Transit/Loiter (no active AI inference required)<br>
-        → Use Mode A: P_ai = 7W<br>
-        → Total hover power = 105.4W (aero) + 7W (AI) = 112.4W<br>
-        → Flight time (100 Wh battery) = 100 / 112.4 = <strong>53.4 min</strong><br><br>
-
-        Flight Phase: Active Search/Targeting (YOLO + VSLAM running concurrently)<br>
-        → Switch to Mode B: P_ai = 15W<br>
-        → Total hover power = 105.4W + 15W = 120.4W<br>
-        → Flight time at this phase rate = 100 / 120.4 = <strong>49.8 min equivalent</strong><br><br>
-
-        Mixed mission (60% transit at 7W, 40% active at 15W):<br>
-        P_avg_ai = 0.6 × 7W + 0.4 × 15W = 4.2 + 6.0 = 10.2W<br>
-        Total avg power = 105.4W + 10.2W = 115.6W<br>
-        Flight time = 100 / 115.6 = <strong>51.9 min</strong> vs. 49.8 min at constant 15W<br><br>
-
-        <strong>Switching command (run on Jetson via companion computer ROS 2 node):</strong><br>
-        sudo nvpmodel -m 0    # Mode 0 = 15W (MAXN performance)<br>
-        sudo nvpmodel -m 1    # Mode 1 = 7W (efficiency)<br>
-        sudo nvpmodel -q      # Query current mode
+    <div class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden mb-6">
+        <div class="px-4 py-3 bg-slate-800 text-xs font-mono text-slate-400 uppercase tracking-widest">Jetson Orin Nano — Power Mode Impact on 100Wh Battery</div>
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="bg-slate-800/50 text-slate-400 text-xs">
+                    <th class="p-3 text-left">Flight Phase</th>
+                    <th class="p-3 text-left">Power Mode</th>
+                    <th class="p-3 text-left">AI Power</th>
+                    <th class="p-3 text-left">Total (aero + AI)</th>
+                    <th class="p-3 text-left">Est. Flight Time</th>
+                </tr>
+            </thead>
+            <tbody class="font-mono text-xs text-slate-300">
+                <tr class="border-t border-slate-800">
+                    <td class="p-3 text-white">Transit / Loiter</td>
+                    <td class="p-3 text-emerald-400">7W Efficiency</td>
+                    <td class="p-3">7 W</td>
+                    <td class="p-3">112.4 W</td>
+                    <td class="p-3 text-emerald-300 font-bold">53.4 min</td>
+                </tr>
+                <tr class="border-t border-slate-800 bg-slate-900/50">
+                    <td class="p-3 text-white">Active AI (YOLO + VSLAM)</td>
+                    <td class="p-3 text-amber-400">15W Performance</td>
+                    <td class="p-3">15 W</td>
+                    <td class="p-3">120.4 W</td>
+                    <td class="p-3 text-amber-300 font-bold">49.8 min</td>
+                </tr>
+                <tr class="border-t border-slate-800">
+                    <td class="p-3 text-white">Mixed (60% transit / 40% active)</td>
+                    <td class="p-3 text-sky-400">Dynamic switching</td>
+                    <td class="p-3">10.2 W avg</td>
+                    <td class="p-3">115.6 W</td>
+                    <td class="p-3 text-sky-300 font-bold">51.9 min</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
+    <p class="text-sm text-slate-300">Switching power mode dynamically via <code>nvpmodel</code> from a ROS 2 node saves ~2 minutes of flight time on a mixed mission — meaningful across a full operation day. The commands: <code>sudo nvpmodel -m 0</code> (15W performance) and <code>sudo nvpmodel -m 1</code> (7W efficiency).</p>
 
     <h3>2.2 Lithium Battery Discharge & Brownouts</h3>
     <p>Drones utilize Lithium Polymer (LiPo) or Lithium-Ion (Li-ion, e.g., 21700 cells) batteries. Their voltage is not constant. A 6-cell (6S) LiPo drops from 25.2V fully charged (4.2V/cell) to ~19.2V at its hard discharge cutoff (3.2V/cell). A resting voltage of ~19.8V (3.3V/cell) is often used as a practical low-battery warning threshold, while 21V (3.5V/cell) is a conservative in-flight limit that preserves cell longevity.</p>

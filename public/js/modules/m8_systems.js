@@ -211,7 +211,9 @@ export default `
     <h3>4.3 MAVLink Protocol Deep Dive</h3>
     <p>MAVLink (Micro Air Vehicle Link) is the lingua franca of open-source drone communication — a lightweight, header-only message marshalling library first released in 2009 by Lorenz Meier. MAVLink v2 (2017) added 24-bit message IDs (from 8-bit v1), optional 13-byte packet signing for authentication, and per-field zero-trimming to reduce payload size. When an AI Python script or ROS 2 node needs to command a flight controller, it constructs a specific MAVLink binary packet and sends it over UDP, UART, or USB.</p>
 
-    <div class="math-block bg-[#0d1117] border-slate-700 mb-8">
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block bg-[#0d1117] border-slate-700 mb-8">
         <h4 class="mt-0 text-sky-400 text-sm mb-3">Packet Anatomy: MAVLink v2 Frame</h4>
         <div class="flex flex-wrap gap-2 text-xs font-mono mb-4">
             <span class="bg-rose-900/40 text-rose-300 p-2 border border-rose-700 rounded">STX<br>0xFD<br>1 B</span>
@@ -232,6 +234,7 @@ export default `
             Signature adds 13 bytes (link ID + timestamp + HMAC-SHA256 truncated) when COMP_FLAGS bit 0 is set.
         </p>
     </div>
+</details>
 
     <h4>Key MAVLink Message IDs for AI Integration</h4>
     <table class="w-full text-left border-collapse mt-4 mb-8 text-sm">
@@ -307,6 +310,8 @@ export default `
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-8">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">mavlink-router: dual-path C2 (UART FC + LTE GCS + local AI stack)</div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Shell Code Example</summary>
 <pre><code class="language-bash"># /etc/mavlink-router/main.conf
 [General]
 TcpServerPort = 5760
@@ -328,6 +333,7 @@ Port    = 14552
 # mavlink-router forwards every packet to ALL endpoints simultaneously.
 # PX4 failsafe triggers if HEARTBEAT absent for COM_DL_LOSS_T seconds.
 # Set COM_DL_LOSS_T = 10 for BVLOS; 3 for VLOS testing.</code></pre>
+</details>
         </div>
     </div>
 
@@ -371,6 +377,8 @@ Port    = 14552
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-8">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">PX4 DroneCAN setup and ESC telemetry via ROS 2 DDS</div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Shell Code Example</summary>
 <pre><code class="language-bash"># PX4 parameter setup (QGC Parameters tab or MAVLink shell):
 # UAVCAN_ENABLE    = 2   (enable sensors + ESC outputs)
 # UAVCAN_ESC_IDLT  = 1   (ESC idle output on arming)
@@ -387,6 +395,7 @@ yakut monitor   # shows all node health + transfer counts in terminal
 
 # Check node ID allocation table:
 ros2 param get /fmu/out/uavcan_node_ids uavcan_node_ids</code></pre>
+</details>
         </div>
     </div>
 
@@ -466,6 +475,8 @@ ros2 param get /fmu/out/uavcan_node_ids uavcan_node_ids</code></pre>
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-8">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">ROS 2 C++: correct QoS for PX4 /fmu/out/ subscription</div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>C++ Code Example</summary>
 <pre><code class="language-cpp">#include "rclcpp/rclcpp.hpp"
 #include "px4_msgs/msg/vehicle_local_position.hpp"
 
@@ -482,6 +493,7 @@ auto sub = node-&gt;create_subscription&lt;px4_msgs::msg::VehicleLocalPosition&g
         // msg-&gt;vx, msg-&gt;vy, msg-&gt;vz — velocity m/s
         // msg-&gt;timestamp — microseconds (CLOCK_MONOTONIC on FC)
     });</code></pre>
+</details>
         </div>
     </div>
 
@@ -516,6 +528,8 @@ auto sub = node-&gt;create_subscription&lt;px4_msgs::msg::VehicleLocalPosition&g
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-8">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">PX4 + Micro XRCE-DDS Agent on Jetson Orin (ROS 2 Humble)</div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Shell Code Example</summary>
 <pre><code class="language-bash"># Install Micro XRCE-DDS Agent on companion computer:
 sudo apt install ros-humble-micro-ros-agent
 
@@ -538,6 +552,7 @@ ros2 topic list
 # Expand exposed topics by editing dds_topics.yaml in PX4 source:
 # src/modules/uxrce_dds_client/dds_topics.yaml
 # Add any uORB topic — it appears as /fmu/out/&lt;name&gt; automatically</code></pre>
+</details>
         </div>
     </div>
 
@@ -581,6 +596,8 @@ ros2 topic list
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">GStreamer: H.265 zero-copy encode → RTP UDP (Jetson Orin)</div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Shell Code Example</summary>
 <pre><code class="language-bash"># SENDER on Jetson Orin — 1080p@30fps H.265, ~4 Mbps, ~30 ms latency
 gst-launch-1.0 \
   nvarguscamerasrc sensor-id=0 ! \
@@ -599,6 +616,7 @@ gst-launch-1.0 \
 # MediaMTX (formerly rtsp-simple-server) for multi-client RTSP:
 # docker run -d --network host bluenviron/mediamtx:latest
 # Clients pull rtsp://drone-ip:8554/live</code></pre>
+</details>
         </div>
     </div>
 
@@ -608,6 +626,8 @@ gst-launch-1.0 \
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-8">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">GStreamer: H.265 hardware encode on RK3588 (Rockchip MPP)</div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Shell Code Example</summary>
 <pre><code class="language-bash"># RK3588 hardware H.265 via V4L2 M2M interface (Rockchip MPP)
 gst-launch-1.0 \
   v4l2src device=/dev/video0 ! \
@@ -619,38 +639,68 @@ gst-launch-1.0 \
 v4l2-ctl --list-devices | grep -A2 rkvenc
 # /dev/video-enc0   (H.264)
 # /dev/video-enc1   (H.265)</code></pre>
+</details>
         </div>
     </div>
 
     <h3>4.8 End-to-End Latency Budget Analysis</h3>
     <p>The most important latency metric for an AI-controlled drone is the <em>perception-to-actuation latency</em>: the time from a photon hitting the camera sensor to a corrective motor command being executed by the ESC. For stable autonomous flight at moderate speeds, this must stay below 150 ms. For aggressive manoeuvring or obstacle avoidance at high speed, below 50 ms is required. Understanding where latency comes from allows systematic optimisation.</p>
 
-    <div class="math-block">
-        Perception-to-Actuation Latency Budget (1080p@30fps, Jetson Orin, PX4 v1.15):<br><br>
-        L_total = L_sensor + L_interface + L_inference + L_comms + L_fc + L_motor<br><br>
-        L_sensor    = Rolling shutter exposure + readout time<br>
-                    = 1/30 fps + 2 ms rolling shutter = 33 ms + 2 ms = 35 ms<br>
-                    (Global shutter IMX585: eliminates rolling shutter → 16 ms@60fps)<br><br>
-        L_interface = CSI-2 DMA transfer to NVMM + ROS 2 NVMM zero-copy<br>
-                    ≈ 0.5 ms (CSI-2 hardware) + 0.2 ms (zero-copy) = 0.7 ms<br><br>
-        L_inference = AI model forward pass<br>
-                    = INT8 YOLO-NAS-S on Orin AGX = 3 ms (120 TOPS @ INT8)<br>
-                    = FP16 YOLO-v8m on Orin AGX  = 8 ms<br>
-                    = FP32 YOLO-v8m on Orin AGX  = 22 ms<br><br>
-        L_comms     = XRCE-DDS TrajectorySetpoint to FC<br>
-                    ≈ 1 ms (UDP loopback, 100BASE-T1)<br>
-                    ≈ 5 ms (UART 921600, worst case baud fill)<br><br>
-        L_fc        = FC main loop period + EKF update<br>
-                    = 1 / 400 Hz = 2.5 ms (PX4 default rate)<br>
-                    = 1 / 1000 Hz = 1.0 ms (PX4 high-rate configuration)<br><br>
-        L_motor     = ESC DShot frame period + motor electrical rise time<br>
-                    = DShot300: 1/300 s = 3.3 ms + motor rise ~5 ms = 8.3 ms<br>
-                    = DShot600: 1/600 s = 1.7 ms + motor rise ~4 ms = 5.7 ms<br><br>
-        ──────────────────────────────────────────────────────────────<br>
-        Typical config (30fps, FP16, UART, 400Hz FC, DShot300):<br>
-          L_total ≈ 35 + 0.7 + 8 + 5 + 2.5 + 8 = 59 ms<br><br>
-        Optimised config (60fps global shutter, INT8, UDP, 1kHz FC, DShot600):<br>
-          L_total ≈ 18 + 0.7 + 3 + 1 + 1 + 6 = 30 ms
+    <div class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden mb-6">
+        <div class="px-4 py-3 bg-slate-800 text-xs font-mono text-slate-400 uppercase tracking-widest">Perception-to-Actuation Latency Budget — Jetson Orin / PX4 v1.15</div>
+        <table class="w-full text-xs font-mono">
+            <thead>
+                <tr class="bg-slate-800/50 text-slate-400">
+                    <th class="p-3 text-left">Pipeline Stage</th>
+                    <th class="p-3 text-left">Component</th>
+                    <th class="p-3 text-center text-amber-400">Typical</th>
+                    <th class="p-3 text-center text-emerald-400">Optimised</th>
+                </tr>
+            </thead>
+            <tbody class="text-slate-300">
+                <tr class="border-t border-slate-800">
+                    <td class="p-3 text-white">Sensor</td>
+                    <td class="p-3 text-slate-400">30fps rolling shutter → 60fps global shutter</td>
+                    <td class="p-3 text-center text-amber-400">35 ms</td>
+                    <td class="p-3 text-center text-emerald-400">18 ms</td>
+                </tr>
+                <tr class="border-t border-slate-800 bg-slate-900/50">
+                    <td class="p-3 text-white">Interface</td>
+                    <td class="p-3 text-slate-400">CSI-2 DMA + ROS 2 zero-copy (both configs)</td>
+                    <td class="p-3 text-center text-amber-400">0.7 ms</td>
+                    <td class="p-3 text-center text-emerald-400">0.7 ms</td>
+                </tr>
+                <tr class="border-t border-slate-800">
+                    <td class="p-3 text-white">AI Inference</td>
+                    <td class="p-3 text-slate-400">FP16 YOLO-v8m → INT8 YOLO-NAS-S</td>
+                    <td class="p-3 text-center text-amber-400">8 ms</td>
+                    <td class="p-3 text-center text-emerald-400">3 ms</td>
+                </tr>
+                <tr class="border-t border-slate-800 bg-slate-900/50">
+                    <td class="p-3 text-white">Comms to FC</td>
+                    <td class="p-3 text-slate-400">UART 921600 → UDP 100BASE-T1</td>
+                    <td class="p-3 text-center text-amber-400">5 ms</td>
+                    <td class="p-3 text-center text-emerald-400">1 ms</td>
+                </tr>
+                <tr class="border-t border-slate-800">
+                    <td class="p-3 text-white">Flight Controller</td>
+                    <td class="p-3 text-slate-400">400Hz loop → 1kHz high-rate</td>
+                    <td class="p-3 text-center text-amber-400">2.5 ms</td>
+                    <td class="p-3 text-center text-emerald-400">1 ms</td>
+                </tr>
+                <tr class="border-t border-slate-800 bg-slate-900/50">
+                    <td class="p-3 text-white">Motor</td>
+                    <td class="p-3 text-slate-400">DShot300 + rise → DShot600 + rise</td>
+                    <td class="p-3 text-center text-amber-400">8 ms</td>
+                    <td class="p-3 text-center text-emerald-400">6 ms</td>
+                </tr>
+                <tr class="border-t border-slate-700 bg-slate-800">
+                    <td class="p-3 text-white font-bold" colspan="2">Total Latency</td>
+                    <td class="p-3 text-center text-amber-300 font-bold text-sm">~59 ms</td>
+                    <td class="p-3 text-center text-emerald-300 font-bold text-sm">~30 ms</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 text-sm">
@@ -852,6 +902,8 @@ v4l2-ctl --list-devices | grep -A2 rkvenc
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-8">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">linuxptp: hardware PTP synchronisation on Jetson Orin</div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Shell Code Example</summary>
 <pre><code class="language-bash"># Verify Orin NIC supports hardware PTP timestamps:
 ethtool -T eth0 | grep -i "hardware transmit\|hardware receive"
 
@@ -869,6 +921,7 @@ sudo phc2sys -s eth0 -c CLOCK_REALTIME -w -O 0 -m 2&gt;&amp;1 | grep offset &amp
 # ROS 2 clock: use rclcpp::Clock(RCL_SYSTEM_TIME) with /use_sim_time false
 # All sensor drivers must call std::chrono::system_clock::now() for timestamps
 # — not ROS time — to stay in sync with hardware clocks.</code></pre>
+</details>
         </div>
     </div>
 
@@ -916,6 +969,8 @@ sudo phc2sys -s eth0 -c CLOCK_REALTIME -w -O 0 -m 2&gt;&amp;1 | grep offset &amp
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-8">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">PX4 Remote ID + dual C2 configuration summary</div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Shell Code Example</summary>
 <pre><code class="language-bash"># PX4 parameters for BVLOS + Remote ID compliance:
 # RID_ENABLE   = 1       (enable OpenDroneID broadcast)
 # UAS_ID_TYPE  = 1       (Serial Number)
@@ -927,6 +982,7 @@ sudo phc2sys -s eth0 -c CLOCK_REALTIME -w -O 0 -m 2&gt;&amp;1 | grep offset &amp
 # Verify Remote ID broadcast (requires WiFi-capable device nearby):
 # Use DroneScanner app (iOS/Android) to confirm reception
 # Check both WiFi NaN beacon and BLE 5 Long Range advertisement</code></pre>
+</details>
         </div>
     </div>
 </div>

@@ -13,7 +13,13 @@ export default `
     <h4>14.1.2 ByteTrack (Zhang et al., 2022) — The Current Standard</h4>
     <p>ByteTrack was the top-performing tracker on the MOT17 and MOT20 benchmarks when published. Its key insight is that DeepSORT discards low-confidence detections (score &lt; 0.5), but these "byte" detections often contain real objects that are partially occluded or far away. ByteTrack performs two-stage association:</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">BYTETRACK TWO-STAGE ASSOCIATION</div>
+        <p class="text-slate-200 text-sm mt-1">ByteTrack runs Hungarian matching twice per frame: first against high-confidence detections, then against low-confidence "byte" detections for tracks that were unmatched in stage 1. This second pass rescues tracks that briefly drop in confidence due to partial occlusion, dramatically cutting identity switches compared to DeepSORT.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 ByteTrack Two-Stage Association Pipeline:
 
 Input: D = all detections from detector (0.0–1.0 confidence scores)
@@ -35,11 +41,36 @@ Stage 2: Low-confidence association (the "byte" step)
   → Still-unmatched tracks: survive for max_age frames (default 30) via KF prediction only.
 
 Result: ByteTrack recovers objects during partial occlusion that DeepSORT loses.
+    </div>
+</details>
 
-Benchmark (MOT17 test set, private detector):
-  ByteTrack:  HOTA=63.1, MOTA=80.3, IDF1=77.3, IDSW=2196
-  DeepSORT:   HOTA=55.6, MOTA=75.2, IDF1=68.4, IDSW=6194
-  (Zhang et al., 2022, arXiv:2110.06864)
+    <div class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden mb-6">
+        <table class="w-full text-xs font-mono">
+            <thead><tr class="bg-slate-800 text-slate-400">
+                <th class="px-3 py-2 text-left">Tracker</th>
+                <th class="px-3 py-2 text-right">HOTA</th>
+                <th class="px-3 py-2 text-right">MOTA</th>
+                <th class="px-3 py-2 text-right">IDF1</th>
+                <th class="px-3 py-2 text-right">ID Switches</th>
+            </tr></thead>
+            <tbody class="text-slate-300">
+                <tr class="border-t border-slate-700 bg-emerald-950">
+                    <td class="px-3 py-2 text-emerald-400 font-semibold">ByteTrack</td>
+                    <td class="px-3 py-2 text-right">63.1</td>
+                    <td class="px-3 py-2 text-right">80.3</td>
+                    <td class="px-3 py-2 text-right">77.3</td>
+                    <td class="px-3 py-2 text-right">2,196</td>
+                </tr>
+                <tr class="border-t border-slate-700">
+                    <td class="px-3 py-2">DeepSORT</td>
+                    <td class="px-3 py-2 text-right">55.6</td>
+                    <td class="px-3 py-2 text-right">75.2</td>
+                    <td class="px-3 py-2 text-right">68.4</td>
+                    <td class="px-3 py-2 text-right">6,194</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="text-slate-500 text-xs px-3 py-2">MOT17 test set, private detector. Zhang et al., 2022, arXiv:2110.06864</p>
     </div>
 
     <p>ByteTrack does not use appearance features by default — it relies entirely on IoU distance. This makes it very fast (can track 30 objects at 200+ FPS on a GPU) but vulnerable to ID switches when similar-looking targets cross paths. The appearance-free design is intentional: for most drone tracking scenarios (vehicles, personnel) where targets are spatially separated, IoU is sufficient.</p>
@@ -57,7 +88,13 @@ Benchmark (MOT17 test set, private detector):
     <h4>14.1.4 OC-SORT (Cao et al., 2023) — Observation-Centric</h4>
     <p>OC-SORT (Observation-Centric SORT, arXiv:2203.14360) identifies a fundamental flaw in all Kalman-based trackers: during occlusions, the filter runs in "prediction only" mode, accumulating error from the motion model. When the target reappears, the Kalman state may have drifted significantly, causing association failure. OC-SORT introduces two mechanisms:</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">OCCLUSION RECOVERY</div>
+        <p class="text-slate-200 text-sm mt-1">OC-SORT corrects the direction a track's momentum was pointing when a target was occluded by retroactively interpolating between the last seen position and the re-detected position. It also mixes velocity consistency into the association cost so that a target reappearing nearby but moving the wrong direction is not matched to the wrong track.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 OC-SORT Mechanisms:
 
 1. Observation-Centric Momentum (OCM):
@@ -73,15 +110,49 @@ OC-SORT Mechanisms:
    velocity_consistency_distance = ||v_track_predicted - v_obs|| / max_vel
    Weights: w_iou = 0.5, w_vel = 0.5 (tunable)
 
-Result on MOT17:
-  OC-SORT: HOTA=63.9, MOTA=78.0, IDSW=1950 (42% fewer IDSW vs DeepSORT)
-  Particularly effective for trajectories with frequent brief occlusions (urban scenes).
+Particularly effective for trajectories with frequent brief occlusions (urban scenes).
+    </div>
+</details>
+
+    <div class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden mb-6">
+        <table class="w-full text-xs font-mono">
+            <thead><tr class="bg-slate-800 text-slate-400">
+                <th class="px-3 py-2 text-left">Tracker</th>
+                <th class="px-3 py-2 text-right">HOTA</th>
+                <th class="px-3 py-2 text-right">MOTA</th>
+                <th class="px-3 py-2 text-right">ID Switches</th>
+                <th class="px-3 py-2 text-left">Notes</th>
+            </tr></thead>
+            <tbody class="text-slate-300">
+                <tr class="border-t border-slate-700 bg-emerald-950">
+                    <td class="px-3 py-2 text-emerald-400 font-semibold">OC-SORT</td>
+                    <td class="px-3 py-2 text-right">63.9</td>
+                    <td class="px-3 py-2 text-right">78.0</td>
+                    <td class="px-3 py-2 text-right">1,950</td>
+                    <td class="px-3 py-2">42% fewer IDSW vs DeepSORT</td>
+                </tr>
+                <tr class="border-t border-slate-700">
+                    <td class="px-3 py-2">DeepSORT</td>
+                    <td class="px-3 py-2 text-right">55.6</td>
+                    <td class="px-3 py-2 text-right">75.2</td>
+                    <td class="px-3 py-2 text-right">6,194</td>
+                    <td class="px-3 py-2">Reference baseline</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="text-slate-500 text-xs px-3 py-2">MOT17 test set. Cao et al., 2023, arXiv:2203.14360</p>
     </div>
 
     <h4>14.1.5 FairMOT and JDE — Joint Detection and Embedding</h4>
     <p>The prior approaches treat detection and tracking as sequential steps: first run the detector, then run the tracker. FairMOT (Wang et al., 2020, IJCV 2022) and JDE (Joint Detection and Embedding, Wang et al., 2019) embed the re-ID feature extraction directly into the detector backbone, producing bounding boxes, confidence scores, AND 128-d appearance embeddings in a single forward pass.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">JOINT DETECTION AND RE-ID</div>
+        <p class="text-slate-200 text-sm mt-1">FairMOT collapses two separate network passes (detect, then extract appearance) into one by sharing a single feature backbone for both tasks. The key to making this work is using anchor-free detection: each object gets exactly one representative feature vector rather than the ambiguous multiple-anchor representations that confused earlier joint models.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 FairMOT Architecture:
   Backbone: DLA-34 (Deep Layer Aggregation, 34 layers)
   Output heads (shared feature map, stride 4):
@@ -101,6 +172,7 @@ FairMOT Architecture:
   Performance degrades significantly when appearance distribution differs
   from training (e.g., infrared vs. RGB deployment).
     </div>
+</details>
 
     <h4>14.1.6 Transformer-Based Trackers</h4>
     <p>DETR-family trackers reformulate tracking as a set prediction problem, removing the need for hand-crafted IoU matching entirely.</p>
@@ -148,60 +220,40 @@ FairMOT Architecture:
     <h4>14.1.7 MOT Metrics — MOTA, HOTA, IDF1</h4>
     <p>The MOT community uses three main metrics that measure fundamentally different things. A system can score well on one while performing poorly on another, so understanding all three is critical for evaluating a tracker for a specific mission.</p>
 
-    <div class="math-block">
-MOTA — Multiple Object Tracking Accuracy (Bernardin &amp; Stiefelhagen, 2008):
-
-  MOTA = 1 - (FN + FP + IDSW) / GT_count
-
-  FN = false negatives (missed detections across all frames)
-  FP = false positives (spurious detections)
-  IDSW = identity switches (track assigned wrong ID)
-  GT_count = total number of ground-truth object-frame pairs
-
-  MOTA heavily weights detection performance (FN + FP >> IDSW typically).
-  A tracker that detects everything but swaps IDs constantly can still have
-  high MOTA. MOTA can be negative (worse than doing nothing).
-  Range: (-inf, 1.0]. Typical good tracker: MOTA &gt; 0.75 on MOT17.
-
----
-
-IDF1 — ID F1 Score (Ristani et al., 2016):
-
-  Measures association quality: how long does a tracker maintain
-  a consistent ID for each ground-truth track?
-
-  IDTP = ID True Positives (matched track frames)
-  IDFP = ID False Positives (frames assigned wrong ID)
-  IDFN = ID False Negatives (missed track frames)
-
-  IDF1 = 2 * IDTP / (2 * IDTP + IDFP + IDFN)
-
-  IDF1 penalizes ID switches more heavily than MOTA.
-  A system that detects 80% of objects but never swaps IDs scores
-  higher IDF1 than one that detects 95% but swaps IDs constantly.
-  Relevant for: surveillance (maintain identity across a scene).
-  Range: [0, 1]. Typical good tracker: IDF1 &gt; 0.75.
-
----
-
-HOTA — Higher Order Tracking Accuracy (Luiten et al., 2021, IJCV):
-
-  HOTA = geometric mean of Detection Accuracy (DetA) and
-         Association Accuracy (AssA), integrated over IoU thresholds.
-
-  DetA = TP / (TP + FP + FN)              [pure detection quality]
-  AssA = sum_c(A(c)) / |Correctly detected pairs|  [association quality]
-
-  HOTA balances detection and association equally, unlike MOTA.
-  Two trackers with identical MOTA can have very different HOTA
-  if one has better association. HOTA is now the primary benchmark
-  metric for MOT Challenge (2022 onwards).
-  Range: [0, 1]. ByteTrack: HOTA = 63.1 on MOT17.
-
-When to use each metric:
-  Mission: surveillance, re-identification across cameras → IDF1
-  Mission: crowd counting, detection coverage → MOTA
-  Mission: general purpose tracker comparison → HOTA
+    <div class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden mb-6">
+        <table class="w-full text-xs font-mono">
+            <thead><tr class="bg-slate-800 text-slate-400">
+                <th class="px-3 py-2 text-left">Metric</th>
+                <th class="px-3 py-2 text-left">Formula</th>
+                <th class="px-3 py-2 text-left">What it measures</th>
+                <th class="px-3 py-2 text-left">Range</th>
+                <th class="px-3 py-2 text-left">Use when</th>
+            </tr></thead>
+            <tbody class="text-slate-300">
+                <tr class="border-t border-slate-700">
+                    <td class="px-3 py-2 text-sky-400 font-semibold">MOTA</td>
+                    <td class="px-3 py-2">1 − (FN+FP+IDSW) / GT</td>
+                    <td class="px-3 py-2">Detection coverage; ID switches barely penalized</td>
+                    <td class="px-3 py-2">(−∞, 1]</td>
+                    <td class="px-3 py-2">Crowd counting, detection coverage</td>
+                </tr>
+                <tr class="border-t border-slate-700">
+                    <td class="px-3 py-2 text-emerald-400 font-semibold">IDF1</td>
+                    <td class="px-3 py-2">2·IDTP / (2·IDTP+IDFP+IDFN)</td>
+                    <td class="px-3 py-2">Identity persistence; heavily penalizes swaps</td>
+                    <td class="px-3 py-2">[0, 1]</td>
+                    <td class="px-3 py-2">Surveillance, multi-camera re-ID</td>
+                </tr>
+                <tr class="border-t border-slate-700">
+                    <td class="px-3 py-2 text-amber-400 font-semibold">HOTA</td>
+                    <td class="px-3 py-2">√(DetA × AssA)</td>
+                    <td class="px-3 py-2">Balanced detection + association; primary since 2022</td>
+                    <td class="px-3 py-2">[0, 1]</td>
+                    <td class="px-3 py-2">General tracker comparison</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="text-slate-500 text-xs px-3 py-2">MOTA: Bernardin &amp; Stiefelhagen, 2008 · IDF1: Ristani et al., 2016 · HOTA: Luiten et al., 2021 (IJCV). ByteTrack reference: HOTA=63.1 on MOT17.</p>
     </div>
 
     <h3>14.2 State Estimation &amp; Filtering for Aerial Tracking</h3>
@@ -210,7 +262,13 @@ When to use each metric:
     <h4>14.2.1 Kalman Filter — Linear Target Tracking</h4>
     <p>The Kalman filter (Kalman, 1960) is the optimal linear unbiased estimator for linear Gaussian systems. For tracking a target moving with approximately constant velocity:</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">KALMAN FILTER INTUITION</div>
+        <p class="text-slate-200 text-sm mt-1">The Kalman filter alternates between two steps: predict where the target will be using a physics motion model (state transition matrix F), then correct that prediction using the latest noisy detector measurement. The Kalman gain K automatically weights these two sources based on which is currently more reliable — if the detector is noisy (large R), the filter trusts the motion model more; if the model is uncertain (large Q), it trusts the detector more.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 Constant Velocity (CV) State Vector:
   x = [px, py, pz, vx, vy, vz]^T   (position + velocity in NED frame)
 
@@ -250,11 +308,18 @@ Measurement noise R encodes: "how accurate is the detector's position output?"
   R = diag([sigma_px^2, sigma_py^2, sigma_pz^2])
   sigma_px = sigma_py = 0.5m  (depends on range and camera resolution)
     </div>
+</details>
 
     <h4>14.2.2 Extended Kalman Filter (EKF) — Nonlinear Targets</h4>
     <p>When the observation model is nonlinear (e.g., the camera projects 3D positions to 2D pixels via perspective division — a nonlinear operation), or when the motion model uses polar/angular coordinates, the standard KF's linearity assumption breaks down. The EKF linearizes the nonlinear functions at the current state estimate using first-order Taylor expansion (the Jacobian).</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">EKF: LINEARIZE AT CURRENT ESTIMATE</div>
+        <p class="text-slate-200 text-sm mt-1">The EKF handles nonlinear systems by approximating the nonlinear function as a straight line (first-order Taylor expansion) right at the current best-guess state. This Jacobian matrix replaces the fixed F and H matrices of the standard Kalman filter. The approximation works well when the nonlinearity is mild, but diverges for highly curved functions like bearing-angle measurements at wide angles.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 EKF: Nonlinear system model
   x_k = f(x_{k-1}, u_k) + w_k       (nonlinear state transition)
   z_k = h(x_k) + v_k                 (nonlinear observation model)
@@ -283,11 +348,18 @@ EKF limitations:
   - Can diverge (P goes negative definite) for highly nonlinear h()
   - Jacobian computation is analytically complex and error-prone
     </div>
+</details>
 
     <h4>14.2.3 Unscented Kalman Filter (UKF) — Sigma Points</h4>
     <p>The UKF (Julier &amp; Uhlmann, 1997) avoids computing Jacobians entirely. Instead, it represents the probability distribution using a carefully chosen set of deterministic sigma points, propagates them through the exact nonlinear function, and reconstructs the mean and covariance from the transformed points. This captures second-order nonlinear effects that the EKF misses.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">UKF: SAMPLE THE DISTRIBUTION, NOT THE GRADIENT</div>
+        <p class="text-slate-200 text-sm mt-1">Instead of approximating the nonlinear function, the UKF approximates the probability distribution with 2n+1 carefully placed sigma points (where n is the state dimension). Each sigma point is run through the exact nonlinear function, and the outputs are recombined to reconstruct a new mean and covariance. No Jacobian required, and the result is accurate to third order in Taylor expansion versus first order for the EKF.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 UKF Sigma Point Selection (Merwe Scaled Sigma Points):
   State dimension: n (e.g., n=6 for CV model)
   Number of sigma points: 2n + 1 = 13
@@ -321,11 +393,18 @@ UKF advantages over EKF:
   - Slightly more computationally expensive: O(n^2) vs O(n^2) for EKF
     (similar asymptotic cost, but UKF has higher constant factor ~3x)
     </div>
+</details>
 
     <h4>14.2.4 Particle Filter — Monte Carlo Tracking</h4>
     <p>When the target's state distribution is multimodal (it could be in one of several locations), or the motion/observation models are highly non-Gaussian (e.g., tracking through heavy foliage with intermittent, non-symmetric detections), neither KF nor UKF can represent the true distribution. The particle filter represents the distribution with N weighted samples (particles).</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">PARTICLE FILTER: MULTIPLE HYPOTHESES IN PARALLEL</div>
+        <p class="text-slate-200 text-sm mt-1">A particle filter maintains hundreds or thousands of candidate target states simultaneously. Each "particle" is a hypothesis about where the target might be; its weight reflects how well that hypothesis matches the latest sensor measurement. After resampling, low-weight particles die and high-weight particles multiply, naturally concentrating the population around the true target state — even when that state has multiple plausible locations (a target hidden behind a building that could emerge left or right).</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 Particle Filter Algorithm (Sequential Importance Resampling, SIR):
 
 1. Initialization:
@@ -361,6 +440,7 @@ Strength: handles multimodal distributions naturally.
 Weakness: computational cost scales as O(N * state_dim). For N=1000,
   6D state, running at 30Hz: ~30M operations/sec — manageable on GPU.
     </div>
+</details>
 
     <h4>14.2.5 Motion Models — CV, CA, CTRV, and Singer</h4>
     <p>The filter's process model encodes assumptions about how the target moves. Mismatch between assumed and actual motion dynamics is the primary source of tracking error.</p>
@@ -381,7 +461,9 @@ Weakness: computational cost scales as O(N * state_dim). For N=1000,
             <div class="bg-slate-900 p-4 rounded border-l-4 border-amber-500">
                 <strong class="text-amber-400 uppercase tracking-widest block mb-2">Constant Turn Rate &amp; Velocity (CTRV)</strong>
                 <p class="text-slate-300">State: [px, py, v, psi, omega] where psi = heading angle, omega = turn rate (yaw rate). Explicitly models turning — the nonlinear state transition integrates a circular arc rather than a straight line. The state transition is nonlinear (sin/cos appear), requiring EKF or UKF.</p>
-                <div class="math-block text-xs mt-2">
+                <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block text-xs mt-2">
 f(x) = [px + (v/omega)*(sin(psi+omega*dt) - sin(psi)),
         py + (v/omega)*(cos(psi) - cos(psi+omega*dt)),
         v,
@@ -390,12 +472,15 @@ f(x) = [px + (v/omega)*(sin(psi+omega*dt) - sin(psi)),
 
 Special case omega → 0: reduces to CV via L'Hopital's rule.
                 </div>
+</details>
                 <p class="text-slate-400 mt-2">CTRV is the standard model for ground vehicle tracking and fixed-wing aircraft. Superior to CV for coordinated turns by a large margin.</p>
             </div>
             <div class="bg-slate-900 p-4 rounded border-l-4 border-purple-500">
                 <strong class="text-purple-400 uppercase tracking-widest block mb-2">Singer Acceleration Model (Singer, 1970)</strong>
                 <p class="text-slate-300">Models target acceleration as an Ornstein-Uhlenbeck (mean-reverting) process rather than white noise. Acceleration decays back to zero with time constant tau (the "maneuver time constant"):</p>
-                <div class="math-block text-xs mt-2">
+                <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block text-xs mt-2">
 da/dt = -a/tau + w_a      (w_a = white noise)
 tau = 1–5 seconds for aircraft, 20s for ships
 sigma_a: max acceleration standard deviation
@@ -405,6 +490,7 @@ position, velocity, and acceleration noise.
 Advantage: optimal for periodic maneuvering (defensive breaks,
 evasive turns that last ~tau seconds then end).
                 </div>
+</details>
             </div>
         </div>
     </div>
@@ -412,7 +498,13 @@ evasive turns that last ~tau seconds then end).
     <h4>14.2.6 IMM — Interacting Multiple Model Estimator</h4>
     <p>No single motion model is optimal across all phases of a target's trajectory. The Interacting Multiple Model (IMM) estimator (Blom &amp; Bar-Shalom, 1988) runs N filters in parallel, each with a different motion model, and maintains a probability weight for each model. The output is a weighted mixture of all filter estimates.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">IMM: LET THE DATA CHOOSE THE MOTION MODEL</div>
+        <p class="text-slate-200 text-sm mt-1">The IMM runs a CV filter, a CA filter, and a CTRV filter simultaneously. Each frame, the filter whose prediction best matches the actual observation gets up-weighted. During straight cruise the CV model dominates; the moment the target banks into a turn, the CTRV model's weight rises automatically. The final track output is the probability-weighted blend of all three estimates, yielding 30–50% lower position error during evasive maneuvers than any single model alone.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 IMM Algorithm (per timestep):
 
 Models: M_1 = CV,  M_2 = CA,  M_3 = CTRV
@@ -447,6 +539,7 @@ Performance improvement over single-model:
   during evasive maneuvering (Bar-Shalom et al., "Estimation with
   Applications to Tracking and Navigation," 2001, Table 11.4).
     </div>
+</details>
 
     <h4>14.2.7 Process Noise (Q) and Measurement Noise (R) Tuning</h4>
     <p>Q and R are the two critical tuning knobs. Getting them wrong produces two failure modes: if Q is too small (you trust the model too much), the filter lags behind maneuvering targets and never catches up. If Q is too large (you trust the model too little), the filter is jumpy and sensitive to detection noise.</p>
@@ -474,7 +567,13 @@ Performance improvement over single-model:
     <h4>14.3.1 Camera Intrinsic Matrix and Distortion</h4>
     <p>The intrinsic matrix K encodes how the camera maps 3D camera-frame coordinates to 2D pixel coordinates. See Module 11 (Perception &amp; Visual SLAM) for the detailed Brown-Conrady distortion model. For targeting, the key requirement is that all pixel coordinates must be <em>undistorted</em> before geolocation — using raw distorted pixels introduces systematic position errors proportional to distance from the image center.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">INTRINSIC MATRIX: PIXEL SPACE TO ANGLE</div>
+        <p class="text-slate-200 text-sm mt-1">The 3×3 intrinsic matrix K converts a 3D point in camera coordinates into pixel coordinates using the focal length (pixels per radian of angle) and principal point (the image center). For geolocation, we invert K to go the other direction: turning a detector's (u, v) pixel coordinate into a unit direction ray in camera space. Always undistort raw pixel detections with the lens distortion coefficients first — skipping this step introduces position errors of 5–20 m at 300 m range for typical wide-angle lenses.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 Intrinsic Matrix K:
   K = [f_x,  0,   c_x]     f_x = focal length in pixels (horizontal)
       [ 0,   f_y,  c_y]     f_y = focal length in pixels (vertical)
@@ -489,11 +588,18 @@ Undistort before geolocation (OpenCV):
   cv2.undistortPoints(pixel_coords, K, dist_coeffs)
   Returns normalized image coordinates: x_n = (u - c_x)/f_x, y_n = (v - c_y)/f_y
     </div>
+</details>
 
     <h4>14.3.2 Camera Extrinsic Matrix — Body Frame to World Frame</h4>
     <p>The extrinsic matrix [R | t] transforms world-frame 3D points into camera-frame 3D points. For an airborne targeting system, building this matrix requires knowing the drone's pose (from EKF / GPS / INS) and the gimbal angles.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">EXTRINSIC CHAIN: GPS + ATTITUDE + GIMBAL → CAMERA ORIENTATION</div>
+        <p class="text-slate-200 text-sm mt-1">Three rotation matrices must be chained together to know exactly where the camera is pointing in world coordinates: the drone's roll/pitch/yaw (from the EKF/INS), the gimbal encoder angles (relative to the body), and a fixed boresight calibration (camera mounting offset). Any error in any of these — a 0.2° attitude error is typical — propagates directly into geolocation error at the ground (0.35 m per degree at 100 m range).</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 Full Transform Chain (World → Camera):
 
   P_cam = R_cam_to_body^T * R_body_to_NED^T * (P_world - t_drone_NED)
@@ -520,11 +626,18 @@ Combined:
   R_total = R_body_to_NED * R_gimbal_to_body
   This gives rotation from gimbal/camera frame to NED world frame.
     </div>
+</details>
 
     <h4>14.3.3 Ray Casting — Pixel to 3D World Point</h4>
     <p>Given a target's pixel coordinates and the full camera model, the geolocation problem is to find the 3D world point that projects to those pixels. The solution depends on what depth information is available.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">RAY CASTING: SHOOTING A LINE FROM CAMERA TO GROUND</div>
+        <p class="text-slate-200 text-sm mt-1">A pixel in the camera image defines a direction ray from the camera center out into the world. Geolocation intersects this ray with a known surface — usually the terrain plane at a known altitude. The intersection point is the target's estimated ground position. Without a depth source (LiDAR or stereo), the altitude of the terrain relative to the drone is the single biggest uncertainty: a 5 m terrain height error at 45° depression angle produces a 5 m horizontal geolocation error.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 Method 1: Ray-Terrain Intersection (Flat Earth Approximation)
 
 Given: pixel (u, v), camera height h_AGL above terrain (from barometer + terrain DEM)
@@ -560,11 +673,18 @@ Method 3: Monocular Depth Estimation (GPS-denied)
     - Altimeter reading for ground plane absolute scaling
   Scale ambiguity is the fundamental limitation of monocular depth.
     </div>
+</details>
 
     <h4>14.3.4 Georeferencing — NED to WGS84</h4>
     <p>Mission systems report target locations in GPS coordinates (WGS84 latitude, longitude, altitude). The conversion from NED meters (relative to the drone's GPS fix) to absolute WGS84 uses the Earth radius approximation for short distances (&lt;100 km):</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">NED TO GPS: METERS INTO DEGREES</div>
+        <p class="text-slate-200 text-sm mt-1">The drone's tracker produces target positions in North-East-Down meters relative to a reference point. Converting these to GPS latitude/longitude divides by the Earth's radius (≈ 6,378 km) and accounts for longitude compression at non-equatorial latitudes (cos(lat) factor). The flat-Earth approximation is accurate to about 1 m at 50 km range — more than adequate for sUAS missions. For precision beyond 1 m, use the WGS84 ellipsoid model and correct altitude against a terrain DEM.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 NED to WGS84 (flat Earth approximation, valid to ~1m error at 50km range):
 
 Given:
@@ -592,6 +712,7 @@ IMU compensation for gimbal motion:
   Electronic rolling shutter sensors: apply per-row IMU correction
   (row timing = row_index / (fps * n_rows)).
     </div>
+</details>
 
     <h4>14.3.5 Geolocation Accuracy Budget</h4>
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
@@ -629,7 +750,13 @@ IMU compensation for gimbal motion:
     <h4>14.4.1 Pure Pursuit</h4>
     <p>Pure Pursuit (PP) simply commands the drone to point directly at the current target position at every timestep. It is the simplest possible guidance law and the easiest to implement.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">PURE PURSUIT: ALWAYS POINT AT THE TARGET</div>
+        <p class="text-slate-200 text-sm mt-1">Pure Pursuit is the guidance equivalent of a dog chasing a car: always nose-on toward the target's current position. This works when the drone is significantly faster than the target. Its fatal weakness is the "tail-chase" spiral — when the drone is only slightly faster, it curves into the target's wake and never closes the gap. It is suitable for slow-moving or hovering targets but unsuitable for fast or lateral intercepts.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 Pure Pursuit Geometry:
   Vector to target: r = P_target - P_drone
   Command heading:  psi_cmd = atan2(r_E, r_N)    [NED heading to target]
@@ -648,11 +775,18 @@ Limitations:
   3. Heading error: PP does not lead the target — it always lags
      by the response latency of the vehicle's control system.
     </div>
+</details>
 
     <h4>14.4.2 Proportional Navigation (PN)</h4>
     <p>Proportional Navigation (PN) is the dominant guidance law for real-world interception systems (missiles, interceptor drones). Instead of pointing at the target, PN nulls the line-of-sight (LOS) rotation rate — because if the LOS angle does not change, a collision course is guaranteed regardless of target speed.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">PROPORTIONAL NAVIGATION: NULL THE LOS ROTATION</div>
+        <p class="text-slate-200 text-sm mt-1">The geometric insight behind PN is that two objects are on a collision course if and only if the line connecting them (the Line of Sight) does not rotate. PN continuously measures how fast the LOS angle is drifting and commands a lateral acceleration proportional to that drift rate, times the closing speed. Navigation gain N=4 is the most common choice — it guarantees intercept against non-maneuvering targets and limits miss distance against moderately maneuvering targets.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 Proportional Navigation Formulation:
 
 Line of Sight (LOS) angle: lambda = atan2(r_E, r_N)
@@ -684,11 +818,18 @@ Effectiveness:
   constant N (mathematically proven for straight-line targets).
   Against constant-acceleration targets, miss distance is bounded.
     </div>
+</details>
 
     <h4>14.4.3 Augmented Proportional Navigation (APN)</h4>
     <p>When the target actively maneuvers (evasive action), pure PN accumulates miss distance because it only reacts to LOS rate. APN adds a feed-forward term from estimated target acceleration, reducing miss distance by a factor of 2–5× against highly maneuvering targets.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">AUGMENTED PN: ANTICIPATE TARGET ACCELERATION</div>
+        <p class="text-slate-200 text-sm mt-1">Pure PN is reactive — it only responds after the target's maneuver has already rotated the LOS. APN adds a feed-forward term using the estimated target acceleration (from an IMM CA filter) perpendicular to the LOS. This pre-compensates for the target's maneuver before it distorts the LOS angle, reducing miss distance from ~5 m to ~0.3 m in simulation against a step-maneuver target (a 16× improvement per Zarchan 2012).</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 Augmented PN (APN):
   a_cmd = N * V_c * lambda_dot + (N/2) * a_target_perp
 
@@ -711,11 +852,18 @@ Strategic Missile Guidance", 6th ed, 2012):
   APN (N=4) vs step-maneuver target:  miss distance ~0.3m
   (factor ~16x improvement in miss distance)
     </div>
+</details>
 
     <h4>14.4.4 Deviated Pure Pursuit (DPP) and Velocity Pursuit</h4>
     <p>Deviated Pure Pursuit steers at a fixed angle ahead of the target position rather than directly at it. By choosing a lead angle based on expected target speed and direction, DPP avoids the tail-chase geometry while requiring less closing-speed margin than pure PN.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">DEVIATED PURSUIT: LEAD THE TARGET</div>
+        <p class="text-slate-200 text-sm mt-1">DPP steers toward a point ahead of the target rather than at the target itself, similar to a hunter leading a moving bird. The lead distance scales with current range, so the intercept geometry stays consistent across approach. Velocity Pursuit is the follow-mode variant: the drone matches the target's heading rather than pointing at it, making it natural for escort or shadow missions where maintaining offset is the goal rather than closing range.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 Deviated Pure Pursuit:
   eta = lead angle (typically 10–30 degrees ahead of target velocity)
   Steer toward: P_lead = P_target + D_lead * v_target_hat
@@ -735,11 +883,18 @@ Collision Course (Zero Effort Miss):
   Equivalent to PN with N → infinity at constant closing velocity
   Computationally simple for fixed-speed platforms
     </div>
+</details>
 
     <h4>14.4.5 MPPI — Model Predictive Path Integral Control</h4>
     <p>MPPI (Williams et al., 2017, ICRA) is a sampling-based stochastic optimal control method that replaces classical guidance laws with trajectory optimization. It samples thousands of control sequences, evaluates them under a cost function, and computes an optimal control as the information-weighted average of low-cost trajectories.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">MPPI: GPU-PARALLEL TRAJECTORY LOTTERY</div>
+        <p class="text-slate-200 text-sm mt-1">MPPI runs 1,000–10,000 random control sequence "rollouts" in parallel on a GPU each control cycle, simulates where each one would take the drone over the next 1–5 seconds, scores each trajectory against a cost function (distance to target, obstacle clearance, speed limits), then blends the good trajectories together — weighting better trajectories exponentially higher. The result automatically handles non-convex constraints and nonlinear dynamics that would defeat PN or classical MPC formulations.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 MPPI Algorithm:
   State: x ∈ R^n,  Control: u ∈ R^m
   Temperature parameter: lambda (controls risk tolerance)
@@ -778,9 +933,16 @@ Real implementations:
   MIT Racecar: MPPI for aggressive autonomous racing
   For drone target following: MPPI with 1000 rollouts at 30Hz requires ~GPU (Jetson AGX: feasible)
     </div>
+</details>
 
     <h4>14.4.6 MAVLink Implementation — Sending Guidance Commands to PX4/ArduPilot</h4>
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">MAVLINK COMMAND INTERFACE</div>
+        <p class="text-slate-200 text-sm mt-1">The companion computer running the guidance law sends velocity or position setpoints to the flight controller via MAVLink messages at 30–50 Hz. The critical choice is between position-only, velocity-only, or combined pos+vel targets — velocity-only commands respond faster and avoid the FC's position integrator lag. Use a UART connection at 921600 baud (≈1 ms latency) rather than a telemetry radio (50–100 ms) to keep the control loop tight.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 Key MAVLink message types for target following:
 
 SET_POSITION_TARGET_LOCAL_NED (MSG #84):
@@ -810,6 +972,7 @@ Latency note:
   Recommendation: run tracking loop on companion computer (Jetson/RPi)
                   connected via UART (TELEM2) at 921600 baud: ~1ms latency
     </div>
+</details>
 
     <h3>14.5 Cascade PID and Advanced Gimbal/Airframe Control</h3>
     <p>The guidance law outputs a desired position, velocity, or acceleration command. Translating that into rotor thrust commands requires a control hierarchy: outer loops set position/velocity targets, inner loops execute attitude commands, and the innermost loop controls angular rate. This section covers each layer and its tuning.</p>
@@ -852,7 +1015,13 @@ Latency note:
         </div>
     </div>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">CASCADE PID: NESTED LOOPS AT DIFFERENT SPEEDS</div>
+        <p class="text-slate-200 text-sm mt-1">Each outer loop outputs a setpoint for the loop inside it. The position loop runs slowest (50 Hz) and outputs a desired velocity; the velocity loop outputs a desired tilt angle; the attitude loop outputs desired rotation rates; the rate loop at 1 kHz closes directly on the gyroscope and outputs motor PWM. The faster inner loops must be tuned first, then the outer loops, because each outer loop assumes the inner loop is infinitely fast relative to it.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 Velocity PID (ArduCopter notation):
   vel_error = v_target - v_measured    [m/s]
 
@@ -872,11 +1041,18 @@ Rate PID (inner loop, most critical for stability):
                                           not error (avoids derivative kick on step input)
   Feed-forward: Kff * rate_target      → improves response to commanded rates
     </div>
+</details>
 
     <h4>14.5.2 Anti-Windup for the Integral Term</h4>
     <p>When the vehicle is at a control saturation limit (e.g., maximum tilt angle reached), the integrator continues accumulating error — "winding up." When the saturation ends, the oversized integral causes large overshoot or oscillation. Anti-windup techniques prevent this.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">ANTI-WINDUP: STOP INTEGRATING WHEN SATURATED</div>
+        <p class="text-slate-200 text-sm mt-1">Integral windup happens when the drone is already at maximum tilt but the error keeps growing — the integrator accumulates a huge value that then drives overshoot after saturation ends. The simplest fix (ArduPilot's approach) is to simply freeze the integrator whenever the output is saturated. The more elegant back-calculation method feeds the saturation "excess" back into the integrator as a negative term, smoothly bleeding off the excess without a discrete freeze/unfreeze transition.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 Anti-Windup Techniques:
 
 1. Clamping (simplest, used in ArduPilot):
@@ -902,11 +1078,18 @@ Anti-Windup Techniques:
 ArduPilot parameter: ATC_RATE_R_IMAX, ATC_RATE_P_IMAX, ATC_RATE_Y_IMAX
   Limit maximum contribution of integral term to ±50% of output range.
     </div>
+</details>
 
     <h4>14.5.3 Feed-Forward Compensation</h4>
     <p>PID controllers are reactive — they only respond after an error has developed. Feed-forward adds a proactive term that compensates for known disturbances or reference model dynamics before the error occurs. For drone tracking, feed-forward significantly improves following performance during accelerations.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">FEED-FORWARD: ACT BEFORE THE ERROR APPEARS</div>
+        <p class="text-slate-200 text-sm mt-1">Feed-forward injects the derivative of the setpoint (acceleration command) directly into the output, bypassing the PID error loop. For gimbal tracking, this means commanding the gimbal to rotate at the target's estimated angular rate before the pixel offset has even grown — so the target stays near the image center rather than drifting to the edge and waiting for the P term to pull it back. Result: 50–70% reduction in RMS pixel tracking error during smooth target motion.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 Feed-Forward in Velocity Control:
   output = PID(vel_error) + Kff * vel_target_dot
 
@@ -922,11 +1105,18 @@ Feed-Forward for Gimbal Tracking:
   Result: gimbal leads the target rather than chasing it.
   Improvement: 50–70% reduction in RMS tracking error during smooth motion.
     </div>
+</details>
 
     <h4>14.5.4 LQR — Linear Quadratic Regulator</h4>
     <p>LQR is a full-state feedback controller that finds the optimal gain matrix K that minimizes a quadratic cost function. Unlike PID, LQR simultaneously optimizes all state variables together, accounting for their cross-coupling effects.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">LQR: OPTIMAL GAIN FROM MATH, NOT TRIAL AND ERROR</div>
+        <p class="text-slate-200 text-sm mt-1">LQR replaces manual PID tuning with solving an algebraic Riccati equation: you specify Q (how much you care about each state error) and R (how much you care about control effort), and the solver returns the optimal gain matrix K. The key advantage over PID is that K is a full matrix — it can, for example, command a roll correction in response to a lateral velocity error, properly accounting for the coupling between roll angle and horizontal acceleration in a multirotor.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 LQR Problem Formulation:
   System: x_dot = A*x + B*u   (linear time-invariant)
   Cost:   J = integral_0^inf (x^T Q x + u^T R u) dt
@@ -955,11 +1145,18 @@ Disadvantages:
   - LQR is a state feedback law — requires full state measurement (or observer)
   - LQR + integral: must augment state with integral of error (LQI)
     </div>
+</details>
 
     <h4>14.5.5 MPC — Model Predictive Control</h4>
     <p>MPC solves an online optimization problem at each timestep, finding the control sequence that minimizes a cost function over a finite horizon while respecting constraints on actuator limits, velocity, and state. MPC inherently handles constraints, which PID and LQR cannot do natively.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">MPC: PLAN AHEAD WITH HARD CONSTRAINTS</div>
+        <p class="text-slate-200 text-sm mt-1">MPC solves a miniature trajectory optimization every control cycle, looking N steps into the future and finding the control sequence that stays within actuator limits while minimizing tracking cost. Only the first action is applied, then the optimization repeats. The critical advantage over LQR is that tilt angle limits, maximum velocity, and obstacle avoidance can all be stated as hard constraints — LQR and PID can only approximate these as soft penalties. Modern QP solvers like OSQP solve the N=20 horizon problem in under 1 ms.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 MPC Formulation (Receding Horizon):
   Minimize: sum_{k=0}^{N-1} [x_k^T Q x_k + u_k^T R u_k] + x_N^T P_f x_N
   Subject to:
@@ -980,13 +1177,20 @@ Tools:
   acados (Verschueren et al., 2022): high-speed MPC, generates C code for embedded
   CasADi: symbolic differentiation for nonlinear MPC (NMPC)
     </div>
+</details>
 
     <h3>14.6 3D Velocity and Trajectory Estimation</h3>
 
     <h4>14.6.1 Estimating Target Velocity from Bounding Box Motion</h4>
     <p>When only 2D detections are available (no depth), target velocity can still be estimated from the bounding box motion history, combined with known camera geometry and platform motion compensation.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">VELOCITY FROM PIXEL SHIFT</div>
+        <p class="text-slate-200 text-sm mt-1">The pixel displacement of a target's bounding box centroid between frames can be converted to ground-plane speed using the known camera focal length and estimated range (height ÷ cos(elevation)). The drone's own velocity must be subtracted to isolate true target motion from platform ego-motion. A Kalman filter then smooths the noisy per-frame velocity estimates into a stable signal usable by the guidance law.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 Target Velocity from Pixel Motion + Known Geometry:
 
 Given: two consecutive frames t and t+1
@@ -1014,11 +1218,18 @@ Kalman filter smoothing:
   Feed (v_target_N, v_target_E) measurements into CV Kalman filter
   KF smooths noisy per-frame estimates → stable velocity for guidance law
     </div>
+</details>
 
     <h4>14.6.2 Optical Flow for Ego-Motion Compensation</h4>
     <p>When the camera is moving (airborne platform), all pixels appear to move — even a stationary ground point moves in the image. Optical flow separates target motion from background (ego-motion) flow to isolate true target movement.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">OPTICAL FLOW: BACKGROUND SUBTRACTION VIA HOMOGRAPHY</div>
+        <p class="text-slate-200 text-sm mt-1">Because the entire background image shifts together when the drone moves, a homography (planar warp) can predict where each background pixel should have moved due to drone motion alone. After warping the previous frame to align with the current frame, any pixel that does not match the warp is moving relative to the ground — i.e., it is a target. This moving-target indicator (MTI) technique is how the military detects moving ground vehicles from airborne sensors without a deep learning detector.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 Optical Flow Approaches:
 
 Lucas-Kanade (sparse, feature-based):
@@ -1044,11 +1255,18 @@ Ego-motion subtraction:
   If ||residual|| > threshold AND inside bounding box → target is moving
   This detects moving vehicles against a static background at 30 Hz.
     </div>
+</details>
 
     <h4>14.6.3 Dead Reckoning During Occlusion</h4>
     <p>When the detector returns no detection for 1–N frames (due to occlusion, adverse lighting, or temporary confidence drop), the tracker must predict forward using only the motion model. The Kalman filter prediction step handles this automatically — but prediction quality degrades with occlusion duration.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">OCCLUSION TIERS: SHORT, MEDIUM, LONG</div>
+        <p class="text-slate-200 text-sm mt-1">A well-engineered tracker handles occlusions in tiers. For short gaps (1–5 frames), Kalman prediction alone keeps the track alive with acceptable uncertainty growth. For medium gaps (5–30 frames), the process noise Q is inflated to widen the search gate so the target can be re-associated even if it reappears outside the original prediction box. For long gaps (30+ frames), appearance re-ID embeddings stored from the last good frame are compared against new detections anywhere in the frame to re-link a broken track.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 Occlusion Handling Strategy:
 
 1. Frames 1–5 (short occlusion): pure KF prediction
@@ -1074,11 +1292,18 @@ Occlusion Handling Strategy:
 ByteTrack approach: track preserved for max_age=30 frames even with no detection
   Reappears within 30 frames + IoU match → track ID maintained, never broken
     </div>
+</details>
 
     <h4>14.6.4 Trajectory Prediction with LSTMs</h4>
     <p>For targets exhibiting complex social or intentional behavior (pedestrians in crowds, evasive aircraft), Kalman filters model kinematics but not intent. LSTM-based trajectory predictors learn motion patterns from data and can predict 2–5 seconds into the future with better accuracy than KF for human targets.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">LEARNED TRAJECTORY PREDICTION: INTENT, NOT JUST PHYSICS</div>
+        <p class="text-slate-200 text-sm mt-1">Kalman filters know that a pedestrian was moving north at 1.2 m/s, so they predict continued northward motion. Social LSTM also knows that another pedestrian is approaching from the left, so it predicts the first pedestrian will veer right to avoid collision — even before any turning motion is observed. This social intent modeling cuts 4.8-second prediction error roughly in half versus constant-velocity extrapolation on the ETH/UCY benchmark dataset.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 Social LSTM (Alahi et al., 2016, CVPR):
   Input: position history (x_t, y_t) for t = -T_obs..0
   Architecture:
@@ -1104,6 +1329,7 @@ Transformer-based prediction (Giuliari et al., 2021):
   Computationally feasible at inference: ~5ms per forward pass on GPU
   Requires training data with diverse motion patterns
     </div>
+</details>
 
     <h3>14.7 Sensor Fusion for Robust Tracking</h3>
 
@@ -1134,7 +1360,13 @@ Transformer-based prediction (Giuliari et al., 2021):
     <h4>14.7.2 Radar + Vision Fusion</h4>
     <p>Radar detects range and radial velocity (Doppler) reliably through rain, fog, and at long range (1–10 km for 77 GHz automotive radar). Vision provides precise angle and appearance. Fusing both combines radar's long-range detection with vision's angular precision.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">RADAR + CAMERA: COMPLEMENTARY STRENGTHS</div>
+        <p class="text-slate-200 text-sm mt-1">Radar is accurate in range (±10 cm) but coarse in angle (±0.5°), while a camera is accurate in angle (±0.05°) but blind to range. A Kalman filter in polar coordinates fuses both measurement types into a single state: radar updates the range and radial velocity rows, and the camera updates only the azimuth and elevation rows. The result is a full 3D track with the best accuracy from each sensor in the dimensions it measures well.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 Radar + Vision Track Association:
 
 Radar measurement: (range r, azimuth az, elevation el, range_rate r_dot)
@@ -1155,11 +1387,18 @@ Practical radar types for small drones:
   X-band pulsed (size of shoebox): 2–5 km range, heavy/power-hungry
   FMCW radar: provides range + Doppler in a single chirp, no moving parts
     </div>
+</details>
 
     <h4>14.7.3 LiDAR Point Cloud + Visual Tracker Fusion</h4>
     <p>LiDAR provides precise 3D geometry (range accuracy ~2cm at 100m) but produces sparse point clouds that may not contain sufficient points on small or distant targets. Visual trackers provide dense 2D information. Fusion addresses both shortcomings.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">LIDAR + CAMERA: DEPTH FOR FREE FROM THE CAMERA BOX</div>
+        <p class="text-slate-200 text-sm mt-1">LiDAR points are projected onto the camera image plane using the calibrated extrinsic transform. For each detection bounding box, the LiDAR points that fall inside it are collected and their median range is used as the target's depth — converting the camera's 2D bearing into a full 3D position at centimeter-level range accuracy. This avoids the need for stereo cameras or monocular depth estimation while being more robust than relying on LiDAR clustering alone for small or partially-obscured targets.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 LiDAR-Vision Fusion Pipeline:
 
 1. Project LiDAR points onto camera image plane:
@@ -1183,11 +1422,18 @@ Sensors:
   Velodyne VLP-16: 100m range, 300k pts/sec, 360° FOV, 830g, 8W — larger platform
   Ouster OS0-32: 50m range, 655k pts/sec, 360°×90° FOV, 445g — good for targeting
     </div>
+</details>
 
     <h4>14.7.4 Covariance Intersection — Multi-UAV Track Fusion</h4>
     <p>When multiple UAVs each maintain their own target tracker, fusing their independent track estimates requires care. If the tracks have correlated errors (e.g., both used the same GPS satellite constellation), naively averaging them underestimates the true uncertainty. Covariance Intersection (CI) is a conservative fusion method that does not require knowledge of the cross-correlation.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">COVARIANCE INTERSECTION: SAFE FUSION WITHOUT KNOWING CORRELATIONS</div>
+        <p class="text-slate-200 text-sm mt-1">When two UAVs each report a target track, their errors may be correlated (both using the same GPS constellation, same weather, same terrain DEM). Naively averaging the two estimates as if they were independent produces an overconfident covariance that can cause filter divergence. Covariance Intersection finds the weighted combination of the two estimates' information matrices that is guaranteed to be conservative — never claiming more certainty than warranted — regardless of the unknown correlation between them.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 Covariance Intersection (Julier &amp; Uhlmann, 1997):
 
 Inputs:  (x_1, P_1) from UAV-1,  (x_2, P_2) from UAV-2
@@ -1212,6 +1458,7 @@ Track-to-Track Fusion protocol (multi-UAV scenario):
   3. Broadcast fused track back to all UAVs for consistent common operating picture
   4. Track ID association across UAVs: use Re-ID appearance embedding + CI distance gate
     </div>
+</details>
 
     <h3>14.8 Anti-Drone and Counter-UAS AI Systems</h3>
     <p>The same technologies used for drone targeting are also deployed defensively to detect, track, classify, and defeat hostile unmanned systems. Understanding the C-UAS (Counter-Unmanned Aircraft Systems) pipeline is essential context for sUAS operators and AI developers working in security-relevant applications.</p>
@@ -1244,7 +1491,13 @@ Track-to-Track Fusion protocol (multi-UAV scenario):
     </div>
 
     <h4>14.8.2 Friend/Foe/Neutral Classification AI Pipeline</h4>
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">C-UAS CLASSIFICATION: FUSE RF, KINEMATICS, AND VISUAL CUES</div>
+        <p class="text-slate-200 text-sm mt-1">A C-UAS classifier fuses three independent evidence streams: RF features (protocol type, frequency, transmission fingerprint) identify the drone's make/model without line of sight; kinematic features (speed, altitude profile, trajectory shape) indicate intent; and visual features (frame shape, rotor count, payload presence) confirm classification when the target is close enough. A Random Forest or gradient-boosted tree combining all three achieves ~95% classification accuracy distinguishing commercial drones from birds, aircraft, and weather balloons.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 C-UAS Classification Pipeline:
 
 Stage 1: Detection (any sensor triggers)
@@ -1279,6 +1532,7 @@ Stage 4: Intent assessment
   Loiter pattern detection: if drone circles a fixed point for &gt;30s → surveillance flag
   Output: threat score 0.0–1.0 + category (FRIENDLY / UNKNOWN / HOSTILE / NEUTRAL)
     </div>
+</details>
 
     <h4>14.8.3 Defeat Mechanisms</h4>
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
@@ -1311,7 +1565,13 @@ Stage 4: Intent assessment
     <h4>14.9.1 Latency Budget Analysis</h4>
     <p>End-to-end latency — from photons hitting the sensor to motor response — determines the maximum target speed and maneuver rate that can be tracked. Every millisecond matters.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">END-TO-END LATENCY: 110–350 MS FROM PHOTONS TO ROTORS</div>
+        <p class="text-slate-200 text-sm mt-1">The largest single contributor to tracking latency is usually the GPU inference step (10–30 ms for YOLOv8), but the rotor mechanical response time (50–150 ms rise constant) means that even a perfect zero-latency computer cannot close the loop faster than the motors allow. At a typical 200 ms total latency and 5 m/s target speed, the drone is reacting to where the target was 1 meter ago — requiring the Kalman filter to predict the target's position forward by the measured latency before issuing guidance commands.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 Typical Latency Budget (30 Hz pipeline):
 
 Source                          Typical Latency   Notes
@@ -1341,6 +1601,7 @@ Latency compensation:
   x_compensated = x_hat + v_hat * t_latency + 0.5 * a_hat * t_latency^2
   Use t_latency measured empirically (hardware timestamp at capture + timestamp at command send).
     </div>
+</details>
 
     <h4>14.9.2 Edge Inference Hardware</h4>
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
@@ -1389,7 +1650,13 @@ Latency compensation:
     </div>
 
     <h4>14.9.3 TensorRT and ONNX Optimization</h4>
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">TENSORRT: 2–4× SPEEDUP FROM QUANTIZATION AND FUSION</div>
+        <p class="text-slate-200 text-sm mt-1">TensorRT converts a trained PyTorch model into a GPU-optimized engine by fusing adjacent layers (e.g., Conv + BN + ReLU become one kernel call), rewriting computation graphs to maximize hardware utilization, and optionally quantizing weights from FP32 to FP16 (2× speedup, &lt;0.5% mAP loss) or INT8 (4× speedup, 1–2% mAP loss with a calibration dataset). For Hailo-8 deployment the equivalent is the Hailo Model Zoo compiler which targets the fixed-function dataflow architecture and requires an ONNX intermediate. The ONNX Runtime path (for RPi 5 CPU targets) requires no compilation but delivers the lowest throughput.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 Deployment Optimization Pipeline:
 
 1. Training framework (PyTorch / Ultralytics):
@@ -1422,9 +1689,16 @@ Latency benchmarks (YOLOv8m, 640×640 input, batch=1):
   Hailo-8 INT8:                  12ms  (80 FPS)
   RPi 5 ARM64 ONNX FP32:        120ms  (8 FPS — slow targets only)
     </div>
+</details>
 
     <h4>14.9.4 ROS 2 Integration Architecture</h4>
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">ROS 2 NODE GRAPH: DETECTOR → TRACKER → GUIDANCE → MAVROS</div>
+        <p class="text-slate-200 text-sm mt-1">A complete ROS 2 tracking pipeline chains four nodes: the camera node publishes raw images; the detector node subscribes, runs YOLOv8, and publishes DetectionArray messages; the tracker node subscribes to detections plus the drone's MAVROS pose, runs ByteTrack and geolocation, and publishes 3D world-frame tracks; the guidance node converts the primary track into MAVLink velocity setpoints via MAVROS. Each node publishes at 30 Hz. If the guidance node crashes, PX4's OFFBOARD mode timeout (1–3 sec) automatically returns the drone to HOLD mode as a safety net.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 ROS 2 Node Graph (typical airborne tracking system):
 
 /camera_node (sensor_msgs/Image @ 30Hz)
@@ -1462,6 +1736,7 @@ OFFBOARD mode arming sequence:
   3. Publish setpoints at &gt;2Hz or OFFBOARD drops out
   Safety: if ROS node crashes, FC returns to HOLD mode after 1–3 sec timeout
     </div>
+</details>
 
     <h4>14.9.5 Complete System Power Budget</h4>
     <div class="interactive-panel bg-[#0d1320] border-slate-700">

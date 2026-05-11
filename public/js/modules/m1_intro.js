@@ -63,14 +63,33 @@ export default `
 
     <h3>1.3 The Edge vs. Cloud Paradigm</h3>
     <p>Why put a heavy, hot, power-hungry GPU on a flying battery? Why not stream the video to the cloud, process it on an AWS server, and send commands back? The answer is <strong>Latency and Reliability</strong>.</p>
-    <div class="math-block">
-        Total Cloud Loop Latency = t_encode + t_tx + t_network + t_inference + t_rx + t_decode<br><br>
-        Example:<br>
-        Video Encode (H.265): 20ms<br>
-        4G/5G Uplink: 40ms<br>
-        Cloud Inference (A100 GPU): 10ms<br>
-        Command Downlink: 30ms<br>
-        Total Latency: ~100ms
+
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-4 text-xs text-center font-mono">
+        <div class="bg-slate-900 p-3 rounded border border-slate-700">
+            <div class="text-slate-400 text-[10px] uppercase mb-1">Encode</div>
+            <div class="text-amber-400 font-bold text-base">20ms</div>
+            <div class="text-slate-500">H.265</div>
+        </div>
+        <div class="bg-slate-900 p-3 rounded border border-slate-700">
+            <div class="text-slate-400 text-[10px] uppercase mb-1">Uplink</div>
+            <div class="text-amber-400 font-bold text-base">40ms</div>
+            <div class="text-slate-500">4G/5G</div>
+        </div>
+        <div class="bg-slate-900 p-3 rounded border border-slate-700">
+            <div class="text-slate-400 text-[10px] uppercase mb-1">Inference</div>
+            <div class="text-emerald-400 font-bold text-base">10ms</div>
+            <div class="text-slate-500">A100 GPU</div>
+        </div>
+        <div class="bg-slate-900 p-3 rounded border border-slate-700">
+            <div class="text-slate-400 text-[10px] uppercase mb-1">Downlink</div>
+            <div class="text-amber-400 font-bold text-base">30ms</div>
+            <div class="text-slate-500">Command</div>
+        </div>
+        <div class="bg-rose-900/30 p-3 rounded border border-rose-700/50">
+            <div class="text-rose-400 text-[10px] uppercase mb-1">Total</div>
+            <div class="text-rose-300 font-bold text-base">~100ms</div>
+            <div class="text-slate-500">Too slow</div>
+        </div>
     </div>
     <p>At 15 m/s (33 mph), a drone travels 1.5 meters in 100ms. If an obstacle appears, by the time the cloud tells the drone to brake, it has already crashed. Furthermore, RF links are easily jammed or blocked by buildings. <strong>Edge AI ensures the OODA loop remains closed and deterministic, operating purely on silicon physics rather than network luck.</strong></p>
 </div>

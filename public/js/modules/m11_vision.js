@@ -10,7 +10,13 @@ export default `
     <h4>The Pinhole Camera Model</h4>
     <p>The ideal pinhole model assumes all light rays pass through a single point (the optical center) and project onto a flat image plane at distance f. This gives the fundamental projection equation used in all SLAM systems:</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">PINHOLE PROJECTION</div>
+        <p class="text-slate-200 text-sm mt-1">Maps a 3D world point to a 2D image pixel using a camera's intrinsic matrix K and its pose in the world. Understanding this transform is essential for recovering geometry from images — every SLAM, SfM, and depth-estimation algorithm builds on it.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
         Pinhole Projection (homogeneous form):<br><br>
         s * p = K * [R | t] * P_world<br><br>
         where:<br>
@@ -35,13 +41,20 @@ export default `
           Y/Z = (v - c_y) / f_y<br>
           Ray direction: d = K^(-1) * [u, v, 1]^T  (normalized gives bearing vector)
     </div>
+</details>
 
     <h4>Lens Distortion: Brown-Conrady Model</h4>
     <p>Real lenses deviate from the ideal pinhole. Distortion corrupts geometric measurements — a 5% radial distortion at the image edge causes ~50px position error, making feature triangulation useless without correction.</p>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
         <h4 class="mt-0 border-none text-white">Brown-Conrady Distortion Model (OpenCV Convention)</h4>
-        <div class="math-block text-sm">
+        <div class="insight-box">
+            <div class="insight-label">LENS DISTORTION MODEL</div>
+            <p class="text-slate-200 text-sm mt-1">Real lenses bend light non-linearly — the Brown-Conrady equations quantify this warping so it can be corrected before any geometric measurement. Without undistortion, feature triangulation errors can reach tens of pixels at the image boundary.</p>
+        </div>
+        <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block text-sm">
 Normalized image coordinates (divide out focal length):<br>
 x_n = (u - c_x) / f_x,   y_n = (v - c_y) / f_y,   r^2 = x_n^2 + y_n^2<br><br>
 Radial distortion (barrel: k1 &lt; 0, pincushion: k1 &gt; 0):<br>
@@ -61,12 +74,19 @@ r_d = f * (theta + k1*theta^3 + k2*theta^5 + k3*theta^7 + k4*theta^9)<br>
 where theta = atan(sqrt(X^2+Y^2)/Z) = angle from optical axis<br>
 OpenCV: cv2.fisheye.calibrate() — separate from standard calibrateCamera()
         </div>
+</details>
     </div>
 
     <h4>Stereo Camera Geometry</h4>
     <p>A stereo camera pair adds one critical measurement: baseline B, the physical distance between the two optical centers. This breaks the scale ambiguity of monocular systems — depth Z can be recovered directly from disparity d.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">STEREO DEPTH ACCURACY</div>
+        <p class="text-slate-200 text-sm mt-1">Depth from a stereo pair scales inversely with disparity — at close range a 1-pixel error means centimeters of error, but at 10 m it means over a meter. This relationship determines the maximum reliable range for any stereo camera given its baseline and focal length.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
         Stereo Depth from Disparity (after rectification):<br><br>
         Z = f * B / d<br><br>
         f = focal length (pixels), B = baseline (meters), d = disparity (pixels)<br><br>
@@ -80,6 +100,7 @@ OpenCV: cv2.fisheye.calibrate() — separate from standard calibrateCamera()
         For RealSense D435i: B=50mm, f≈640px, D_max=96px → Z_min = 0.33m (matches spec)<br>
         For ZED 2: B=120mm, f≈700px, D_max=256px → Z_min = 0.33m but better far-range
     </div>
+</details>
 
     <h4>Camera Calibration: Zhang's Method (OpenCV)</h4>
     <p>Calibration recovers K and the distortion coefficients by observing a planar calibration target (checkerboard) from multiple viewpoints. Zhang's method (2000) requires ≥3 views. Reprojection error (RMS) below 0.5 pixels is required for SLAM-quality calibration.</p>
@@ -87,6 +108,8 @@ OpenCV: cv2.fisheye.calibrate() — separate from standard calibrateCamera()
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-4">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Python: Full Camera Calibration Pipeline (OpenCV)</div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Python Code Example</summary>
 <pre><code class="language-python">import cv2
 import numpy as np
 import glob
@@ -121,6 +144,7 @@ print(f"Distortion: k1={dist[0,0]:.5f} k2={dist[0,1]:.5f} p1={dist[0,2]:.5f}")
 newK, roi = cv2.getOptimalNewCameraMatrix(K, dist, (W, H), alpha=0)
 mapx, mapy = cv2.initUndistortRectifyMap(K, dist, None, newK, (W, H), cv2.CV_32FC1)
 undistorted = cv2.remap(frame, mapx, mapy, cv2.INTER_LINEAR)  # in SLAM loop</code></pre>
+</details>
         </div>
     </div>
 
@@ -156,7 +180,13 @@ undistorted = cv2.remap(frame, mapx, mapy, cv2.INTER_LINEAR)  # in SLAM loop</co
     <h4>ORB: Oriented FAST and Rotated BRIEF — Full Algorithm</h4>
     <p>ORB (Rublee et al., ICCV 2011) is the dominant descriptor in real-time drone SLAM. Binary descriptors enable XOR+popcount matching — one CPU instruction per 64 bits. No GPU required. Patent-free. Used in ORB-SLAM3 exclusively.</p>
 
-    <div class="math-block text-sm">
+    <div class="insight-box">
+        <div class="insight-label">ORB DESCRIPTOR PIPELINE</div>
+        <p class="text-slate-200 text-sm mt-1">ORB detects scale-invariant corners using a Gaussian pyramid, assigns rotation invariance via the intensity centroid, then encodes each keypoint as a 256-bit binary string — enabling XOR-based matching in a single CPU instruction per 64 bits. Its patent-free status and near-GPU speed make it the dominant descriptor in drone SLAM.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block text-sm">
 Step 1 — Gaussian scale pyramid (L=8 levels, scale factor s=1.2):<br>
   Build 8 downsampled versions of the input image<br>
   Detect features at each level: achieves scale invariance without expensive DoG<br>
@@ -187,10 +217,13 @@ Matching: Lowe ratio test (rejects ambiguous matches):<br>
   Accept match only if: hamming(d, n1) / hamming(d, n2) &lt; 0.75<br>
   This rejects 90% of false matches while keeping 95% of true matches
     </div>
+</details>
 
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-4">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Python: ORB Detection, Matching, and RANSAC Filtering</div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Python Code Example</summary>
 <pre><code class="language-python">import cv2
 import numpy as np
 
@@ -221,6 +254,7 @@ E, mask = cv2.findEssentialMat(pts1, pts2, K, method=cv2.RANSAC, prob=0.999, thr
 inliers1 = pts1[mask.ravel() == 1]
 inliers2 = pts2[mask.ravel() == 1]
 print(f"Matches: {len(good)} raw → {inliers1.shape[0]} RANSAC inliers")</code></pre>
+</details>
         </div>
     </div>
 
@@ -229,7 +263,13 @@ print(f"Matches: {len(good)} raw → {inliers1.shape[0]} RANSAC inliers")</code>
 
     <h4>Lucas-Kanade Sparse Flow: Full Derivation</h4>
 
-    <div class="math-block text-sm">
+    <div class="insight-box">
+        <div class="insight-label">LUCAS-KANADE FLOW</div>
+        <p class="text-slate-200 text-sm mt-1">LK solves for 2D pixel motion by assuming all pixels in a small window share the same velocity, turning an underdetermined per-pixel constraint into an overdetermined least-squares system. The invertibility of the resulting structure tensor directly predicts which pixels are trackable — corners yes, flat regions no.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block text-sm">
 Brightness Constancy Assumption:<br>
   I(x, y, t) = I(x + u*dt, y + v*dt, t + dt)<br>
   "A pixel's intensity doesn't change as it moves — it just translates"<br><br>
@@ -258,10 +298,13 @@ Pyramidal LK: run at 4 resolution levels (OpenCV default: winSize=21, maxLevel=3
 Each coarser level estimates large displacements; finer levels refine.<br>
 Handles up to ~1/4 image width displacement per frame before losing track.
     </div>
+</details>
 
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-4">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Python: Continuous Shi-Tomasi + Lucas-Kanade Tracking Loop (VIO Frontend Pattern)</div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Python Code Example</summary>
 <pre><code class="language-python">import cv2
 import numpy as np
 
@@ -302,6 +345,7 @@ while True:
         prev_pts = good_curr.reshape(-1, 1, 2)
 
     prev_gray = curr_gray.copy()</code></pre>
+</details>
         </div>
     </div>
 
@@ -313,7 +357,13 @@ while True:
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
         <h4 class="mt-0 border-none text-white">Essential and Fundamental Matrices: Full Derivation</h4>
-        <div class="math-block text-sm">
+        <div class="insight-box">
+            <div class="insight-label">EPIPOLAR GEOMETRY</div>
+            <p class="text-slate-200 text-sm mt-1">The Essential and Fundamental matrices encode the rigid geometry between two camera views, constraining where a corresponding point must lie to a single epipolar line — collapsing a 2D matching search into a 1D one and enabling robust pose recovery from as few as five point pairs.</p>
+        </div>
+        <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block text-sm">
 Camera 1 at pose [I | 0] (world origin), Camera 2 at pose [R | t].<br>
 A 3D point P seen at p1 in image 1 and p2 in image 2.<br><br>
 In Camera 1 frame: x1 = K1^(-1) * p1  (normalized bearing vector)<br>
@@ -343,12 +393,19 @@ Solution set: (R, t) ∈ {(U*W*V^T, u3), (U*W*V^T, -u3), (U*W^T*V^T, u3), (U*W^T
 Chirality: the correct (R, t) is the one where reconstructed 3D points<br>
 are in FRONT of both cameras (positive Z in both camera frames)
         </div>
+</details>
     </div>
 
     <h4>RANSAC: Robust Estimation Under Outliers</h4>
     <p>Feature matches always contain outliers (mismatches). RANSAC (Random Sample Consensus, Fischler &amp; Bolles, 1981) finds the largest inlier subset consistent with a geometric model by repeated random sampling.</p>
 
-    <div class="math-block text-sm">
+    <div class="insight-box">
+        <div class="insight-label">RANSAC SAMPLE COUNT</div>
+        <p class="text-slate-200 text-sm mt-1">The required number of RANSAC iterations grows exponentially with the outlier fraction — using the 5-point algorithm instead of the 8-point algorithm reduces iterations by roughly 8x at 50% outliers, which is why the Nister solver became standard for real-time SLAM.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block text-sm">
 RANSAC iterations for desired success probability p = 0.99:<br><br>
 N = log(1 - p) / log(1 - (1 - ε)^s)<br><br>
 ε = fraction of outliers, s = minimum sample size for model<br><br>
@@ -364,6 +421,7 @@ Inlier test (symmetric epipolar distance):<br>
   where d(p, l) = (l^T * p)^2 / (l1^2 + l2^2)  [point-to-line distance]<br>
   Threshold: typically 1.0 pixel (RANSAC) or 0.45 pixel (Sampson distance, tighter)
     </div>
+</details>
 
     <h3>11.5 Visual Odometry Architecture</h3>
     <p>Visual Odometry (VO) estimates the camera trajectory by tracking features between consecutive frames — no persistent global map. Drift accumulates; loop closure (Section 11.8) corrects it. The standard pipeline has two phases with different geometric solvers.</p>
@@ -402,7 +460,13 @@ Inlier test (symmetric epipolar distance):<br>
 
     <h4>The PnP Problem: Localizing Against a 3D Map</h4>
 
-    <div class="math-block text-sm">
+    <div class="insight-box">
+        <div class="insight-label">PNP POSE RECOVERY</div>
+        <p class="text-slate-200 text-sm mt-1">PnP localizes a camera against a known 3D map by minimizing reprojection error — how far each predicted landmark pixel deviates from where it is actually observed. EPnP solves this in linear time using virtual control points, then Gauss-Newton refinement converges to sub-pixel RMSE in 3–5 iterations.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block text-sm">
 PnP Cost Function (minimize reprojection error):<br><br>
 F(R, t) = sum_{i=1}^{N} || p_i - pi(K * (R * P_i + t)) ||^2<br><br>
 where pi([x,y,z]) = [x/z, y/z]  (perspective division)<br>
@@ -420,13 +484,20 @@ Gauss-Newton refinement (run after EPnP for better accuracy):<br>
   Update pose: R_{k+1}, t_{k+1} from delta via Lie algebra exponential map<br>
   Converges in 3–5 iterations, typical final RMSE: 0.5–2.0 pixels
     </div>
+</details>
 
     <h3>11.6 Visual-Inertial Odometry (VIO)</h3>
     <p>VIO fuses camera and IMU measurements to recover metric-scale motion with bounded drift — more accurate than camera-only VO, more robust than IMU-only dead reckoning. It is the dominant GPS-denied localization method for modern autonomous drones.</p>
 
     <h4>IMU Noise Model</h4>
 
-    <div class="math-block text-sm">
+    <div class="insight-box">
+        <div class="insight-label">IMU NOISE MODEL</div>
+        <p class="text-slate-200 text-sm mt-1">MEMS IMU errors come from two sources: additive white noise (washed out by averaging) and a slowly drifting bias (grows as t^2 and eventually dominates). Characterizing both with Allan variance parameters is a prerequisite for VIO initialization and determines how long the drone can dead-reckon before position error becomes unacceptable.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block text-sm">
 IMU Measurement Model (stochastic differential equations):<br><br>
 Accelerometer:  a_meas(t) = R^T * (a_world(t) - g) + b_a(t) + n_a(t)<br>
 Gyroscope:      ω_meas(t) = ω_body(t) + b_g(t) + n_g(t)<br><br>
@@ -446,13 +517,20 @@ Position error from pure IMU integration (see Module 9 Section 17.1):<br>
   σ_p(t) ≈ σ_a * t^(3/2) / √3     (white noise contribution)<br>
   σ_p_bias(t) ≈ (1/2) * σ_ba * t^2  (bias drift — grows as t^2, dominant after ~30s)
     </div>
+</details>
 
     <h4>IMU Preintegration on Manifold (Forster et al., 2015/2017)</h4>
     <p>Naive IMU integration must be repeated every time the linearization point (bias estimate) changes during optimization. Preintegration avoids this by defining relative motion quantities that are INDEPENDENT of the absolute state at time i.</p>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
         <h4 class="mt-0 border-none text-white">Preintegration Theory</h4>
-        <div class="math-block text-sm">
+        <div class="insight-box">
+            <div class="insight-label">IMU PREINTEGRATION</div>
+            <p class="text-slate-200 text-sm mt-1">Preintegration accumulates IMU readings into relative rotation, velocity, and position deltas that are computed once and reused across optimization iterations regardless of the current bias estimate — avoiding expensive re-integration and making real-time VIO viable on embedded processors.</p>
+        </div>
+        <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block text-sm">
 Between camera frames i and j (K IMU readings at times t_k, k=i..j-1, dt = 1/400 s):<br><br>
 Naive integration in world frame (must be redone when bias changes):<br>
   R_j = R_i * product_k Exp((ω_k - b_g) * dt)<br>
@@ -477,12 +555,19 @@ Noise covariance Σ_ij (9×9 matrix) is propagated via:<br>
   Σ_{k+1} = A_k * Σ_k * A_k^T + B_k * Q * B_k^T<br>
   (Q = block-diag(σ_a^2*I, σ_g^2*I, σ_ba^2*I, σ_bg^2*I) IMU noise covariance)
         </div>
+</details>
     </div>
 
     <h4>VIO Optimization: The Sliding Window Estimator</h4>
     <p>The sliding window optimizer maintains the last K keyframes, their 3D landmarks, and IMU preintegration factors. At each new keyframe it minimizes the total negative log-likelihood (Maximum A Posteriori estimation):</p>
 
-    <div class="math-block text-sm">
+    <div class="insight-box">
+        <div class="insight-label">VIO SLIDING WINDOW</div>
+        <p class="text-slate-200 text-sm mt-1">The VIO cost function jointly minimizes visual reprojection errors, IMU preintegration residuals, and a marginalization prior — the last term preserves information from removed keyframes without re-processing old data. Schur complement elimination of landmarks makes the remaining sparse pose system solvable in 10–20 ms per keyframe.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block text-sm">
 Full VIO Cost Function:<br><br>
 F(x) = sum over visual factors     || r_vision_ij ||^2_{Σ_ij}<br>
       + sum over IMU factors        || r_imu_ij   ||^2_{Σ_imu_ij}<br>
@@ -501,6 +586,7 @@ Solver: Gauss-Newton or Levenberg-Marquardt with Schur complement<br>
   Solved with CHOLMOD sparse Cholesky or custom band-Cholesky<br>
   Typical: 10–20ms per keyframe on Jetson Orin NX 16GB
     </div>
+</details>
 
     <h4>Filter-Based Alternative: MSCKF</h4>
     <p>The Multi-State Constraint Kalman Filter (Mourikis &amp; Roumeliotis, ICRA 2007) maintains camera poses in the EKF state vector and analytically marginalizes features, creating <em>measurement constraints between poses</em> without estimating feature positions explicitly. MSCKF runs at 100Hz on ARM Cortex-A55, making it suitable for microcontroller-class compute budgets. OpenVINS is the leading open-source MSCKF implementation for drones.</p>
@@ -576,7 +662,13 @@ Solver: Gauss-Newton or Levenberg-Marquardt with Schur complement<br>
     <h4>DBoW2: Bag of Words Place Recognition</h4>
     <p>DBoW2 (Galvez-López &amp; Tardós, IEEE T-RO 2012) represents each image as a sparse histogram over a pre-trained visual vocabulary. Place recognition becomes a vector similarity query — fast enough to check every new keyframe against the entire session history.</p>
 
-    <div class="math-block text-sm">
+    <div class="insight-box">
+        <div class="insight-label">BAG-OF-WORDS RETRIEVAL</div>
+        <p class="text-slate-200 text-sm mt-1">DBoW2 represents each camera frame as a sparse TF-IDF histogram over a million-word visual vocabulary, turning loop-closure detection into a vector similarity query that takes ~10 ms regardless of session length. A relative similarity threshold adapts automatically to repetitive scenes like corridors, cutting false positives that fool fixed thresholds.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block text-sm">
 Vocabulary Construction (offline — runs once, reused across deployments):<br><br>
 1. Extract ORB descriptors from 1 million diverse training images<br>
 2. Build hierarchical k-means tree: k=10 branches, L=6 levels<br>
@@ -600,6 +692,7 @@ Geometric verification (after DBoW2 candidate detected):<br>
 3. RANSAC inlier test: accept if inliers &gt; 50 (prevents perceptual aliasing)<br><br>
 Query time: ~10ms per keyframe for a 10,000-KF map (k-d tree traversal in vocab)
     </div>
+</details>
 
     <h4>Deep Place Recognition: NetVLAD and HF-Net</h4>
     <p>Classical BoW struggles with large viewpoint changes (&gt;30° rotation) and lighting changes. Deep descriptors are more robust:</p>
@@ -611,7 +704,13 @@ Query time: ~10ms per keyframe for a 10,000-KF map (k-d tree traversal in vocab)
     <h4>Pose Graph Optimization</h4>
     <p>After loop closure detection, the accumulated trajectory is modeled as a pose graph — keyframes as nodes, odometry and loop closure constraints as edges. Optimization finds the Maximum A Posteriori trajectory.</p>
 
-    <div class="math-block text-sm">
+    <div class="insight-box">
+        <div class="insight-label">POSE GRAPH OPTIMIZATION</div>
+        <p class="text-slate-200 text-sm mt-1">After loop closure is detected, accumulated trajectory drift is redistributed by solving for the MAP trajectory on SE(3) — a sparse least-squares problem because each keyframe only connects to a handful of neighbors. GTSAM's iSAM2 solver handles 50,000 keyframes in ~200 ms using incremental sparse Cholesky factorization.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block text-sm">
 Pose graph: nodes x = {T_1, T_2, ..., T_N}  (each T_i ∈ SE(3))<br>
 Edges: (i, j, z_ij, Ω_ij) where z_ij = measured relative pose, Ω_ij = information matrix<br><br>
 MAP cost function (minimize total squared Mahalanobis distance):<br><br>
@@ -629,6 +728,7 @@ After pose graph optimization: recompute 3D landmark positions from<br>
 optimized poses via triangulation or Bundle Adjustment (more expensive).<br>
 ORB-SLAM3 runs full Global BA asynchronously after Essential Graph optimization.
     </div>
+</details>
 
     <h3>11.9 Deep Learning Frontiers in Perception</h3>
     <p>Classical geometric SLAM excels in textured, static, well-lit environments. Deep learning extends capability to low-texture surfaces, dynamic scenes, night imagery, and produces richer maps with semantic understanding.</p>
@@ -639,6 +739,8 @@ ORB-SLAM3 runs full Global BA asynchronously after Essential Graph optimization.
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-4">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Python: SuperPoint + LightGlue Feature Matching (kornia / lightglue library)</div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Python Code Example</summary>
 <pre><code class="language-python">import torch
 from lightglue import LightGlue, SuperPoint
 from lightglue.utils import load_image, rbd
@@ -666,6 +768,7 @@ kpts1 = feats1["keypoints"][matches01["matches"][:, 1]]  # (M, 2) matched kps in
 scores = matches01["scores"]  # (M,) match confidence in [0, 1]
 
 print(f"Matched {kpts0.shape[0]} pairs (RANSAC still recommended for pose estimation)")</code></pre>
+</details>
         </div>
     </div>
 
@@ -674,7 +777,13 @@ print(f"Matched {kpts0.shape[0]} pairs (RANSAC still recommended for pose estima
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
         <h4 class="mt-0 border-none text-amber-400 text-sm">Self-Supervised Depth Training: MonoDepth2 Loss (Godard et al., ICCV 2019)</h4>
-        <div class="math-block text-sm">
+        <div class="insight-box">
+            <div class="insight-label">SELF-SUPERVISED DEPTH</div>
+            <p class="text-slate-200 text-sm mt-1">MonoDepth2 trains depth and pose networks jointly on unlabeled video by checking that the depth prediction correctly warps neighboring frames onto the current frame — if the photometric reconstruction is sharp, the depth must be right. Auto-masking and an edge-aware smoothness term handle occlusions and object boundaries without any ground-truth depth labels.</p>
+        </div>
+        <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block text-sm">
 Training setup: video triplet (I_{t-1}, I_t, I_{t+1}) — no depth labels needed<br><br>
 Train two networks jointly:<br>
   DepthNet(I_t) → D_t  (dense depth map)<br>
@@ -694,6 +803,7 @@ Edge-aware smoothness regularization:<br>
   L_smooth = |∂^2_x D| * e^(-|∂_x I|) + |∂^2_y D| * e^(-|∂_y I|)<br>
   Penalizes depth discontinuities EXCEPT at image edges (where depth should change)
         </div>
+</details>
     </div>
 
     <h4>DROID-SLAM: Recurrent Deep SLAM (Teed &amp; Deng, NeurIPS 2021)</h4>
@@ -702,7 +812,13 @@ Edge-aware smoothness regularization:<br>
     <h4>3D Gaussian Splatting for Dense Mapping (2023–2025)</h4>
     <p>3D Gaussian Splatting (3DGS, Kerbl et al., SIGGRAPH 2023) represents a scene as millions of 3D Gaussian primitives — each with position µ, covariance Σ (encoding orientation and scale), opacity α, and view-dependent color (spherical harmonics coefficients). Novel views are rendered via alpha compositing: Gaussians are sorted by depth, then splatted onto the image plane using the EWA splatting formula:</p>
 
-    <div class="math-block text-sm">
+    <div class="insight-box">
+        <div class="insight-label">3D GAUSSIAN SPLATTING</div>
+        <p class="text-slate-200 text-sm mt-1">Each 3D Gaussian is projected to a 2D ellipse via the EWA formula, then composited front-to-back with learned opacity — rendering a 1080p novel view at 30–100 fps, orders of magnitude faster than NeRF. Initialized from a sparse SfM point cloud, Gaussians are adaptively split and pruned during training based on gradient magnitude.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block text-sm">
 EWA Splatting — project 3D Gaussian to 2D image space:<br><br>
 3D covariance Σ = R * S * S^T * R^T   (R=rotation, S=diagonal scale matrix)<br>
 2D covariance Σ_2D = J * W * Σ * W^T * J^T<br>
@@ -721,6 +837,7 @@ SLAM applications (2024):<br>
   Current limitation: real-time map building not yet achievable on drone hardware<br>
   Active research: reducing Gaussian count while maintaining accuracy for navigation
     </div>
+</details>
 
     <h3>11.10 Real-Time Deployment on Drone Hardware</h3>
     <p>SLAM algorithms must fit within the power and weight budget of a drone. This section covers the hardware options, integration patterns, and evaluation methodology for real deployments.</p>
@@ -765,6 +882,8 @@ SLAM applications (2024):<br>
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-4">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Python: VIO→ArduPilot MAVLink Bridge (pymavlink)</div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Python Code Example</summary>
 <pre><code class="language-python">from pymavlink import mavutil
 import time, threading
 
@@ -799,28 +918,48 @@ def vio_callback(pose):
                        pose.roll, pose.pitch, pose.yaw)
 
 # Example: OpenVINS ROS2 bridge calls vio_callback on /ov_msckf/odomimu topic</code></pre>
+</details>
         </div>
     </div>
 
     <h4>EuRoC MAV Benchmark: Standard SLAM Evaluation</h4>
     <p>The EuRoC MAV dataset (Burri et al., IJRR 2016, ETH Zurich) is the standard benchmark for drone SLAM. It contains 11 sequences from an Asctec Firefly hexacopter flying in two indoor environments (Machine Hall MH, Vicon Room V1/V2), with millimeter-accurate ground truth from a Vicon motion capture system. The <strong>Absolute Trajectory Error (ATE RMSE)</strong> metric measures the alignment between the estimated and ground-truth trajectories after optimal rigid-body alignment:</p>
 
-    <div class="math-block text-sm">
+    <div class="insight-box">
+        <div class="insight-label">ATE TRAJECTORY ERROR</div>
+        <p class="text-slate-200 text-sm mt-1">Absolute Trajectory Error (ATE RMSE) measures how far the estimated path deviates from Vicon ground truth after optimal rigid-body alignment — the standard metric for drone SLAM evaluation on the EuRoC MAV dataset. Lower is better; values below 0.05 m are considered high precision for autonomous drone applications.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block text-sm">
 ATE RMSE computation:<br><br>
 1. Align estimated trajectory T_est with ground truth T_gt using Horn's method<br>
    (optimal rotation + translation, optionally scale — use Sim3 for monocular)<br>
 2. For each frame i: e_i = || p_gt_i - (s*R*p_est_i + t) ||<br>
    (Euclidean distance between aligned position estimates)<br>
-3. ATE RMSE = sqrt(mean(e_i^2))   [meters]<br><br>
-Representative results on EuRoC (ATE RMSE, lower = better):<br><br>
-System              | Mode         | MH_01 Easy | MH_04 Hard | V1_02 Med | V2_02 Med<br>
---------------------|--------------|------------|------------|-----------|----------<br>
-ORB-SLAM3           | Stereo+IMU   |  0.016m    |  0.038m    |  0.018m   |  0.021m<br>
-OpenVINS            | Stereo+IMU   |  0.041m    |  0.089m    |  0.038m   |  0.052m<br>
-VINS-Mono           | Mono+IMU     |  0.081m    |  0.135m    |  0.072m   |  0.098m<br>
-DROID-SLAM          | Monocular    |  0.018m    |  0.042m    |  0.022m   |  0.027m<br><br>
-Note: ORB-SLAM3 Stereo+IMU vs DROID-SLAM monocular is not apples-to-apples —<br>
-DROID-SLAM's GPU requirement limits its practical drone deployment to larger platforms.
+3. ATE RMSE = sqrt(mean(e_i^2))   [meters]
+    </div>
+</details>
+
+    <div class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden mb-6">
+        <div class="px-4 py-3 bg-slate-800 text-xs font-mono text-slate-400 uppercase tracking-widest">EuRoC MAV Benchmark — ATE RMSE (lower = better)</div>
+        <table class="w-full text-xs font-mono">
+            <thead><tr class="bg-slate-800/50 text-slate-400">
+                <th class="p-3 text-left">System</th>
+                <th class="p-3 text-left">Mode</th>
+                <th class="p-3 text-left">MH_01 Easy</th>
+                <th class="p-3 text-left">MH_04 Hard</th>
+                <th class="p-3 text-left">V1_02 Med</th>
+                <th class="p-3 text-left">V2_02 Med</th>
+            </tr></thead>
+            <tbody class="text-slate-300">
+                <tr class="border-t border-slate-800"><td class="p-3 text-amber-400">ORB-SLAM3</td><td class="p-3">Stereo+IMU</td><td class="p-3 text-green-400">0.016 m</td><td class="p-3 text-green-400">0.038 m</td><td class="p-3 text-green-400">0.018 m</td><td class="p-3 text-green-400">0.021 m</td></tr>
+                <tr class="border-t border-slate-800"><td class="p-3 text-sky-400">OpenVINS</td><td class="p-3">Stereo+IMU</td><td class="p-3">0.041 m</td><td class="p-3">0.089 m</td><td class="p-3">0.038 m</td><td class="p-3">0.052 m</td></tr>
+                <tr class="border-t border-slate-800"><td class="p-3 text-emerald-400">VINS-Mono</td><td class="p-3">Mono+IMU</td><td class="p-3">0.081 m</td><td class="p-3">0.135 m</td><td class="p-3">0.072 m</td><td class="p-3">0.098 m</td></tr>
+                <tr class="border-t border-slate-800"><td class="p-3 text-purple-400">DROID-SLAM</td><td class="p-3">Monocular</td><td class="p-3">0.018 m</td><td class="p-3">0.042 m</td><td class="p-3">0.022 m</td><td class="p-3">0.027 m</td></tr>
+            </tbody>
+        </table>
+        <p class="text-slate-500 text-xs px-4 py-2">Note: ORB-SLAM3 Stereo+IMU vs DROID-SLAM monocular is not apples-to-apples — DROID-SLAM's GPU requirement limits practical drone deployment to larger platforms.</p>
     </div>
 
     <div class="interactive-panel">

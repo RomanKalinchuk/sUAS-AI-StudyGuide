@@ -161,7 +161,13 @@ export default `
     <h4 class="mt-6">15.4.2 CBBA — The Gold Standard for Task Allocation</h4>
     <p><strong>Consensus-Based Bundle Algorithm (CBBA)</strong>, developed at MIT Aerospace Controls Lab, is the most widely studied decentralized multi-agent task allocation algorithm. Each agent greedily builds a task bundle (ordered list of tasks it will execute), then runs consensus rounds to resolve conflicts when two agents win the same task. CBBA is <em>provably bounded</em>: solution quality is within a known factor of optimal.</p>
 
-    <div class="math-block">
+    <div class="insight-box">
+        <div class="insight-label">CBBA In a Nutshell</div>
+        <p class="text-slate-200 text-sm mt-1">Each drone independently bids on tasks based on reward minus travel cost. Agents then share bids with neighbors, yielding any task where a neighbor bid higher. This bid + consensus loop repeats until stable — converging in rounds proportional to the network diameter. Expand below to see the algorithm pseudocode.</p>
+    </div>
+    <details class="code-expand">
+    <summary>Technical Details ▼</summary>
+<div class="math-block">
 CBBA Phase 1 — Bundle Building (each agent independently):
   For each unassigned task t:
     score(t) = reward(t) - travel_cost(current_pos → t) - deadline_penalty(t)
@@ -173,6 +179,7 @@ CBBA Phase 2 — Consensus (repeat until stable):
     if neighbor_bid(t) > my_bid(t): accept neighbor winner, release t from my bundle
   Re-run Phase 1 if bundle changed
   Convergence guaranteed in O(network diameter) rounds</div>
+</details>
 
     <p class="mt-3 text-sm">Key 2024–2025 CBBA extensions:</p>
     <ul class="space-y-2 text-sm mt-1">

@@ -55,6 +55,8 @@ export default `
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Python: RealSense D435i — Capture Aligned Depth + Color Frames</div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Python Code Example</summary>
 <pre><code class="language-python">import pyrealsense2 as rs
 import numpy as np
 
@@ -95,6 +97,7 @@ try:
 
 finally:
     pipeline.stop()</code></pre>
+</details>
         </div>
     </div>
 
@@ -163,6 +166,8 @@ finally:
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">ROS 2: sensor_msgs/PointCloud2 Message Structure</div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Python Code Example</summary>
 <pre><code class="language-python"># PointCloud2 wire format:
 # header:
 #   stamp: builtin_interfaces/Time
@@ -188,6 +193,7 @@ def cloud_callback(msg):
     # Generator of (x, y, z) tuples
     points = list(pc2.read_points(msg, field_names=("x","y","z"), skip_nans=True))
     arr = np.array(points, dtype=np.float32)  # Shape: (N, 3)</code></pre>
+</details>
         </div>
     </div>
 
@@ -227,6 +233,8 @@ def cloud_callback(msg):
         <div class="bg-[#1e1e1e] rounded-xl overflow-hidden border border-slate-700 mt-3">
             <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Python: Open3D ICP Registration + TSDF Reconstruction</div>
             <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Python Code Example</summary>
 <pre><code class="language-python">import open3d as o3d
 import numpy as np
 
@@ -274,6 +282,7 @@ for depth_img, color_img, T_camera_world in frames:
 mesh = volume.extract_triangle_mesh()
 mesh.compute_vertex_normals()
 o3d.io.write_triangle_mesh("reconstruction.ply", mesh)</code></pre>
+</details>
             </div>
         </div>
     </div>
@@ -289,6 +298,8 @@ o3d.io.write_triangle_mesh("reconstruction.ply", mesh)</code></pre>
         <div class="bg-[#1e1e1e] rounded-xl overflow-hidden border border-slate-700 mt-3">
             <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">ArduPilot Terrain Following Parameter Block</div>
             <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Shell Code Example</summary>
 <pre><code class="language-bash"># Enable terrain database
 TERRAIN_ENABLE = 1
 TERRAIN_SPACING = 100    # SRTM grid spacing in meters (default)
@@ -305,14 +316,17 @@ WP_RFND_USE      = 1     # Use rangefinder instead of terrain DB during RTL
 
 # DO NOT CHANGE:
 # EK3_SRC1_POSZ = 1 (barometer, default) — rangefinder is secondary source</code></pre>
+</details>
             </div>
         </div>
     </div>
 
     <h3>15.6 Depth Image to Point Cloud: The Math</h3>
-    <p class="text-slate-300 text-sm">Converting a 2D depth image to a 3D point cloud requires inverting the pinhole camera projection. Given camera intrinsic matrix K:</p>
+    <p class="text-slate-300 text-sm">Converting a 2D depth image to a 3D point cloud requires inverting the pinhole camera projection. For each pixel <strong>(u, v)</strong> with depth value <strong>D</strong> (meters along optical axis), we unproject it into 3D world coordinates using the camera's focal lengths <strong>(fx, fy)</strong> and principal point <strong>(cx, cy)</strong> — numbers found in the camera calibration file. RealSense and OAK-D both output Z-depth (along axis), not radial distance from lens center.</p>
 
-    <div class="math-block text-sm">
+    <details class="code-expand">
+    <summary>Projection Formula ▼</summary>
+<div class="math-block text-sm">
         <span class="text-slate-400">Camera Intrinsic Matrix K:</span><br><br>
         K = [ f_x,  0,   c_x ]<br>
             [  0,  f_y,  c_y ]<br>
@@ -326,10 +340,13 @@ WP_RFND_USE      = 1     # Use rangefinder instead of terrain DB during RTL
         [X, Y, Z]^T = D * K^(-1) * [u, v, 1]^T<br><br>
         <span class="text-slate-400 text-xs">Note: this assumes the depth D is measured along the optical axis (Z), not as Euclidean distance from the camera center. RealSense and OAK-D both output Z-depth, not radial depth. For radial depth (some ToF sensors), use D_radial = sqrt(X^2 + Y^2 + Z^2) and invert accordingly.</span>
     </div>
+</details>
 
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mt-4 mb-6">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Python: Vectorized Depth Image to Point Cloud (NumPy)</div>
         <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Python Code Example</summary>
 <pre><code class="language-python">import numpy as np
 
 def depth_to_pointcloud(depth_image, fx, fy, cx, cy, depth_scale=1.0):
@@ -369,6 +386,7 @@ cx, cy = 640.0, 360.0   # principal point (image center)
 
 # depth_image: uint16 array in millimeters from pyrealsense2
 cloud_xyz = depth_to_pointcloud(depth_image, fx, fy, cx, cy, depth_scale=0.001)</code></pre>
+</details>
         </div>
     </div>
 
