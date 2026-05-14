@@ -1866,6 +1866,131 @@ li {
   background-color: rgba(14, 165, 233, 0.05);
 }
 
+/* Gantt Chart */
+.gantt-container {
+  background: #0d1320;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  font-size: 0.72rem;
+}
+
+.gantt-header-row {
+  display: flex;
+  align-items: center;
+  min-height: 2rem;
+  background: #141d2e;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.gantt-row-item {
+  display: flex;
+  align-items: center;
+  min-height: 2.5rem;
+  border-bottom: 1px solid #1a2234;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.gantt-row-item:last-child {
+  border-bottom: none;
+}
+
+.gantt-row-item:hover {
+  background: rgba(14, 165, 233, 0.04);
+}
+
+.gantt-row-item.gantt-active {
+  background: rgba(14, 165, 233, 0.07);
+}
+
+.gantt-row-item.gantt-active .gantt-label-col {
+  color: #e2e8f0;
+}
+
+.gantt-label-col {
+  min-width: 140px;
+  max-width: 140px;
+  padding: 0 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-right: 1px solid var(--border);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.gantt-weeks {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.gantt-weeks span {
+  padding: 0.35rem 0;
+  border-right: 1px solid #1e293b;
+  font-size: 0.65rem;
+}
+
+.gantt-weeks span:last-child {
+  border-right: none;
+}
+
+.gantt-track {
+  flex: 1;
+  position: relative;
+  height: 2.5rem;
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent calc(8.3333% - 1px),
+    #1e2a3e 8.3333%
+  );
+}
+
+.gantt-bar {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 1.4rem;
+  border-radius: 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+  opacity: 0.75;
+  transition: opacity 0.2s, filter 0.2s;
+  white-space: nowrap;
+  padding: 0 0.35rem;
+  letter-spacing: 0.02em;
+}
+
+.gantt-row-item:hover .gantt-bar,
+.gantt-row-item.gantt-active .gantt-bar {
+  opacity: 1;
+  filter: brightness(1.15);
+}
+
+.gantt-phase-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.7rem;
+  height: 1.2rem;
+  border-radius: 0.2rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
 #swarmCanvas {
   background-color: #05080f;
   border: 1px solid var(--border);
