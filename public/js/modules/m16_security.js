@@ -102,6 +102,30 @@ mavproxy.py --master /dev/ttyUSB0 --baud 57600
         </div>
     </div>
 
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-xs font-mono">
+        <div class="bg-slate-900 p-4 rounded border border-slate-700">
+            <strong class="text-purple-400 block mb-2 font-sans text-sm">Galileo OSNMA — Authenticated Navigation (Nov 2023)</strong>
+            <p class="text-slate-400 font-sans text-xs mb-2">The first deployed cryptographically authenticated GNSS service. Uses the TESLA protocol (Timed Efficient Stream Loss-tolerant Authentication) to sign Galileo navigation messages at the satellite. A spoofer cannot forge valid OSNMA authentication tags without EUSPA's root signing key, making nav-message replay attacks cryptographically infeasible.</p>
+            <div class="text-slate-300 space-y-1 font-sans">
+                <div><span class="text-sky-400">Standard:</span> Galileo OS-NMA ICD v1.1</div>
+                <div><span class="text-sky-400">Status:</span> Full operational service Nov 2023 (test phase Jan 2023)</div>
+                <div><span class="text-sky-400">Auth latency:</span> ~30 s (TESLA requires delayed key revelation)</div>
+                <div><span class="text-sky-400">Supported receivers:</span> STM Teseo-LIV3R; u-blox NEO-D9S (firmware update)</div>
+                <div class="text-emerald-400 mt-1">Enable via ArduPilot GPS_GNSS_MODE |= 4 (Galileo) to benefit from OSNMA-capable receivers</div>
+            </div>
+        </div>
+        <div class="bg-slate-900 p-4 rounded border border-slate-700">
+            <strong class="text-green-400 block mb-2 font-sans text-sm">Dual-Antenna GNSS Heading (u-blox ZED-F9P)</strong>
+            <p class="text-slate-400 font-sans text-xs mb-2">Two GNSS antennas on a known rigid baseline (30–50 cm apart) derive a heading independent of magnetometer. Spoofing both antennas simultaneously with phase-consistent signals at both positions greatly increases attack complexity over single-antenna spoofing.</p>
+            <div class="text-slate-300 space-y-1 font-sans">
+                <div><span class="text-sky-400">Mode:</span> ZED-F9P "moving baseline" RTK — primary is base, secondary is rover</div>
+                <div><span class="text-sky-400">Heading accuracy:</span> ~0.1° RMS with 30 cm baseline</div>
+                <div><span class="text-sky-400">ArduPilot params:</span> GPS_TYPE2=17, GPS_MB1_OFS_X/Y/Z (baseline vector)</div>
+                <div class="text-emerald-400 mt-1">GPS heading vs IMU/mag discrepancy &gt;5° → spoof flag raised</div>
+            </div>
+        </div>
+    </div>
+
     <h3>13.3 RF Jamming, Detection, and FHSS</h3>
     <p>RC link jamming involves transmitting high-power broadband noise on the control link frequency (2.4 GHz or 900 MHz), raising the noise floor until the receiver can no longer decode packets. From the drone's perspective, packet loss rises to 100% and the RC failsafe triggers.</p>
 
@@ -264,6 +288,33 @@ sudo systemctl mask bluetooth        # Bluetooth attack surface
                 <span class="text-sky-400 w-32 flex-shrink-0">Comms Transport</span>
                 <span class="text-slate-300">Encrypted data link (AES-256 on RF transport layer where feasible) + WireGuard VPN for IP traffic to GCS</span>
             </div>
+        </div>
+    </div>
+
+    <h3>13.8 Remote ID: Broadcast, Detection &amp; Spoofing</h3>
+    <p>FAA Remote ID became mandatory for all registered UAS in the United States on <strong>16 September 2023</strong> (EU: January 2024 under EU Regulation 2019/945). Every compliant drone must continuously broadcast a position-and-identity packet over Bluetooth 5 Long Range or Wi-Fi Beacon. The same broadcast that enables legal accountability provides a passive detection surface for C-UAS systems — and, because the current standard includes no authentication, it is trivially spoofable.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div class="interactive-panel bg-[#0d1320] border-slate-700">
+            <h4 class="mt-0 border-none text-sky-400 text-sm">Broadcast Mechanism — ASTM F3411-22a</h4>
+            <ul class="text-slate-300 text-xs list-disc pl-4 space-y-1">
+                <li><strong>Transport options:</strong> Bluetooth 5 Long Range (BT5 LE, 1 Mbps Coded PHY) or IEEE 802.11 Wi-Fi Beacon frame — every compliant UAS must support at least one; DJI O3 hardware broadcasts on both simultaneously</li>
+                <li><strong>Broadcast interval:</strong> ≥ 1 Hz (one packet per second minimum)</li>
+                <li><strong>Range:</strong> BT5 LR ≈ 300 m; Wi-Fi Beacon ≈ 1–3 km line-of-sight</li>
+                <li><strong>Data fields per packet:</strong> UA serial number or session ID, operator ID, operator GPS lat/lon, UA lat/lon (WGS-84), geodetic altitude (m), barometric altitude (m), horizontal velocity (m/s), vertical velocity (m/s), timestamp (Unix), emergency status byte</li>
+                <li><strong>Authentication:</strong> None — broadcasts are completely unauthenticated in ASTM F3411-22a. Cryptographic authentication is on the ASTM roadmap for a future standard revision.</li>
+                <li><strong>DJI AeroScope retirement:</strong> DJI ended AeroScope (proprietary OcuSync/O3 decode for serial-number extraction) in 2023; new DJI aircraft use standard Remote ID. Legacy AeroScope hardware no longer receives firmware updates.</li>
+            </ul>
+        </div>
+        <div class="interactive-panel bg-[#0d1320] border-slate-700">
+            <h4 class="mt-0 border-none text-amber-400 text-sm">Security Vulnerabilities &amp; C-UAS Use</h4>
+            <ul class="text-slate-300 text-xs list-disc pl-4 space-y-1">
+                <li><strong>Identity spoofing:</strong> Any ESP32 or BT5-capable microcontroller running open-source OpenDroneID firmware can broadcast arbitrary UA IDs and fake GPS coordinates. Publicly demonstrated at DEF CON 2023; source tools are openly available on GitHub.</li>
+                <li><strong>Phantom swarm attack:</strong> A single transmitter cycling through hundreds of UA IDs floods C-UAS operator displays with false tracks, masking a real threat in manufactured clutter.</li>
+                <li><strong>Operator location exposure:</strong> The broadcast includes the operator's own GPS coordinates in plaintext — receivable by anyone with a BT5 scanner within 300 m. A significant force-protection risk in contested environments.</li>
+                <li><strong>Passive C-UAS detection:</strong> BT5/Wi-Fi scanners enumerate all compliant UAS within 1–3 km and extract operator location without alerting the pilot — enabling instant geolocation of the remote pilot by law enforcement or adversaries.</li>
+                <li><strong>Mitigation:</strong> Network Remote ID (via FAA-authorized USS/UTM service supplier over cellular LTE/5G) provides a server-side cryptographically logged audit trail resistant to local spoofing, at the cost of requiring cellular connectivity on the drone.</li>
+            </ul>
         </div>
     </div>
 </div>
