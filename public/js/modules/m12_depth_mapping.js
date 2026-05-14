@@ -52,6 +52,56 @@ export default `
         </div>
     </div>
 
+    <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-4">
+        <h4 class="mt-0 border-none text-sky-400 text-sm">Stereolabs ZED 2i &amp; ZED X — Long-Range Outdoor Stereo</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+            <div>
+                <p class="text-slate-400 text-xs font-semibold mb-1">ZED 2i (USB, outdoor-ruggedized)</p>
+                <ul class="text-slate-300 text-xs list-disc pl-4 space-y-1">
+                    <li><strong>Baseline:</strong> 120mm; depth range 0.2m – 20m (passive stereo — no IR projector overwhelmed by sunlight)</li>
+                    <li><strong>Resolution:</strong> 1920×1080 @ 30 fps per eye; 9-DoF IMU (accel + gyro + baro + mag)</li>
+                    <li><strong>IP rating:</strong> IP66; built-in circular polarizing filter to reduce sky glare</li>
+                    <li><strong>Depth engine:</strong> Neural depth runs on host Jetson GPU — outperforms SGM on low-texture outdoor surfaces (tarmac, concrete)</li>
+                    <li><strong>vs D435i:</strong> 20m vs ~5m range; passive stereo works in full sunlight; IP66 vs unrated</li>
+                </ul>
+            </div>
+            <div>
+                <p class="text-slate-400 text-xs font-semibold mb-1">ZED X (GMSL2, global shutter)</p>
+                <ul class="text-slate-300 text-xs list-disc pl-4 space-y-1">
+                    <li><strong>Sensors:</strong> Dual 1920×1200 global shutter — eliminates rolling-shutter skew during fast flight</li>
+                    <li><strong>Depth range:</strong> 0.3–20m (2mm lens) / 1–35m (4mm lens)</li>
+                    <li><strong>Frame rate:</strong> 60 fps; interface GMSL2 (up to 15m cable to Jetson Orin, lower latency than USB)</li>
+                    <li><strong>IP rating:</strong> IP67; vibration-resistant IMU mount</li>
+                    <li><strong>Best for:</strong> High-speed flight (global shutter prevents motion smear), 35m long-range obstacle avoidance with 4mm lens</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-6">
+        <h4 class="mt-0 border-none text-amber-400 text-sm">Learning-Based Stereo: RAFT-Stereo &amp; Unimatch</h4>
+        <p class="text-slate-300 text-sm">Classical SGM fails on low-texture surfaces (white walls, tarmac, water) and produces noisy disparity in high-dynamic-range lighting. Neural stereo networks learn from large synthetic datasets and generalize to conditions that defeat SGM.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+            <div>
+                <p class="text-slate-400 text-xs font-semibold mb-1">RAFT-Stereo</p>
+                <ul class="text-slate-300 text-xs list-disc pl-4 space-y-1">
+                    <li><strong>Architecture:</strong> Multi-level convolutional GRUs iteratively refine a disparity field (adapted from RAFT optical flow backbone)</li>
+                    <li><strong>Speed:</strong> 5–26 FPS at KITTI resolution; ~15 FPS on Jetson AGX Orin with FP16 TensorRT export</li>
+                    <li><strong>Accuracy:</strong> 5.91% D1 on KITTI; #1 on Middlebury and ETH3D two-view stereo benchmarks; ~30% lower D1 error vs SGM</li>
+                </ul>
+            </div>
+            <div>
+                <p class="text-slate-400 text-xs font-semibold mb-1">Unimatch (Google Research, 2023)</p>
+                <ul class="text-slate-300 text-xs list-disc pl-4 space-y-1">
+                    <li><strong>Design:</strong> Single unified model covering optical flow, stereo matching, and monocular depth — shared weights across three tasks</li>
+                    <li><strong>Speed:</strong> 2.3× faster than RAFT-Stereo on A100; latency 151 ms → 66 ms; state-of-the-art on 10 benchmarks simultaneously</li>
+                    <li><strong>Practical value:</strong> Replaces three separate inference models with one — lower memory footprint and simpler deployment on drone companion computers</li>
+                </ul>
+            </div>
+        </div>
+        <p class="text-slate-400 text-xs mt-3"><strong>Hardware requirement:</strong> Neural stereo needs a GPU (Jetson Orin NX or better for real-time). Classical SGM runs on CPU. Choose neural stereo when depth quality on difficult surfaces outweighs compute cost.</p>
+    </div>
+
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Python: RealSense D435i — Capture Aligned Depth + Color Frames</div>
         <div class="p-4 overflow-x-auto">
@@ -152,7 +202,9 @@ finally:
                 <tbody>
                     <tr class="border-b border-slate-800"><td class="py-1 pr-4 font-mono">RPLIDAR S3</td><td class="py-1 pr-4">2D, 360°</td><td class="py-1 pr-4">40m</td><td class="py-1 pr-4">32,000</td><td class="py-1 pr-4">USB</td><td class="py-1 pr-4">230g</td><td class="py-1 pr-4">~$200</td><td class="py-1">Indoor 2D SLAM, corridor following, simple obstacle avoidance</td></tr>
                     <tr class="border-b border-slate-800"><td class="py-1 pr-4 font-mono">Livox Mid-360</td><td class="py-1 pr-4">3D, non-repetitive</td><td class="py-1 pr-4">40m (100m on white)</td><td class="py-1 pr-4">200,000</td><td class="py-1 pr-4">Ethernet</td><td class="py-1 pr-4">265g</td><td class="py-1 pr-4">~$500</td><td class="py-1">3D outdoor mapping, SLAM, obstacle avoidance. Best entry-level 3D.</td></tr>
-                    <tr><td class="py-1 pr-4 font-mono">Ouster OS0-32</td><td class="py-1 pr-4">3D, 32-beam</td><td class="py-1 pr-4">50m (65m @10% refl)</td><td class="py-1 pr-4">655,360</td><td class="py-1 pr-4">Ethernet</td><td class="py-1 pr-4">447g</td><td class="py-1 pr-4">~$4,000</td><td class="py-1">High-density 3D survey, 90° vertical FOV (ultra-wide, good for drones)</td></tr>
+                    <tr class="border-b border-slate-800"><td class="py-1 pr-4 font-mono">Ouster OS0-32</td><td class="py-1 pr-4">3D, 32-beam</td><td class="py-1 pr-4">50m (65m @10% refl)</td><td class="py-1 pr-4">655,360</td><td class="py-1 pr-4">Ethernet</td><td class="py-1 pr-4">447g</td><td class="py-1 pr-4">~$4,000</td><td class="py-1">High-density 3D survey, 90° vertical FOV (ultra-wide, good for drones)</td></tr>
+                    <tr class="border-b border-slate-800"><td class="py-1 pr-4 font-mono">Livox HAP</td><td class="py-1 pr-4">3D, solid-state</td><td class="py-1 pr-4">150m (200m @50%)</td><td class="py-1 pr-4">452,000</td><td class="py-1 pr-4">Ethernet</td><td class="py-1 pr-4">1,120g</td><td class="py-1 pr-4">~$1,600</td><td class="py-1">Long-range solid-state; 120°×25° FOV; automotive-grade reliability; no moving parts</td></tr>
+                    <tr><td class="py-1 pr-4 font-mono">DJI Zenmuse L2</td><td class="py-1 pr-4">3D, 5-return</td><td class="py-1 pr-4">450m (@50% refl)</td><td class="py-1 pr-4">1,200,000</td><td class="py-1 pr-4">DJI payload</td><td class="py-1 pr-4">905g</td><td class="py-1 pr-4">~$15,000</td><td class="py-1">Enterprise survey on Matrice 350/300 RTK; ±4cm vertical accuracy @ 150m; integrated 4/3 RGB camera</td></tr>
                 </tbody>
             </table>
         </div>
@@ -284,6 +336,54 @@ mesh.compute_vertex_normals()
 o3d.io.write_triangle_mesh("reconstruction.ply", mesh)</code></pre>
 </details>
             </div>
+        </div>
+    </div>
+
+    <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-4">
+        <h4 class="mt-0 border-none text-sky-400">LiDAR-Inertial SLAM: FAST-LIO2 &amp; LIO-SAM</h4>
+        <p class="text-slate-300 text-sm">When accurate pose is not available from GPS or VIO, LiDAR-inertial SLAM provides drift-resistant odometry by tightly fusing raw LiDAR scans with IMU preintegration. Two dominant ROS 2-compatible systems for drone use in 2024–2025:</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3 mb-4">
+            <div>
+                <p class="text-slate-400 text-xs font-semibold mb-1">FAST-LIO2 (HKU MARS Lab)</p>
+                <ul class="text-slate-300 text-xs list-disc pl-4 space-y-1">
+                    <li><strong>Algorithm:</strong> Iterated Extended Kalman Filter (iEKF) fusing raw LiDAR points + IMU — no feature extraction step reduces compute and latency</li>
+                    <li><strong>Key data structure:</strong> ikd-Tree (incremental k-d tree) enables O(log N) map updates at sensor rate — the enabling innovation for 100 Hz throughput</li>
+                    <li><strong>Processing rate:</strong> 100+ Hz on Intel i7-8550U (8 GB RAM); validated on Jetson TX2, Orin NX, Raspberry Pi 4B 8 GB</li>
+                    <li><strong>LiDAR support:</strong> Spinning (Velodyne, Ouster) and solid-state (Livox Avia, Mid-70, Mid-360) — non-repetitive scans natively handled</li>
+                    <li><strong>Drift:</strong> &lt;1% on 1–2 km sequences (ULHK, NCLT benchmarks)</li>
+                    <li><strong>Loop closure:</strong> None — pure odometry; combine with Scan Context for loop closure if needed</li>
+                    <li><strong>ROS 2:</strong> <code>hku-mars/FAST_LIO</code> (ros2 branch); multiple community ports also active</li>
+                    <li><strong>Typical drone config:</strong> Livox Mid-360 + Jetson Orin NX 16 GB + PX4 EKF at 100 Hz</li>
+                </ul>
+            </div>
+            <div>
+                <p class="text-slate-400 text-xs font-semibold mb-1">LIO-SAM (MIT SPARK Lab)</p>
+                <ul class="text-slate-300 text-xs list-disc pl-4 space-y-1">
+                    <li><strong>Algorithm:</strong> Factor graph (GTSAM) with IMU preintegration factor + LiDAR odometry factor + optional GPS factor + loop closure factor</li>
+                    <li><strong>Loop closure:</strong> Scan Context place recognition — corrects accumulated drift when the drone revisits a previously mapped area</li>
+                    <li><strong>LiDAR requirement:</strong> Mechanical spinning LiDAR with per-point timestamps for motion deskewing (Ouster, Velodyne, Hesai); not natively solid-state</li>
+                    <li><strong>IMU requirement:</strong> 9-axis (magnetometer for yaw initialization)</li>
+                    <li><strong>Best for:</strong> Long-duration survey missions where drift accumulates and the trajectory revisits areas; GPS-denied building interiors with return paths</li>
+                    <li><strong>ROS 2:</strong> Native ros2 branch in <code>TixiaoShan/LIO-SAM</code></li>
+                </ul>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs text-slate-300 mt-1">
+                <thead><tr class="text-sky-400 border-b border-slate-700">
+                    <th class="text-left py-1 pr-4">Property</th>
+                    <th class="text-left py-1 pr-4">FAST-LIO2</th>
+                    <th class="text-left py-1 pr-4">LIO-SAM</th>
+                    <th class="text-left py-1">RTAB-Map</th>
+                </tr></thead>
+                <tbody>
+                    <tr class="border-b border-slate-800"><td class="py-1 pr-4">Loop closure</td><td class="py-1 pr-4 text-red-400">None (odometry only)</td><td class="py-1 pr-4 text-green-400">Yes (Scan Context)</td><td class="py-1 text-green-400">Yes (Bag-of-Words)</td></tr>
+                    <tr class="border-b border-slate-800"><td class="py-1 pr-4">Solid-state LiDAR</td><td class="py-1 pr-4 text-green-400">Yes (Livox natively)</td><td class="py-1 pr-4 text-red-400">No</td><td class="py-1 text-green-400">Yes</td></tr>
+                    <tr class="border-b border-slate-800"><td class="py-1 pr-4">CPU load</td><td class="py-1 pr-4 text-green-400">Low (100 Hz on i7)</td><td class="py-1 pr-4 text-amber-400">Moderate</td><td class="py-1 text-red-400">High (visual loop closure)</td></tr>
+                    <tr class="border-b border-slate-800"><td class="py-1 pr-4">External pose needed</td><td class="py-1 pr-4 text-green-400">No (self-contained)</td><td class="py-1 pr-4 text-green-400">No (optional GPS)</td><td class="py-1 text-green-400">No</td></tr>
+                    <tr><td class="py-1 pr-4">Ideal use case</td><td class="py-1 pr-4">Real-time flight, Livox solid-state</td><td class="py-1 pr-4">Long survey + GPS + revisit</td><td class="py-1">Indoor + visual features, RGB-D</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
