@@ -1,10 +1,10 @@
 export default `
 <div class="fade-in">
-    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 10</span>
+    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 3</span>
     <h2>Power Electronics & Circuit Design for AI Drones</h2>
     <p>Power architecture is the unglamorous foundation that everything else depends on. A poorly designed power tree will cause brownouts that corrupt flight controller state, reboot the companion computer mid-flight, or silently introduce noise into IMU readings. This module covers every layer from the main battery bus down to the load capacitors at the Jetson's VDD rail.</p>
 
-    <h3>10.1 Power Distribution Architecture</h3>
+    <h3>3.1 Power Distribution Architecture</h3>
     <p>The main Power Distribution Board (PDB) is the high-current switching matrix of the drone. On a 6S (22.2V nominal) quad carrying a 25W AI payload, peak current can exceed 200A during an aggressive pitch maneuver. This is not a place for off-the-shelf PCBs with 2oz copper pours.</p>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -39,7 +39,7 @@ export default `
         <p class="text-slate-200 text-sm mt-1">When all 4 motors snap from 50% to 100% throttle in a crash-avoidance maneuver, current spikes ~80A in 500µs. Without bus capacitors, this causes a voltage droop that knocks downstream BECs out of regulation. The theoretical ideal would be 80,000µF, but in practice the battery's own source impedance handles the low-frequency bulk — PDB capacitors only need to cover the <strong>1–50kHz transient range: 470µF × 4 = 1,880µF practical minimum</strong>.</p>
     </div>
 
-    <h3>10.2 BEC (Battery Elimination Circuit) Design</h3>
+    <h3>3.2 BEC (Battery Elimination Circuit) Design</h3>
     <p>A BEC converts the high-voltage LiPo bus down to regulated 5V and 12V rails for flight controller, GPS modules, telemetry radios, RC receivers, and servos. On a 6S system (up to 25.2V in), a <strong>linear regulator is strictly forbidden</strong> for anything above a few milliamps: a linear regulator dropping 25.2V → 5V at 1A dissipates (25.2 - 5) × 1 = 20.2W as heat. That is physically impossible to manage on a drone airframe.</p>
 
     <div class="space-y-6 mb-8">
@@ -120,7 +120,7 @@ export default `
         <strong>6S System BEC Rule:</strong> On a 6S LiPo (22.2V nominal), always use a <strong>synchronous buck converter with integrated MOSFETs</strong> (TPS54560 class or better). The input voltage exceeds the absolute maximum rating of many cheap linear regulators. Verify the converter's absolute maximum Vin rating — most are 60V, but some budget ICs are 28V and will be destroyed by a freshly charged 6S (25.2V) if any voltage spike occurs.
     </div>
 
-    <h3>10.3 Companion Computer Power Delivery (Jetson Orin NX)</h3>
+    <h3>3.3 Companion Computer Power Delivery (Jetson Orin NX)</h3>
     <p>The Jetson Orin NX at 25W peak requires a <strong>dedicated, high-quality power rail</strong> — it must never share a BEC with any ESC, servo, or motor. The reason: motor PWM switching creates enormous current transients that couple as voltage spikes onto shared rails. Even a 50mV glitch can cause LPDDR5 memory errors or trigger the Jetson's hardware undervoltage protection (UVLO), causing an instantaneous power-off.</p>
 
     <div class="bg-slate-900 p-4 rounded border border-slate-700 mb-6 text-xs font-mono">
@@ -139,7 +139,7 @@ export default `
             <div class="bg-slate-800 p-3 rounded">
                 <div class="text-slate-400 text-[10px] uppercase mb-1">GPU Burst</div>
                 <div class="text-rose-400 font-bold">3.5A</div>
-                <div class="text-slate-500 text-[10px">for &lt;50ms</div>
+                <div class="text-slate-500 text-[10px]">for &lt;50ms</div>
             </div>
             <div class="bg-emerald-900/30 border border-emerald-700/50 p-3 rounded">
                 <div class="text-emerald-400 text-[10px] uppercase mb-1">Recommended</div>
@@ -174,7 +174,7 @@ export default `
         </div>
     </div>
 
-    <h3>10.4 ESC Architecture and Digital Protocols</h3>
+    <h3>3.4 ESC Architecture and Digital Protocols</h3>
     <p>Electronic Speed Controllers (ESCs) convert the power bus voltage into variable 3-phase AC for brushless motors. The firmware defines the feature set and protocol capabilities.</p>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -254,7 +254,7 @@ export default `
         <p class="text-slate-200 text-sm mt-1">After each throttle command frame, the ESC responds on the same wire (half-duplex) with an eRPM telemetry packet. The flight controller uses this real RPM data to set dynamic notch filter frequencies in the gyro processing pipeline — dramatically improving noise rejection without manual filter tuning.</p>
     </div>
 
-    <h3>10.5 Current Sensing: INA219, INA226, INA3221</h3>
+    <h3>3.5 Current Sensing: INA219, INA226, INA3221</h3>
     <p>Accurate current sensing enables ArduPilot's battery failsafe and gives the operator real-time mAh consumed. All three Texas Instruments devices use an external shunt resistor and an I2C interface.</p>
 
     <div class="space-y-4 mb-8">
@@ -301,7 +301,7 @@ export default `
         </div>
     </div>
 
-    <h3>10.6 Motor KV Rating and Propeller Selection</h3>
+    <h3>3.6 Motor KV Rating and Propeller Selection</h3>
     <p>KV (not kilovolts — the unit is RPM/V) is the motor's velocity constant: the no-load RPM increase per additional Volt applied to the terminals.</p>
 
     <div class="insight-box mb-4">
@@ -340,7 +340,7 @@ export default `
     </div>
     <p class="text-sm text-slate-300 mb-6">Prop notation: "1345" = 13 inch diameter, 4.5 inch pitch. Larger diameter = larger disk area = more efficient thrust at the same RPM. Higher pitch = more thrust per revolution but requires more torque (higher current).</p>
 
-    <h3>10.7 Brownout Protection: Capacitor Bank Design</h3>
+    <h3>3.7 Brownout Protection: Capacitor Bank Design</h3>
     <p>A brownout occurs when the battery voltage sags below the BEC's minimum operating input voltage during peak current draw. The energy stored in a capacitor bank bridges this transient. The Rubycon ZLH and Panasonic FR series are the industry standard for this application because they combine very low ESR with high ripple current rating and long life at elevated temperatures.</p>
 
     <div class="insight-box mb-4">

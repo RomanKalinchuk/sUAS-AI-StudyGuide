@@ -313,11 +313,11 @@ export default `
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 text-xs font-mono">
             <div class="bg-slate-900 p-3 rounded border-l-4 border-emerald-500"><strong class="text-emerald-400">1. Compute Architecture</strong><br/><span class="text-slate-400">Orin Nano/NX SWaP-C tradeoffs, TensorRT optimization, power mode scheduling → Modules 2–4</span></div>
             <div class="bg-slate-900 p-3 rounded border-l-4 border-sky-500"><strong class="text-sky-400">2. AI / ML Pipeline</strong><br/><span class="text-slate-400">YOLO11, VSLAM, VLM inference, foundation model stacks, synthetic data → Modules 10–12, 14</span></div>
-            <div class="bg-slate-900 p-3 rounded border-l-4 border-amber-500"><strong class="text-amber-400">3. Middleware & Comms</strong><br/><span class="text-slate-400">ROS 2 Jazzy, Micro XRCE-DDS, MAVLink 2 signing, RF link design → Modules 5–7</span></div>
-            <div class="bg-slate-900 p-3 rounded border-l-4 border-purple-500"><strong class="text-purple-400">4. Flight Control</strong><br/><span class="text-slate-400">PX4 / ArduPilot architecture, EKF3, sensor fusion, failsafe trees → Modules 8–9</span></div>
+            <div class="bg-slate-900 p-3 rounded border-l-4 border-amber-500"><strong class="text-amber-400">3. Middleware & Comms</strong><br/><span class="text-slate-400">ROS 2 Jazzy, Micro XRCE-DDS, MAVLink 2 signing, RF link design → Modules 6–8</span></div>
+            <div class="bg-slate-900 p-3 rounded border-l-4 border-purple-500"><strong class="text-purple-400">4. Flight Control</strong><br/><span class="text-slate-400">PX4 / ArduPilot architecture, EKF3, sensor fusion, failsafe trees → Modules 5, 9</span></div>
             <div class="bg-slate-900 p-3 rounded border-l-4 border-rose-500"><strong class="text-rose-400">5. EW Resilience</strong><br/><span class="text-slate-400">Anti-spoof GNSS, FHSS C2, GNSS-denied nav stack, encrypted comms → This module + 16</span></div>
             <div class="bg-slate-900 p-3 rounded border-l-4 border-amber-600"><strong class="text-amber-600">6. Swarm Coordination</strong><br/><span class="text-slate-400">Decentralized flocking, mesh comms, multi-agent task allocation → Module 15</span></div>
-            <div class="bg-slate-900 p-3 rounded border-l-4 border-slate-500 md:col-span-1"><strong class="text-slate-300">7. Power Electronics</strong><br/><span class="text-slate-400">Battery chemistry, PDB design, ESC architecture, thermal management → Module 8</span></div>
+            <div class="bg-slate-900 p-3 rounded border-l-4 border-slate-500 md:col-span-1"><strong class="text-slate-300">7. Power Electronics</strong><br/><span class="text-slate-400">Battery chemistry, PDB design, ESC architecture, thermal management → Module 3</span></div>
         </div>
     </div>
 </div>

@@ -1,10 +1,11 @@
 export default `
 <div class="fade-in">
-    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 11</span>
+    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 5</span>
+    <div class="inline-flex items-center gap-2 bg-amber-900/30 border border-amber-700/50 rounded px-3 py-1 mb-3 text-xs font-mono text-amber-400">ArduPilot stack · ChibiOS RTOS</div>
     <h2>Flight Controller Architecture & Flight Modes</h2>
     <p>The flight controller is the drone's brainstem — a dedicated hard-real-time embedded computer that runs PID control loops at 400Hz and must never, under any circumstances, miss a scheduling deadline. This module dissects the autopilot hardware, the full PID cascade from position to motor, every ArduPilot flight mode, and the failsafe architecture that determines whether a drone returns home or falls out of the sky.</p>
 
-    <h3>11.1 Autopilot Hardware</h3>
+    <h3>5.1 Autopilot Hardware</h3>
     <p>Modern open-source autopilots are built around the STM32H7 series microcontroller — a Cortex-M7 core running at 480MHz with a double-precision FPU, enabling the floating-point PID math required for 400Hz attitude control without compromising loop timing.</p>
 
     <div class="space-y-6 mb-8">
@@ -103,7 +104,7 @@ export default `
         </div>
     </div>
 
-    <h3>11.2 The Full Cascaded PID Control Loop</h3>
+    <h3>5.2 The Full Cascaded PID Control Loop</h3>
     <p>The flight control stack is a cascade of nested PID loops. Each outer loop's output becomes the setpoint (reference) for the next inner loop. This architecture is why a drone can hold GPS position while simultaneously maintaining attitude stability in wind — different loops handle different physical variables at different frequencies.</p>
 
     <div class="space-y-2 mb-6">
@@ -188,7 +189,7 @@ export default `
         </table>
     </div>
 
-    <h3>11.3 ArduPilot Flight Modes (Copter)</h3>
+    <h3>5.3 ArduPilot Flight Modes (Copter)</h3>
     <p>ArduPilot Copter (AC) implements a hierarchy of flight modes. Each mode activates different layers of the PID cascade. Understanding exactly what each mode controls — and what the pilot controls — is essential for AI integration design.</p>
 
     <div class="space-y-4 mb-8">
@@ -298,7 +299,7 @@ export default `
         </div>
     </div>
 
-    <h3>11.4 Failsafe Configuration</h3>
+    <h3>5.4 Failsafe Configuration</h3>
     <p>ArduPilot has a layered failsafe architecture. Each layer triggers independently and the system always escalates to the most conservative safe action given the current state. Understanding the exact trigger conditions and responses is mandatory for airworthiness.</p>
 
     <div class="space-y-4 mb-8">
@@ -354,7 +355,7 @@ export default `
         </div>
     </div>
 
-    <h3>11.5 Pre-Arm Checks</h3>
+    <h3>5.5 Pre-Arm Checks</h3>
     <p>ArduPilot will refuse to arm the motors until all pre-arm checks pass. These are not arbitrary gates — each check prevents a specific class of inflight failure. The ARMING_CHECK bitmask parameter controls which checks are active (default: all enabled = 1).</p>
 
     <div class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden mb-6">
@@ -397,7 +398,7 @@ export default `
         </div>
     </div>
 
-    <h3>11.6 GUIDED_NOGPS Mode — Flying Without GPS</h3>
+    <h3>5.6 GUIDED_NOGPS Mode — Flying Without GPS</h3>
     <p>Standard GUIDED mode requires a valid GPS position (EKF position source = GPS). GUIDED_NOGPS mode allows the same MAVLink-commanded flight using alternative position estimates from optical flow or Visual-Inertial Odometry (VIO).</p>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">

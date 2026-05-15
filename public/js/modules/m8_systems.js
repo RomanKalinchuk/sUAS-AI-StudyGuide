@@ -1,10 +1,11 @@
 export default `
 <div class="fade-in">
-    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 4</span>
+    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 8</span>
+    <div class="inline-flex items-center gap-2 bg-sky-900/30 border border-sky-700/50 rounded px-3 py-1 mb-3 text-xs font-mono text-sky-400">Topology diagram shows PX4 stack · NuttX RTOS — ArduPilot uses ChibiOS (see Module 5)</div>
     <h2>Data Links & Topology</h2>
     <p>A high-performance AI brain is useless if the nervous system is slow. Drone topology dictates how sensor data flows into the AI pipeline, how processed commands flow back to actuators, and how the aircraft communicates with the outside world. This module covers every layer of the drone data stack: physical interfaces, internal buses, protocol bridges, video pipelines, timing architecture, and bandwidth budgeting — with production-accurate 2025–2026 values throughout.</p>
 
-    <h3>4.1 Physical Interface Standards</h3>
+    <h3>8.1 Physical Interface Standards</h3>
     <p>Internal drone communication spans several physical layers, each optimised for a different tradeoff: bandwidth, determinism, cable reach, power draw, and EMI tolerance. Choosing the wrong interface for a sensor creates hard-to-diagnose bottlenecks that only surface at full flight rate.</p>
 
     <table class="w-full text-left border-collapse mt-6 mb-8 text-sm">
@@ -86,7 +87,7 @@ export default `
         </tbody>
     </table>
 
-    <h3>4.2 Complete System Topology</h3>
+    <h3>8.2 Complete System Topology</h3>
     <p>The following diagram maps the canonical data flow architecture for a modern AI autonomous drone. Physical interfaces are labelled on each link. Sensor data flows upward through AI processing to external communication; actuation commands flow downward from the flight controller to motors and servos.</p>
 
     <div class="bg-slate-900 border border-slate-700 rounded-xl p-6 mb-8 overflow-x-auto">
@@ -208,7 +209,7 @@ export default `
         </div>
     </div>
 
-    <h3>4.3 MAVLink Protocol Deep Dive</h3>
+    <h3>8.3 MAVLink Protocol Deep Dive</h3>
     <p>MAVLink (Micro Air Vehicle Link) is the lingua franca of open-source drone communication — a lightweight, header-only message marshalling library first released in 2009 by Lorenz Meier. MAVLink v2 (2017) added 24-bit message IDs (from 8-bit v1), optional 13-byte packet signing for authentication, and per-field zero-trimming to reduce payload size. When an AI Python script or ROS 2 node needs to command a flight controller, it constructs a specific MAVLink binary packet and sends it over UDP, UART, or USB.</p>
 
     <details class="code-expand">
@@ -337,7 +338,7 @@ Port    = 14552
         </div>
     </div>
 
-    <h3>4.4 DroneCAN / OpenCyphal (UAVCAN v1)</h3>
+    <h3>8.4 DroneCAN / OpenCyphal (UAVCAN v1)</h3>
     <p>DroneCAN (formerly UAVCAN v0) is the standard peripheral bus for open-source drone platforms — a full application layer over CAN that provides typed messages, node health monitoring, and firmware update over the bus. OpenCyphal (UAVCAN v1, ratified 2022) extends this with CAN FD support, UDP transport, and a redesigned port/subject model. PX4 has supported DroneCAN since v1.9; ArduPilot since v3.x.</p>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 text-sm">
@@ -399,7 +400,7 @@ ros2 param get /fmu/out/uavcan_node_ids uavcan_node_ids</code></pre>
         </div>
     </div>
 
-    <h3>4.5 DDS Middleware & ROS 2 QoS Profiles</h3>
+    <h3>8.5 DDS Middleware & ROS 2 QoS Profiles</h3>
     <p>Inside the companion computer, data does not flow sequentially through a queue. ROS 2 uses DDS (Data Distribution Service), an OMG-standard decentralised pub/sub middleware. Any node publishes to a topic; any node subscribes to any topic; no central broker exists. The two dominant DDS implementations on drone platforms are <strong>FastDDS</strong> (eProsima, the ROS 2 default) and <strong>CycloneDDS</strong> (Eclipse/ZettaScale, preferred for real-time).</p>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 text-sm">
@@ -497,7 +498,7 @@ auto sub = node-&gt;create_subscription&lt;px4_msgs::msg::VehicleLocalPosition&g
         </div>
     </div>
 
-    <h3>4.6 Micro XRCE-DDS — Replacing MAVROS</h3>
+    <h3>8.6 Micro XRCE-DDS — Replacing MAVROS</h3>
     <p>MAVROS was the ROS 1 bridge between companion computer and flight controller: MAVLink packets arrived over UART and were deserialised then republished as ROS topics — a translation layer with a separate serialisation/deserialisation step per message. Micro XRCE-DDS eliminates this bridge: a lightweight XRCE-DDS client runs directly on the flight controller MCU (Cortex-M7, NuttX), publishing flight state natively into the DDS global data space. The UART or UDP serial link becomes transparent middleware, not a bottleneck.</p>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm mb-6">
@@ -556,7 +557,7 @@ ros2 topic list
         </div>
     </div>
 
-    <h3>4.7 Video Encoding for Drone Downlinks</h3>
+    <h3>8.7 Video Encoding for Drone Downlinks</h3>
     <p>Drone video pipelines have fundamentally different constraints from broadcast streaming: encoding latency must stay under 100 ms for real-time GCS situational awareness, RF bandwidth limits downlinks to 2–20 Mbps for BVLOS operations, and the encoder must run on battery-constrained hardware at &lt;5 W. Software encoders (libx264, libx265) are disqualified on power alone — hardware encode is mandatory.</p>
 
     <table class="w-full text-left border-collapse mt-4 mb-6 text-sm">
@@ -643,7 +644,7 @@ v4l2-ctl --list-devices | grep -A2 rkvenc
         </div>
     </div>
 
-    <h3>4.8 End-to-End Latency Budget Analysis</h3>
+    <h3>8.8 End-to-End Latency Budget Analysis</h3>
     <p>The most important latency metric for an AI-controlled drone is the <em>perception-to-actuation latency</em>: the time from a photon hitting the camera sensor to a corrective motor command being executed by the ESC. For stable autonomous flight at moderate speeds, this must stay below 150 ms. For aggressive manoeuvring or obstacle avoidance at high speed, below 50 ms is required. Understanding where latency comes from allows systematic optimisation.</p>
 
     <div class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden mb-6">
@@ -728,7 +729,7 @@ v4l2-ctl --list-devices | grep -A2 rkvenc
         </div>
     </div>
 
-    <h3>4.9 Bandwidth Budget Calculator</h3>
+    <h3>8.9 Bandwidth Budget Calculator</h3>
     <p>Use this calculator to determine the required internal data bandwidth for a given sensor configuration. Results indicate which physical interface is required between the sensor layer and the companion computer. <em>Note: raw bandwidth is the CSI-2/USB load; compressed bandwidth is what flows over an RF downlink.</em></p>
 
     <div class="interactive-panel">
@@ -866,7 +867,7 @@ v4l2-ctl --list-devices | grep -A2 rkvenc
         </div>
     </div>
 
-    <h3>4.10 Precision Time Protocol & Clock Synchronisation</h3>
+    <h3>8.10 Precision Time Protocol & Clock Synchronisation</h3>
     <p>Sensor fusion requires that every measurement carries an accurate timestamp. Fusing a camera frame timestamped at T_cam with an IMU reading at T_imu when the two clocks have drifted by 5 ms introduces artificial position noise. At 10 m/s drone speed, a 5 ms timing error causes 5 cm of spurious position excursion per IMU update — enough to destabilise a VIO estimator at close range to obstacles.</p>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 text-sm">
@@ -928,7 +929,7 @@ sudo phc2sys -s eth0 -c CLOCK_REALTIME -w -O 0 -m 2&gt;&amp;1 | grep offset &amp
     <h4>Hardware Trigger Synchronisation for Stereo / Camera-IMU</h4>
     <p>For stereo SLAM and camera-IMU tight coupling, software timestamping introduces ±half-frame uncertainty (~8 ms at 60 fps). Hardware trigger eliminates this: the IMU fires a GPIO trigger at a fixed rate (typically 200 Hz), the camera sensor captures on the rising edge, and the timestamp is taken at trigger issuance — reducing timing uncertainty to &lt;50 µs (IMU jitter). PX4 can output a camera trigger via CAM_TRIG_MODE parameter on any unused GPIO. OAK-D cameras expose a hardware sync connector natively.</p>
 
-    <h3>4.11 C2 Link Design Patterns</h3>
+    <h3>8.11 C2 Link Design Patterns</h3>
     <p>The Command and Control (C2) link carries MAVLink telemetry between the ground station and the aircraft. For BVLOS operations the link must be resilient: FAA Part 108 and EASA regulations require Detect and Avoid capability and a documented C2 link specification. Even for VLOS autonomous missions, an undetected C2 link loss must trigger failsafe RTL automatically, not a hover-and-wait that drains the battery.</p>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 text-sm">

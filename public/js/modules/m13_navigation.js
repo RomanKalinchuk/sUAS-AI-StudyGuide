@@ -1,10 +1,10 @@
 export default `
 <div class="fade-in">
-    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 12</span>
+    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 13</span>
     <h2>Path Planning &amp; Autonomous Navigation</h2>
     <p>Autonomous navigation is not a single algorithm — it is a layered architecture where each tier has a distinct time horizon and problem scope. Global planners compute optimal paths over known maps. Local planners react to real-time sensor data. Trajectory generators produce physically realizable motion for the quadrotor's dynamics. Getting all three tiers to interoperate correctly is the central engineering challenge. Modern autonomous drones additionally require GPS-denied localization, real-time SLAM, safety-critical control guarantees, and multi-agent coordination — each a deep sub-field with production-quality open-source implementations.</p>
 
-    <h3>12.1 The Navigation Stack Architecture</h3>
+    <h3>13.1 The Navigation Stack Architecture</h3>
     <p>The navigation stack is organized into four concentric loops operating at different frequencies. Understanding the time scales prevents the most common integration bugs.</p>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
@@ -33,7 +33,7 @@ export default `
         </div>
     </div>
 
-    <h3>12.2 Costmaps: The Spatial Representation of Risk</h3>
+    <h3>13.2 Costmaps: The Spatial Representation of Risk</h3>
     <p>A costmap is a 2D (or 3D) grid where every cell holds a value in [0, 254]. Cost 0 means free space. Cost 254 (lethal) means confirmed obstacle. Values in between are produced by the <strong>inflation radius</strong>: cells near an obstacle receive an exponentially decaying cost. This forces the planner to treat proximity to walls as risky even if they are technically traversable, producing paths that hug the center of corridors.</p>
 
     <div class="insight-box">
@@ -70,7 +70,7 @@ export default `
         </div>
     </div>
 
-    <h3>12.3 Global Planning Algorithms</h3>
+    <h3>13.3 Global Planning Algorithms</h3>
 
     <h4>A* (A-Star)</h4>
     <p>A* is a best-first graph search. It maintains an open set of nodes ordered by <code>f(n) = g(n) + h(n)</code>, where <code>g(n)</code> is the exact cost from start to node n, and <code>h(n)</code> is the admissible heuristic estimate to goal. Euclidean distance is the standard heuristic for 3D drone navigation. A* is guaranteed optimal <em>if and only if</em> h(n) never overestimates the true cost (admissibility). On a 3D voxel grid with resolution 0.2m and a 200m flight envelope, A* explores up to 10<sup>6</sup> cells — computationally feasible offline but too slow for real-time replanning.</p>
@@ -184,7 +184,7 @@ export default `
     </div>
 </details>
 
-    <h3>12.4 Dynamic Replanning: D* Lite</h3>
+    <h3>13.4 Dynamic Replanning: D* Lite</h3>
     <p>When the environment changes mid-flight — a door closes, a new obstacle appears — replanning with A* from scratch is wasteful. <strong>D* Lite</strong> (Koenig &amp; Likhachev, 2002) is an incremental heuristic search that maintains and repairs a shortest-path tree rather than recomputing it. Only the portion of the tree affected by map changes is re-evaluated, making it orders of magnitude faster than fresh A* in dynamic environments.</p>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
@@ -223,7 +223,7 @@ export default `
     </div>
 </details>
 
-    <h3>12.5 SMAC Planner: Hybrid A* and State Lattice</h3>
+    <h3>13.5 SMAC Planner: Hybrid A* and State Lattice</h3>
     <p>The <strong>nav2 SMAC Planner</strong> (Steve Macenski, Open Navigation) provides three kinodynamically-aware A* variants that produce smoother, more physically realistic paths than vanilla A*. Unlike standard A* which ignores robot kinematics, SMAC searches the robot's configuration space including heading.</p>
 
     <div class="interactive-panel">
@@ -246,7 +246,7 @@ export default `
 
     <p>For quadrotors, <strong>SmacPlannerHybrid</strong> is most commonly adapted: setting <code>minimum_turning_radius: 0.0</code> makes it holonomic (the drone can translate in any direction), while the (x, y, theta) search still produces heading-aware paths useful for camera-pointed inspection missions. The planner runs at ~5 Hz for typical indoor maps.</p>
 
-    <h3>12.6 Local Planning: DWA and TEB</h3>
+    <h3>13.6 Local Planning: DWA and TEB</h3>
 
     <h4>DWA — Dynamic Window Approach</h4>
     <p>DWA operates entirely in velocity space. At each 10 Hz tick, it samples hundreds of (linear_velocity, angular_velocity) pairs within a "dynamic window" — the subset of velocities physically reachable within one timestep given the drone's acceleration limits. Each sample is forward-simulated for ~1.5 seconds to produce a trajectory arc. Each arc is scored by a weighted sum:</p>
@@ -280,7 +280,7 @@ export default `
         <div class="p-4 overflow-x-auto">
 <details class="code-expand">
     <summary>Shell Code Example</summary>
-<pre><code class="language-bash">controller_server:
+<pre><code class="language-yaml">controller_server:
   ros__parameters:
     controller_plugins: ["FollowPath"]
     FollowPath:
@@ -303,7 +303,7 @@ export default `
         </div>
     </div>
 
-    <h3>12.7 MPPI Controller — Model Predictive Path Integral</h3>
+    <h3>13.7 MPPI Controller — Model Predictive Path Integral</h3>
     <p>MPPI (Model Predictive Path Integral) is the state-of-the-art local planner in nav2 as of 2024. Unlike DWA and TEB, MPPI is a <strong>stochastic sampling-based MPC</strong>: it forward-simulates thousands of randomly perturbed control sequences in parallel, evaluates each with a cost function, and computes the optimal control as an information-theoretically weighted average. Critically, the cost function does not need to be convex or differentiable — enabling complex multi-objective behaviors impossible with optimization-based methods.</p>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
@@ -387,7 +387,7 @@ export default `
         <div class="p-4 overflow-x-auto">
 <details class="code-expand">
     <summary>Shell Code Example</summary>
-<pre><code class="language-bash">controller_server:
+<pre><code class="language-yaml">controller_server:
   ros__parameters:
     controller_plugins: ["FollowPath"]
     FollowPath:
@@ -417,7 +417,7 @@ export default `
         </div>
     </div>
 
-    <h3>12.8 SE(3) Trajectory Generation — Minimum Snap</h3>
+    <h3>13.8 SE(3) Trajectory Generation — Minimum Snap</h3>
     <p>Once waypoints are computed, the drone cannot simply jump between them. It must follow a trajectory that is <strong>dynamically feasible</strong> — respecting its mass, moment of inertia, and maximum rotor thrust. For quadrotors, the key insight from Mellinger &amp; Kumar (2011) is that the rotor force is the 4th derivative of position, called <strong>snap</strong>. Minimizing snap minimizes the required rotor force variation, which means smoother flight with lower vibration and lower battery consumption.</p>
 
     <div class="insight-box">
@@ -477,7 +477,7 @@ opt.getTrajectory(&amp;trajectory);</code></pre>
         </div>
     </div>
 
-    <h3>12.9 Gradient-Based Trajectory Optimization: EGO-Planner</h3>
+    <h3>13.9 Gradient-Based Trajectory Optimization: EGO-Planner</h3>
     <p>Traditional gradient-based trajectory optimization requires a precomputed <strong>Euclidean Signed Distance Field (ESDF)</strong> — a 3D grid storing the distance and gradient to the nearest obstacle at every cell. Building and updating this field is expensive: for a 100m x 100m x 20m volume at 0.1m resolution, it requires maintaining ~200M cells. <strong>EGO-Planner</strong> (HKUST, 2021) eliminates this requirement entirely.</p>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
@@ -523,7 +523,7 @@ opt.getTrajectory(&amp;trajectory);</code></pre>
 
     <p>EGO-Planner v2 (EGO-Swarm) extends the framework to swarm coordination by adding inter-drone repulsion terms. The planner is the core of several open-source aggressive flight systems at HKUST and Zhejiang University, achieving obstacle avoidance at 5+ m/s in cluttered forests.</p>
 
-    <h3>12.10 Potential Field Method &amp; Local Minima</h3>
+    <h3>13.10 Potential Field Method &amp; Local Minima</h3>
     <p>The potential field method computes a scalar field over the workspace: <strong>U(q) = U_att(q) + U_rep(q)</strong>. The attractive potential pulls the drone toward the goal (typically parabolic: 0.5 * k_att * ||q - q_goal||^2). The repulsive potential pushes it away from obstacles. The drone follows the negative gradient of this field.</p>
 
     <div class="insight-box">
@@ -543,7 +543,7 @@ opt.getTrajectory(&amp;trajectory);</code></pre>
 
     <p>The critical failure mode is <strong>local minima</strong>: configurations where F_att and F_rep cancel exactly. Standard mitigation strategies: random walk injection (perturb velocity when stuck for N seconds), backtracking (detect oscillation, reverse and attempt detour), and navigation functions (theoretically correct fields with provably no local minima — Rimon &amp; Koditschek, 1992).</p>
 
-    <h3>12.11 nav2 Core Architecture</h3>
+    <h3>13.11 nav2 Core Architecture</h3>
     <p>nav2 is the production navigation framework for ROS 2 robots. Its architecture uses <strong>BehaviorTree.CPP</strong> to define mission logic, lifecycle-managed nodes for clean startup/shutdown sequencing, and an action server interface for external mission commanding.</p>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
@@ -611,7 +611,7 @@ class DroneNavClient:
         </div>
     </div>
 
-    <h3>12.12 Behavior Trees for Navigation</h3>
+    <h3>13.12 Behavior Trees for Navigation</h3>
     <p><strong>BehaviorTree.CPP</strong> is the library that underpins nav2's mission logic. A Behavior Tree is a hierarchical structure of nodes that tick from root to leaves at a fixed rate (e.g., 10 Hz). Each node returns <code>SUCCESS</code>, <code>FAILURE</code>, or <code>RUNNING</code>. Control flow nodes determine how results propagate: a <strong>Sequence</strong> runs children left-to-right and fails immediately on any child failure. A <strong>Fallback</strong> (Selector) tries children in order, returning success on the first success. A <strong>Parallel</strong> node ticks all children simultaneously.</p>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
@@ -682,7 +682,7 @@ class DroneNavClient:
         </div>
     </div>
 
-    <h3>12.13 GPS-Denied Navigation: Visual-Inertial Odometry</h3>
+    <h3>13.13 GPS-Denied Navigation: Visual-Inertial Odometry</h3>
     <p>When GPS is unavailable — indoors, underground, under dense canopy, or in GPS-jammed environments — the drone must estimate its position from onboard sensors alone. <strong>Visual-Inertial Odometry (VIO)</strong> fuses camera images and IMU measurements to produce 6-DOF pose estimates at 50–200 Hz. The IMU provides high-frequency angular rate and acceleration; the camera provides absolute scale-reference and prevents IMU drift. Together they are complementary: IMU handles fast motion, camera handles slow drift.</p>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
@@ -820,7 +820,7 @@ async def main():
         </div>
     </div>
 
-    <h3>12.14 SLAM for Drone Navigation</h3>
+    <h3>13.14 SLAM for Drone Navigation</h3>
     <p>Simultaneous Localization And Mapping (SLAM) solves a chicken-and-egg problem: to build a map you need to know where you are, but to know where you are you need a map. Modern SLAM systems solve this jointly via probabilistic state estimation. For drones, the two dominant modalities are <strong>LiDAR-Inertial SLAM</strong> (accurate metric maps, works in dark/textureless environments) and <strong>Visual SLAM</strong> (low cost, rich semantic information).</p>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
@@ -902,7 +902,7 @@ async def main():
     <h4>OctoMap: The Standard 3D Map Format</h4>
     <p>OctoMap represents 3D occupancy as an octree — a recursive spatial subdivision where each node represents a 3D volume and is either free, occupied, or unknown. Each cell stores the log-odds probability of occupancy: <code>L(n) = L(n_prev) + L_meas</code>, where L_meas = log(p_occ / (1-p_occ)). Cells are clamped to [L_min, L_max] to remain responsive to changes. Typical resolution: 0.1m voxels. OctoMap files (.bt) are the standard exchange format for nav2 map server and most drone planners. For very large maps (km scale), newer formats like OpenVDB provide better compression and query performance.</p>
 
-    <h3>12.15 Safety-Critical Control: Control Barrier Functions</h3>
+    <h3>13.15 Safety-Critical Control: Control Barrier Functions</h3>
     <p>Classical navigation stacks provide probabilistic safety (unlikely to hit obstacles) but no hard guarantees. <strong>Control Barrier Functions (CBFs)</strong> provide mathematically provable safety constraints that are enforced in real-time by augmenting any existing controller with a minimal correction via Quadratic Program (QP). The key insight: rather than planning around obstacles, CBFs modify the control input u to guarantee the system state never leaves a defined safe set S.</p>
 
     <div class="insight-box">
@@ -947,7 +947,7 @@ async def main():
         </div>
     </div>
 
-    <h3>12.16 Multi-Agent Path Finding (MAPF)</h3>
+    <h3>13.16 Multi-Agent Path Finding (MAPF)</h3>
     <p>When multiple drones must navigate simultaneously in shared airspace, individual path planners create collisions and deadlocks. Multi-Agent Path Finding (MAPF) computes collision-free paths for all agents simultaneously. The two dominant paradigms are <strong>centralized planning</strong> (optimal but computationally expensive) and <strong>distributed reactive avoidance</strong> (scalable but suboptimal).</p>
 
     <h4>Conflict-Based Search (CBS)</h4>
@@ -995,7 +995,7 @@ async def main():
         </div>
     </div>
 
-    <h3>12.17 Learning-Based Navigation</h3>
+    <h3>13.17 Learning-Based Navigation</h3>
     <p>Classical planners require accurate maps and explicit obstacle representations. Learning-based methods — particularly Deep Reinforcement Learning (DRL) — learn navigation policies end-to-end from sensor inputs, without explicit map building. The agent receives raw sensor observations (depth image, IMU, goal vector) and outputs control commands, learning through trial-and-error in simulation.</p>
 
     <div class="interactive-panel">
@@ -1028,7 +1028,7 @@ async def main():
     <h4>Limitations vs. Classical Methods</h4>
     <p>RL policies are black boxes — they provide no guarantees of safety or optimality. They can fail catastrophically in out-of-distribution scenarios. For safety-critical drone operations, RL is best used as a <strong>motion primitive library</strong> or a <strong>heuristic planner</strong> that is supervised by a CBF safety filter, rather than as a standalone controller. Pure RL for full autonomous flight remains a research-stage approach as of 2025.</p>
 
-    <h3>12.18 Energy-Aware Path Planning</h3>
+    <h3>13.18 Energy-Aware Path Planning</h3>
     <p>Quadrotor power consumption is dominated by hover thrust, which scales with rotor thrust squared divided by rotor disk area. A drone's endurance is typically 20–40 minutes; energy-aware planning can extend mission range by 15–30% by optimizing altitude, speed, and path shape. Energy planning is especially critical for delivery drones and long-range inspection missions.</p>
 
     <div class="insight-box">
@@ -1072,7 +1072,7 @@ async def main():
         </div>
     </div>
 
-    <h3>12.19 Mission Planning with MAVSDK</h3>
+    <h3>13.19 Mission Planning with MAVSDK</h3>
     <p><strong>MAVSDK</strong> is the modern, actively maintained SDK for commanding PX4-based drones via MAVLink. It replaces DroneKit (last released 2017, ArduPilot-focused) with a clean async API supporting C++, Python, Swift, and Kotlin. MAVSDK v3.5 (2025) adds gRPC streaming for low-latency telemetry and is the recommended approach for PX4 companion computer applications.</p>
 
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-8">
@@ -1190,7 +1190,7 @@ async def run_survey_mission():
         </div>
     </div>
 
-    <h3>12.20 Practical Considerations for 3D Drone Path Planning</h3>
+    <h3>13.20 Practical Considerations for 3D Drone Path Planning</h3>
 
     <div class="interactive-panel">
         <h4 class="mt-0 text-white border-none">Production Engineering Checklist</h4>

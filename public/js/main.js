@@ -18,7 +18,7 @@ import m17_workflow    from './modules/m17_workflow.js';
 
 import { runThermalSim }    from './interactive/thermal.js';
 import { initHardwareChart } from './interactive/hwChart.js';
-import { initSwarm }        from './interactive/swarm.js';
+import { initSwarm, stopSwarm } from './interactive/swarm.js';
 import { updateWorkflow }     from './interactive/workflow.js';
 import { calcDataBandwidth }  from './interactive/dataBandwidth.js';
 
@@ -72,6 +72,8 @@ function buildNav() {
 }
 
 window.loadModule = function (id) {
+    stopSwarm();
+
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     const activeBtn = document.getElementById(`nav-${id}`);
     if (activeBtn) activeBtn.classList.add('active');
@@ -81,22 +83,6 @@ window.loadModule = function (id) {
 
     const container = document.getElementById('content-container');
     container.innerHTML = contentDB[id] ?? '<p class="text-white">Content loading error.</p>';
-
-    const navIdx = modules.findIndex(m => m.id === id);
-    if (navIdx >= 0) {
-        const newNum = navIdx + 1;
-        let oldNum = null;
-        container.querySelectorAll('.text-sky-500.font-mono').forEach(el => {
-            const m = el.textContent.trim().match(/^Module\s+(\d+)$/i);
-            if (m) { oldNum = parseInt(m[1]); el.textContent = `Module ${newNum}`; }
-        });
-        if (oldNum !== null && oldNum !== newNum) {
-            const re = new RegExp(`^${oldNum}\\.(\\d)`);
-            container.querySelectorAll('h2, h3, h4, h5').forEach(h => {
-                h.textContent = h.textContent.replace(re, `${newNum}.$1`);
-            });
-        }
-    }
 
     document.getElementById('main-scroll').scrollTop = 0;
 

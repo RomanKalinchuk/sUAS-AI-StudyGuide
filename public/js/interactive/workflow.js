@@ -164,7 +164,7 @@ Ground Control Station (QGroundControl / Mission Planner)</div>
                 </div>
                 <div class="bg-slate-900 p-3 rounded border-l-4 border-orange-500">
                     <strong class="text-orange-400 block">ROS 2 DDS discovery failure on localhost</strong>
-                    <p class="text-slate-400">ROS 2 Humble defaults to multicast UDP for node discovery. On some systems, the loopback interface blocks multicast. Fix: set RMW_IMPLEMENTATION=rmw_cyclonedds_cpp and configure Cyclone DDS to explicitly allow the loopback interface. Also ensure ROS_DOMAIN_ID is consistent across all terminals.</p>
+                    <p class="text-slate-400">ROS 2 Jazzy (and Humble) defaults to multicast UDP for node discovery. On some systems, the loopback interface blocks multicast. Fix: set RMW_IMPLEMENTATION=rmw_cyclonedds_cpp and configure Cyclone DDS to explicitly allow the loopback interface. Also ensure ROS_DOMAIN_ID is consistent across all terminals.</p>
                 </div>
                 <div class="bg-slate-900 p-3 rounded border-l-4 border-yellow-500">
                     <strong class="text-yellow-400 block">PID gains from SITL don't transfer to hardware</strong>
@@ -181,10 +181,10 @@ Ground Control Station (QGroundControl / Mission Planner)</div>
         <h4 class="text-white text-sm font-semibold mt-4 mb-2">3.1 Companion Computer Setup</h4>
         <ul class="list-disc pl-5 space-y-2 text-sm text-slate-400 mb-4">
             <li>Flash using NVIDIA SDK Manager on a host Ubuntu PC. Connect the Jetson via USB-C with the FORCE_RECOVERY button held during power-on to enter recovery mode.</li>
-            <li>Select JetPack 5.x LTS (Ubuntu 20.04 base) for Jetson Orin. Avoid JetPack 6 until your ROS 2 package dependencies are tested against Ubuntu 22.04.</li>
+            <li>Select <strong>JetPack 6.x</strong> (Ubuntu 22.04 base, CUDA 12.x, TensorRT 10.x) for all new Jetson Orin builds. JetPack 5.x (Ubuntu 20.04) is legacy and no longer receives active feature updates.</li>
             <li>Verify the stack after flash: <code>nvcc --version</code> (CUDA present), <code>dpkg -l | grep tensorrt</code> (TensorRT installed), then <code>python3 -c "import torch; print(torch.cuda.is_available())"</code> should return True.</li>
             <li>Set max-performance mode for bench testing: <code>sudo jetson_clocks</code> pins all clocks at maximum. <code>sudo nvpmodel -m 0</code> sets MAXN mode. Note: this increases power draw and heat — monitor with <code>tegrastats</code>.</li>
-            <li>Install ROS 2 Humble from the NVIDIA-provided ROS packages (pre-built for JetPack, include GPU-accelerated nodes not available in the standard Debian packages).</li>
+            <li>Install <strong>ROS 2 Jazzy Jalisco</strong> (Ubuntu 24.04 LTS base, EOL May 2029) from the NVIDIA-provided ROS packages. Jazzy is the current LTS release and the version covered throughout this guide. Note: Jazzy targets Ubuntu 24.04 — if your JetPack 6.x image ships Ubuntu 22.04, use ROS 2 Humble as an interim until NVIDIA releases a 24.04-based JetPack.</li>
         </ul>
 
         <h4 class="text-white text-sm font-semibold mt-4 mb-2">3.2 Flight Controller Setup</h4>

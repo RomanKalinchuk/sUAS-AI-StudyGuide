@@ -1,10 +1,10 @@
 export default `
 <div class="fade-in">
-    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 3</span>
+    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 4</span>
     <h2>Compute Silicon Matrix</h2>
     <p>The landscape of Edge AI processors is vast. Selecting the correct System on Module (SoM) is the most consequential decision in the engineering lifecycle. We must look beyond raw TOPS and analyze memory bandwidth, framework support, and physical footprint.</p>
 
-    <h3>3.1 The AI Silicon Landscape Visualization</h3>
+    <h3>4.1 The AI Silicon Landscape Visualization</h3>
     <p>This chart maps the current market. Cost is plotted logarithmically. Notice how newer NPUs (Neural Processing Units) are drastically pulling down the cost-to-performance ratio compared to traditional GPUs.</p>
 
     <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-6 mb-10 shadow-lg">
@@ -13,7 +13,7 @@ export default `
         </div>
     </div>
 
-    <h3>3.2 Exhaustive Hardware Profiles</h3>
+    <h3>4.2 Exhaustive Hardware Profiles</h3>
 
     <div class="space-y-8">
         <!-- NVIDIA Family -->
@@ -280,7 +280,7 @@ export default `
         </div>
     </div>
 
-    <h3>3.3 The TOPS Trap — Why Raw Numbers Lie</h3>
+    <h3>4.3 The TOPS Trap — Why Raw Numbers Lie</h3>
     <p>TOPS (Tera Operations Per Second) is the most-cited benchmark in edge AI marketing. It is also one of the most misleading. A 100-TOPS chip can be bottlenecked to 20-TOPS effective throughput by an insufficient memory bus. Understanding the actual constraints will save you from picking the wrong silicon.</p>
 
     <div class="space-y-4 mb-10">
@@ -375,7 +375,7 @@ export default `
         </div>
     </div>
 
-    <h3>3.4 Hardware Selection Framework</h3>
+    <h3>4.4 Hardware Selection Framework</h3>
     <p>Use this decision logic to narrow to a candidate platform before benchmarking. These are not absolute rules — they are starting points based on the dominant constraint at each branch.</p>
 
     <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-6 mb-10">

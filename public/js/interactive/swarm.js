@@ -1,5 +1,12 @@
 let animationId;
 
+export function stopSwarm() {
+    if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+    }
+}
+
 export function initSwarm() {
     const canvas = document.getElementById('swarmCanvas');
     if (!canvas) return;
@@ -13,6 +20,7 @@ export function initSwarm() {
     const VISUAL_RANGE = 60;
     const SEPARATION_RANGE = 20;
     const SPEED_LIMIT = 3;
+    const MIN_SPEED = 0.5;
 
     class Boid {
         constructor() {
@@ -80,6 +88,9 @@ export function initSwarm() {
             if (speed > SPEED_LIMIT) {
                 this.dx = (this.dx / speed) * SPEED_LIMIT;
                 this.dy = (this.dy / speed) * SPEED_LIMIT;
+            } else if (speed > 0 && speed < MIN_SPEED) {
+                this.dx = (this.dx / speed) * MIN_SPEED;
+                this.dy = (this.dy / speed) * MIN_SPEED;
             }
 
             this.x = (this.x + this.dx + canvas.width) % canvas.width;

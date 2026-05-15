@@ -1,10 +1,10 @@
 export default `
 <div class="fade-in">
-    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 14</span>
+    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 10</span>
     <h2>AI Model Training &amp; Dataset Pipeline for Drone Applications</h2>
     <p>Training a detector on COCO and dropping it onto a drone will get mAP scores 15-20 points below what the same architecture achieves when fine-tuned on aerial data. This module covers why aerial data is different, which datasets to use, and the full pipeline from training to edge deployment.</p>
 
-    <h3>14.1 Why Aerial Datasets Are Different</h3>
+    <h3>10.1 Why Aerial Datasets Are Different</h3>
     <p>Standard vision datasets like COCO and ImageNet are overwhelmingly ground-level, eye-level photography. Drone imagery breaks almost every assumption baked into those datasets.</p>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -26,7 +26,7 @@ export default `
         </div>
     </div>
 
-    <h3>14.2 Key Aerial &amp; Drone Datasets</h3>
+    <h3>10.2 Key Aerial &amp; Drone Datasets</h3>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-4">
         <h4 class="mt-0 border-none text-sky-400">VisDrone2019</h4>
@@ -72,7 +72,7 @@ export default `
         </ul>
     </div>
 
-    <h3>14.3 Data Collection Strategy</h3>
+    <h3>10.3 Data Collection Strategy</h3>
     <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-6">
         <h4 class="mt-0 border-none text-white">Coverage Matrix for a Production Dataset</h4>
         <table class="w-full text-xs text-slate-300 mt-2">
@@ -98,7 +98,7 @@ export default `
         <li><strong>Roboflow</strong> — SaaS, includes augmentation pipeline + dataset versioning + auto-train. Fastest path from raw images to YOLO-ready dataset. Free tier: 10,000 source images.</li>
     </ul>
 
-    <h3>14.4 YOLO Model Family Selection (2025)</h3>
+    <h3>10.4 YOLO Model Family Selection (2025)</h3>
     <p>YOLO11 was released by Ultralytics in October 2024. It introduces the C3k2 block (cross-stage partial with two kernels) and C2PSA (Cross-Stage Partial with Spatial Attention) modules, replacing the C2f block from YOLOv8. <span class="text-amber-400 font-bold">Note:</span> YOLO12 (February 2025) is now the Ultralytics-supported successor, introducing an area-attention mechanism accepted at NeurIPS 2025 that yields ~1.2% mAP improvement over YOLO11n at comparable speed. YOLO11 remains the recommended choice for edge deployment — Hailo, RKNN, and TensorRT pipelines have mature YOLO11 support while YOLO12 toolchain support matures.</p>
 
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
@@ -160,7 +160,7 @@ export default `
         </table>
     </div>
 
-    <h3>14.5 Training Pipeline</h3>
+    <h3>10.5 Training Pipeline</h3>
 
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Bash: Ultralytics YOLO11 Training Commands</div>
@@ -234,7 +234,7 @@ yolo detect val \\
         <p class="text-slate-300 text-sm mt-2"><strong>Batch size / VRAM:</strong> At imgsz=1280, YOLO11s requires ~14 GB VRAM with batch=8. Use batch=-1 to have Ultralytics auto-select the maximum safe batch. On a 24GB GPU (RTX 3090/4090), batch=4-6 at imgsz=1280 with YOLO11m.</p>
     </div>
 
-    <h3>14.6 Export Pipeline to Edge</h3>
+    <h3>10.6 Export Pipeline to Edge</h3>
 
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Python/Bash: Complete Edge Export Workflows</div>
@@ -287,7 +287,7 @@ model.export(format="rknn", imgsz=640)
         </div>
     </div>
 
-    <h3>14.7 Vision-Language Models (VLMs) at the Edge</h3>
+    <h3>10.7 Vision-Language Models (VLMs) at the Edge</h3>
     <p>YOLO-class CNNs draw bounding boxes around pre-defined object classes — they answer "Is there a car here?" Traditional navigation is then: "fly to bounding box." VLMs break this constraint by enabling <strong>semantic scene understanding</strong>: "navigate to the red truck near the damaged building." The drone can reason about novel objects and spatial relationships without retraining.</p>
 
     <div class="bg-amber-900/20 border border-amber-500/50 p-4 rounded mb-6 text-amber-200 text-sm">

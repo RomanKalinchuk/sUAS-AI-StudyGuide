@@ -1,10 +1,10 @@
 export default `
 <div class="fade-in">
-    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 16</span>
+    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 6</span>
     <h2>RF Communications & Link Management for AI Drones</h2>
     <p>Every autonomous drone mission is constrained by its communications architecture. The RF stack determines command latency, telemetry fidelity, video quality, and jamming resilience. This module dissects every layer — from the silicon transceiver to swarm-level spectrum coordination.</p>
 
-    <h3>16.1 RC Link Architecture: ExpressLRS (ELRS)</h3>
+    <h3>6.1 RC Link Architecture: ExpressLRS (ELRS)</h3>
     <p>ExpressLRS is the dominant open-source RC link for performance applications, built on Semtech LoRa transceivers. The critical design decision is the transceiver chip per band. <span class="text-amber-400 font-bold">Current firmware: ELRS v4.0.0</span> (February 2025) — a major release that drops STM32-based hardware (ESP32/ESP8285 only) and introduces doubled telemetry bandwidth in Gemini mode. ELRS v4.0.0 is incompatible with all v3.x hardware/firmware; upgrade both TX and RX together.</p>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
@@ -148,7 +148,7 @@ export default `
         </tbody>
     </table>
 
-    <h3>16.2 Frequency Bands and Engineering Tradeoffs</h3>
+    <h3>6.2 Frequency Bands and Engineering Tradeoffs</h3>
     <p>The choice of RF band is not a preference — it is an engineering decision with direct consequences for link budget, antenna size, propagation physics, and regulatory compliance.</p>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
@@ -206,7 +206,7 @@ export default `
         </table>
     </div>
 
-    <h3>16.3 FPV Video Links: Analog vs Digital</h3>
+    <h3>6.3 FPV Video Links: Analog vs Digital</h3>
     <p>The FPV video link is entirely separate from the RC control link. It operates in the opposite direction (drone to pilot) and uses completely different modulation and encoding. The latency characteristics fundamentally determine which applications each system suits.</p>
 
     <h4>Analog FPV (NTSC/PAL Composite Video)</h4>
@@ -264,7 +264,7 @@ export default `
 
     <p><strong>Engineering rationale for analog in racing:</strong> Competitive FPV racing requires deterministic, jitter-free latency. DJI O3/O4 standard mode latency can vary frame-to-frame by ±5ms due to codec pipeline variations and channel adaptation. HDZero and analog maintain near-constant latency. For inspection, infrastructure survey, or BVLOS operations, digital systems are mandatory: they provide sufficient resolution to identify structural defects (cracks, corrosion), GPS coordinates embedded in the OSD, and superior link reliability before the signal cliff.</p>
 
-    <h3>16.4 Ground Data Links and Telemetry Modems</h3>
+    <h3>6.4 Ground Data Links and Telemetry Modems</h3>
     <p>Separate from the RC control link, long-range MAVLink telemetry uses dedicated radio modems operating on 900MHz or 433MHz for ground station (GCS) connectivity over kilometers.</p>
 
     <h4>RFDesign RFD900x</h4>
@@ -318,7 +318,7 @@ export default `
         </div>
     </div>
 
-    <h3>16.5 Encrypted and Secure RF Links</h3>
+    <h3>6.5 Encrypted and Secure RF Links</h3>
     <p>Standard consumer RC links (ELRS, FrSky) transmit in plaintext. An adversary with a spectrum analyzer can decode control packets. For professional and defense applications, purpose-built encrypted links are required.</p>
 
     <h4>Why Standard RC Links Are Not Encrypted</h4>
@@ -339,7 +339,7 @@ export default `
         <p class="text-slate-200 text-sm mt-1">A SiK radio hopping across 50 × 125kHz channels spreads its signal over 6.25MHz. A narrowband jammer on a single channel only disrupts 1/50th of the packets. A broadband jammer must spread its power across all 6.25MHz, gaining only 17 dB of processing gain advantage against it. <strong>Important caveat:</strong> FHSS reduces but does not eliminate jamming effectiveness, and does not prevent detection or decoding by a sophisticated adversary with a wideband receiver.</p>
     </div>
 
-    <h3>16.6 Software Defined Radio (SDR) for RF Awareness</h3>
+    <h3>6.6 Software Defined Radio (SDR) for RF Awareness</h3>
     <p>A drone equipped with an SDR can monitor its own RF environment — detecting interference sources, identifying occupied channels, and even sniffing RF emissions from nearby threats. SDR moves RF signal processing from dedicated hardware into software running on a general-purpose CPU or GPU.</p>
 
     <h4>SDR Hardware Platforms</h4>
@@ -389,7 +389,7 @@ export default `
         <li><strong>Deployment on drone:</strong> ADALM-PLUTO via USB 2.0 to Jetson Orin NX. GNU Radio flowgraph monitors 2.4GHz and 5.8GHz simultaneously using spectrum sensing. Detected interference triggers automatic channel migration in the ground station link.</li>
     </ul>
 
-    <h3>16.7 Multi-Drone RF Spectrum Management</h3>
+    <h3>6.7 Multi-Drone RF Spectrum Management</h3>
     <p>Operating swarms of drones in the same airspace creates a self-interference problem: multiple drones sharing the same RF band must coordinate to avoid packet collisions and mutual jamming.</p>
 
     <h4>TDMA (Time Division Multiple Access) in UAV Swarms</h4>

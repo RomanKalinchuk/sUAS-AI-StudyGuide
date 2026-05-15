@@ -1,7 +1,7 @@
 export function runThermalSim() {
-    const pwr = document.getElementById('pwr-input2').value;
-    const amb = document.getElementById('amb-input2').value;
-    const vel = document.getElementById('vel-input').value;
+    const pwr = parseFloat(document.getElementById('pwr-input2').value);
+    const amb = parseFloat(document.getElementById('amb-input2').value);
+    const vel = parseFloat(document.getElementById('vel-input').value);
 
     document.getElementById('pwr-val2').innerText = pwr + ' W';
     document.getElementById('amb-val2').innerText = amb + ' °C';
@@ -12,7 +12,7 @@ export function runThermalSim() {
         R_th = R_th / (1 + 1.5 * Math.sqrt(vel));
     }
 
-    const tj = parseFloat(amb) + (parseFloat(pwr) * R_th);
+    const tj = amb + (pwr * R_th);
     const tjEl = document.getElementById('tj-result');
     const statEl = document.getElementById('tj-status');
 

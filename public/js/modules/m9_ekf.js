@@ -1,10 +1,10 @@
 export default `
 <div class="fade-in">
-    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 17</span>
+    <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 9</span>
     <h2>Sensor Fusion & Extended Kalman Filter Architecture</h2>
     <p>State estimation is the mathematical foundation of autonomous flight. Without knowing position, velocity, and attitude with bounded error, no control law can function correctly. This module covers the EKF architecture used in production ArduPilot systems — the concepts, the implementation decisions, and the failure modes engineers must understand.</p>
 
-    <h3>17.1 Why EKF: The IMU Integration Problem</h3>
+    <h3>9.1 Why EKF: The IMU Integration Problem</h3>
     <p>Inertial Measurement Units (IMUs) measure acceleration and angular rate. To get position from acceleration requires two integrations — and each integration <strong>accumulates error</strong>. This is not an implementation flaw; it is fundamental physics. The EKF exists to correct this drift using external references.</p>
 
     <div class="insight-box mb-6">
@@ -58,7 +58,7 @@ export default `
     </div>
     <p>The <strong>t² bias drift</strong> is the critical failure mode. An EKF fuses GPS, barometer, and magnetometer measurements to continuously correct and bound this drift, turning the IMU into a useful short-term predictor between external fixes.</p>
 
-    <h3>17.2 ArduPilot Filter Evolution: DCM → EKF2 → EKF3</h3>
+    <h3>9.2 ArduPilot Filter Evolution: DCM → EKF2 → EKF3</h3>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
         <h4 class="mt-0 border-none text-white">Filter Architecture Progression</h4>
@@ -104,7 +104,7 @@ export default `
         </div>
     </div>
 
-    <h3>17.3 The EKF3 State Vector: All 24 States</h3>
+    <h3>9.3 The EKF3 State Vector: All 24 States</h3>
     <p>The EKF tracks 24 quantities simultaneously. Each state has an associated uncertainty, and the filter knows how all 24 uncertainties correlate with each other. This is what allows it to say "my position is drifting, therefore my velocity estimate is also suspect."</p>
 
     <div class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden mb-6">
@@ -171,7 +171,7 @@ export default `
         </table>
     </div>
 
-    <h3>17.4 The EKF Predict-Update Cycle</h3>
+    <h3>9.4 The EKF Predict-Update Cycle</h3>
     <p>The EKF alternates between two phases: <strong>Predict</strong> (runs at 400Hz using the IMU) and <strong>Update</strong> (runs whenever a sensor measurement arrives). This is what lets it fuse sensors running at completely different rates.</p>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -212,7 +212,7 @@ export default `
     </ol>
     <p class="mt-3">This is why the EKF correctly fuses GPS (100ms late, 5Hz), barometer (50ms late, 10Hz), optical flow (20ms late, 30Hz), and IMU (2.5ms) simultaneously without timing artifacts.</p>
 
-    <h3>17.5 Measurement Updates: Sensor Fusion Details</h3>
+    <h3>9.5 Measurement Updates: Sensor Fusion Details</h3>
 
     <h4>GPS Outlier Rejection (Innovation Gating)</h4>
     <p>Not every GPS reading is valid — multipath reflections off buildings, momentary satellite geometry problems, and spoofing attacks can all inject bad position fixes. The EKF uses <strong>innovation gating</strong> to automatically reject outliers.</p>
@@ -254,7 +254,7 @@ export default `
         <li>EKF3 fuses the VIO position using the same innovation gating as GPS — if VIO jumps (tracking failure), it gets rejected</li>
     </ol>
 
-    <h3>17.6 EKF Health Monitoring and Failsafe</h3>
+    <h3>9.6 EKF Health Monitoring and Failsafe</h3>
     <p>ArduPilot continuously evaluates EKF health and can trigger failsafe actions when confidence in the state estimate falls below thresholds.</p>
 
     <h4>EKF Health Variances (EKF_STATUS_REPORT, 2Hz)</h4>
@@ -329,7 +329,7 @@ export default `
 
     <p class="text-sm text-slate-300">Log analysis: Dataflash log fields <code>NKF4.SP</code> (position), <code>NKF4.SV</code> (velocity), <code>NKF4.SM</code> (magnetic). Any field sustained above 1.0 means the EKF is rejecting that sensor — investigate before autonomous flight.</p>
 
-    <h3>17.7 Multi-EKF Architecture: Redundancy and Fault Tolerance</h3>
+    <h3>9.7 Multi-EKF Architecture: Redundancy and Fault Tolerance</h3>
     <p>ArduPilot can run multiple simultaneous EKF instances — one per IMU. With a triple-redundant platform (Cube Orange+), three EKF3 instances run in parallel. If one IMU degrades, the autopilot automatically switches to the healthiest instance.</p>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
@@ -354,7 +354,7 @@ export default `
     <h4>EKF Source Switching (GPS ↔ Optical Flow ↔ VIO)</h4>
     <p>EKF3 supports three independent source sets (SRC1, SRC2, SRC3). A hardware RC switch or MAVLink command selects the active set. This enables in-flight transitions between GPS (outdoors) and optical flow / VIO (indoors) without rebooting. The transition is seamless — EKF3 momentarily fuses both sources simultaneously during handover, so the position state never jumps.</p>
 
-    <h3>17.8 Complementary Filter vs EKF</h3>
+    <h3>9.8 Complementary Filter vs EKF</h3>
     <p>The complementary filter is the predecessor to the EKF. It blends gyroscope (good at high-frequency, drifts long-term) with accelerometer/magnetometer (good DC reference, noisy short-term). It works well for attitude on stable platforms. The EKF replaced it because the complementary filter has three fundamental limitations for position navigation:</p>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">

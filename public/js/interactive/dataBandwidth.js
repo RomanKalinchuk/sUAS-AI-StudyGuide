@@ -48,7 +48,7 @@ export function calcDataBandwidth() {
         recEl.textContent  = 'PCIe 3.0 ×4 or better required (>20 Gbps raw)';
         recEl.style.color  = '#f87171';
     } else if (rawBps > 10e9) {
-        recEl.textContent  = 'MIPI CSI-2 C-PHY 4-lane (40 Gbps) or PCIe';
+        recEl.textContent  = 'PCIe 3.0 ×4 required (>10 Gbps — exceeds CSI-2 D-PHY limit)';
         recEl.style.color  = '#fb923c';
     } else if (rawBps > 2.5e9) {
         recEl.textContent  = 'MIPI CSI-2 D-PHY 4-lane (10 Gbps)';

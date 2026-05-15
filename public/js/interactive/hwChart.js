@@ -10,7 +10,7 @@ export function initHardwareChart() {
 
     const data = [
         { x: 600,  y: 100, r: 25, label: 'Jetson Orin NX',       cat: 'GPU',    color: 'rgba(16, 185, 129, 0.7)' },
-        { x: 2000, y: 275, r: 40, label: 'Jetson AGX Orin',       cat: 'GPU',    color: 'rgba(16, 185, 129, 0.7)' },
+        { x: 2000, y: 275, r: 40, label: 'Jetson AGX Orin 64GB',   cat: 'GPU',    color: 'rgba(16, 185, 129, 0.7)' },
         { x: 150,  y: 26,  r: 15, label: 'Hailo-8',               cat: 'NPU',    color: 'rgba(168, 85, 247, 0.7)' },
         { x: 130,  y: 13,  r: 12, label: 'RPi 5 + Hailo-8L',      cat: 'Hybrid', color: 'rgba(236, 72, 153, 0.7)' },
         { x: 120,  y: 6,   r: 10, label: 'Orange Pi 5 (RK3588)',   cat: 'SoC',    color: 'rgba(245, 158, 11, 0.7)'  },
