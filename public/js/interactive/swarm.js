@@ -44,11 +44,7 @@ export function initSwarm() {
             ctx.setTransform(1, 0, 0, 1, 0, 0);
         }
 
-        update(flock) {
-            const sepW = parseFloat(document.getElementById('sep-slider').value);
-            const aliW = parseFloat(document.getElementById('ali-slider').value);
-            const cohW = parseFloat(document.getElementById('coh-slider').value);
-
+        update(flock, sepW, aliW, cohW) {
             let centerX = 0, centerY = 0;
             let avgDx = 0, avgDy = 0;
             let moveX = 0, moveY = 0;
@@ -102,9 +98,12 @@ export function initSwarm() {
     if (animationId) cancelAnimationFrame(animationId);
 
     function loop() {
+        const sepW = parseFloat(document.getElementById('sep-slider').value);
+        const aliW = parseFloat(document.getElementById('ali-slider').value);
+        const cohW = parseFloat(document.getElementById('coh-slider').value);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (const boid of boids) {
-            boid.update(boids);
+            boid.update(boids, sepW, aliW, cohW);
             boid.draw();
         }
         animationId = requestAnimationFrame(loop);
