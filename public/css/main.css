@@ -1580,25 +1580,6 @@ video {
   transition-duration: 500ms;
 }
 
-.\[crc\:2\]{
-  crc: 2;
-}
-
-.\[link_id\:1\]{
-  link_id: 1;
-}
-
-.\[payload\:len\]{
-  payload: len;
-}
-
-.\[sig\:6\]{
-  sig: 6;
-}
-
-.\[timestamp\:6\]{
-  timestamp: 6;
-}
 
 :root {
   --bg-main: #0a0f1a;
