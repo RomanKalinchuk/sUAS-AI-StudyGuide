@@ -239,15 +239,15 @@ export default `
         <p class="text-sm text-slate-400 mb-4">Adjust the parameters to see how airflow (from props or forward flight) affects the required heatsink size.</p>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
             <div>
-                <label class="text-slate-400 block mb-1">Processor Power (W): <span id="pwr-val2" class="text-white font-bold">20W</span></label>
+                <label class="text-slate-400 block mb-1">Processor Power (W): <span id="pwr-val2" class="text-white font-bold">20 W</span></label>
                 <input type="range" id="pwr-input2" min="5" max="60" value="20" class="w-full accent-sky-500" oninput="runThermalSim()">
             </div>
             <div>
-                <label class="text-slate-400 block mb-1">Internal Ambient Temp (°C): <span id="amb-val2" class="text-white font-bold">45°C</span></label>
+                <label class="text-slate-400 block mb-1">Internal Ambient Temp (°C): <span id="amb-val2" class="text-white font-bold">45 °C</span></label>
                 <input type="range" id="amb-input2" min="20" max="75" value="45" class="w-full accent-sky-500" oninput="runThermalSim()">
             </div>
             <div class="md:col-span-2">
-                <label class="text-slate-400 block mb-1">Airflow Velocity over Heatsink (m/s): <span id="vel-val" class="text-white font-bold">1.0 m/s</span></label>
+                <label class="text-slate-400 block mb-1">Airflow Velocity over Heatsink (m/s): <span id="vel-val" class="text-white font-bold">1 m/s</span></label>
                 <input type="range" id="vel-input" min="0" max="15" step="0.5" value="1.0" class="w-full accent-emerald-500" oninput="runThermalSim()">
                 <p class="text-xs text-slate-500 mt-1">0 = Enclosed. 2–5 = Active Fan. 5–15 = Exposed to Prop Wash / Forward Flight.</p>
             </div>
