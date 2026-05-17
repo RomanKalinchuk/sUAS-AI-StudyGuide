@@ -411,8 +411,8 @@ N = log(1 - p) / log(1 - (1 - ε)^s)<br><br>
 ε = fraction of outliers, s = minimum sample size for model<br><br>
 Concrete examples:<br>
   ε=50%, s=5 (5-point Essential): N = log(0.01)/log(1 - 0.5^5) ≈ 146 iterations<br>
-  ε=50%, s=8 (8-point Essential): N = log(0.01)/log(1 - 0.5^8) ≈ 1,132 iterations<br>
-  ε=70%, s=5:                     N = log(0.01)/log(1 - 0.3^5) ≈ 1,695 iterations<br><br>
+  ε=50%, s=8 (8-point Essential): N = log(0.01)/log(1 - 0.5^8) ≈ 1,176 iterations<br>
+  ε=70%, s=5:                     N = log(0.01)/log(1 - 0.3^5) ≈ 1,892 iterations<br><br>
 The 5-point algorithm (Nister, 2004) is preferred precisely because s=5 instead of 8<br>
 → 8× fewer iterations at 50% outlier rate → faster and more practical in real-time SLAM<br><br>
 Inlier test (symmetric epipolar distance):<br>
@@ -508,12 +508,12 @@ Where:<br>
   b_g    = gyroscope bias (random walk):    db_g/dt = n_bg, n_bg ~ N(0, σ_bg^2 * I)<br>
   n_a    = additive white noise: n_a ~ N(0, σ_a^2 * I)<br>
   n_g    = additive white noise: n_g ~ N(0, σ_g^2 * I)<br><br>
-Typical MEMS IMU parameters (e.g., BMI088, used in RealSense T265):<br>
+Typical MEMS IMU parameters (e.g., BMI088 in Pixhawk 6C, ICM-42688-P in ArduPilot FCs):<br>
   σ_a  = 0.01  m/s^2 / √Hz    (accelerometer noise density)<br>
   σ_ba = 0.001 m/s^2 / √Hz    (accelerometer random walk — bias drift rate)<br>
   σ_g  = 0.001 rad/s / √Hz    (gyroscope noise density)<br>
   σ_bg = 1e-5  rad/s / √Hz    (gyroscope random walk — lower for MEMS)<br><br>
-Position error from pure IMU integration (see Module 9 Section 17.1):<br>
+Position error from pure IMU integration (see Module 9, Section 9.1):<br>
   σ_p(t) ≈ σ_a * t^(3/2) / √3     (white noise contribution)<br>
   σ_p_bias(t) ≈ (1/2) * σ_ba * t^2  (bias drift — grows as t^2, dominant after ~30s)
     </div>
