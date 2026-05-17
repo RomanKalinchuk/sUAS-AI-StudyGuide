@@ -43,7 +43,7 @@ export default `
                 <li><strong>Stereo baseline:</strong> 75mm</li>
                 <li><strong>Stereo type:</strong> Active stereo — onboard IR laser dot projector (ASV) improves depth on low-texture surfaces (walls, floors)</li>
                 <li><strong>Depth range:</strong> 0.2m - 35m (active stereo) vs 0.3m - 12m (passive)</li>
-                <li><strong>Onboard AI:</strong> RVC2 chip — 1.4 TOPS for neural inference. Runs MobileNet/YOLOv5n class models directly on the camera without host CPU</li>
+                <li><strong>Onboard AI:</strong> RVC2 chip (Intel MyriadX) — 4 TOPS INT8 for neural inference. Runs MobileNet/YOLOv5n class models directly on the camera without host CPU</li>
                 <li><strong>Depth output:</strong> Disparity / depth map at up to 1280x800 @ 60fps, hardware SGM</li>
                 <li><strong>Interface:</strong> USB 3.1 or PoE (OAK-D Pro PoE variant)</li>
                 <li><strong>Power:</strong> 7.5W max</li>
