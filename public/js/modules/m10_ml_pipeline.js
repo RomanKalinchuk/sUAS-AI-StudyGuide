@@ -299,7 +299,7 @@ model.export(format="rknn", imgsz=640)
             <h4 class="text-white mt-0 text-base">Edge-Deployable VLM Architectures (2025–2026)</h4>
             <ul class="space-y-3 text-slate-300 text-xs font-mono">
                 <li>
-                    <strong class="text-sky-400 block">LLaVA-1.6 / LLaVA-Phi-3 Mini (3B)</strong>
+                    <strong class="text-sky-400 block">LLaVA-1.6 / LLaVA-Phi-3 Mini (3.8B)</strong>
                     CLIP ViT vision encoder + small language model (Phi-3 Mini 3.8B). Fits in 8GB LPDDR5 on Jetson Orin Nano at FP16. ~2–4 inference/sec at 336px input. Use for semantic scene description when real-time rate is not required (e.g., mission planning queries, pre-flight area assessment).
                 </li>
                 <li>
