@@ -71,7 +71,7 @@ mavproxy.py --master /dev/ttyUSB0 --baud 57600
     <h4>Detection Methods</h4>
     <ul class="space-y-4">
         <li>
-            <strong>Multi-constellation GNSS:</strong> Real satellites transmit on L1/L2 from GPS (US), GLONASS (RU), Galileo (EU), BeiDou (CN) simultaneously. A real-world receiver sees these as geometrically consistent with its true position. A spoofer must simultaneously synthesize signals for every visible satellite on every constellation — a hardware-intensive attack. Enable via ArduPilot's <code>GPS_GNSS_MODE</code> parameter (set to 0 = all constellations, or explicitly OR the bitmask: GPS=1, GLONASS=2, Galileo=4, BeiDou=8).
+            <strong>Multi-constellation GNSS:</strong> Real satellites transmit on L1/L2 from GPS (US), GLONASS (RU), Galileo (EU), BeiDou (CN) simultaneously. A real-world receiver sees these as geometrically consistent with its true position. A spoofer must simultaneously synthesize signals for every visible satellite on every constellation — a hardware-intensive attack. Enable via ArduPilot's <code>GPS_GNSS_MODE</code> parameter (set to 0 = all constellations, or explicitly OR the bitmask: GPS=1, SBAS=2, Galileo=4, BeiDou=8, GLONASS=64).
         </li>
         <li>
             <strong>IMU cross-check (AHRS / EKF consistency monitor):</strong> ArduPilot's Extended Kalman Filter fuses GPS velocity with IMU-integrated velocity. If the EKF innovation (difference between GPS-predicted position and IMU-predicted position) exceeds a threshold, the EKF flags GPS as potentially spoofed and can switch to dead-reckoning. Parameter: <code>EK3_GPS_VACC_MAX</code> controls the acceptable velocity accuracy variance.
@@ -298,7 +298,7 @@ sudo systemctl mask bluetooth        # Bluetooth attack surface
         <div class="interactive-panel bg-[#0d1320] border-slate-700">
             <h4 class="mt-0 border-none text-sky-400 text-sm">Broadcast Mechanism — ASTM F3411-22a</h4>
             <ul class="text-slate-300 text-xs list-disc pl-4 space-y-1">
-                <li><strong>Transport options:</strong> Bluetooth 5 Long Range (BT5 LE, 1 Mbps Coded PHY) or IEEE 802.11 Wi-Fi Beacon frame — every compliant UAS must support at least one; DJI O3 hardware broadcasts on both simultaneously</li>
+                <li><strong>Transport options:</strong> Bluetooth 5 Long Range (BT5 LE Coded PHY, 125–500 kbps) or IEEE 802.11 Wi-Fi Beacon frame — every compliant UAS must support at least one; DJI O3 hardware broadcasts on both simultaneously</li>
                 <li><strong>Broadcast interval:</strong> ≥ 1 Hz (one packet per second minimum)</li>
                 <li><strong>Range:</strong> BT5 LR ≈ 300 m; Wi-Fi Beacon ≈ 1–3 km line-of-sight</li>
                 <li><strong>Data fields per packet:</strong> UA serial number or session ID, operator ID, operator GPS lat/lon, UA lat/lon (WGS-84), geodetic altitude (m), barometric altitude (m), horizontal velocity (m/s), vertical velocity (m/s), timestamp (Unix), emergency status byte</li>
