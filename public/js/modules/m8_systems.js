@@ -62,12 +62,12 @@ export default `
             </tr>
             <tr>
                 <td class="p-3 border border-slate-700 text-white font-bold">SPI<br><span class="text-slate-500 text-xs font-normal">up to 50 MHz</span></td>
-                <td class="p-3 border border-slate-700">~200 Mbps</td>
+                <td class="p-3 border border-slate-700">~50 Mbps</td>
                 <td class="p-3 border border-slate-700 text-emerald-400">&lt;1 µs</td>
                 <td class="p-3 border border-slate-700">High-speed IMU (ICM-42688-P at 8 kHz ODR uses SPI at 24 MHz), barometers (BMP388), SPI NOR flash for blackbox logging. Used inside FC between STM32 and IMU silicon. Full-duplex synchronous. Max useful cable length ~30 cm without level shifters.</td>
             </tr>
             <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white font-bold">I2C<br><span class="text-slate-500 text-xs font-normal">Fast-Mode+ 3.4 MHz</span></td>
+                <td class="p-3 border border-slate-700 text-white font-bold">I2C<br><span class="text-slate-500 text-xs font-normal">High-Speed Mode 3.4 MHz</span></td>
                 <td class="p-3 border border-slate-700">~3.4 Mbps</td>
                 <td class="p-3 border border-slate-700 text-amber-400">Low</td>
                 <td class="p-3 border border-slate-700">Magnetometers (IST8310, QMC5883L), external barometers (MS5611), battery fuel gauges (BQ40Z80). Up to 127 devices on one shared bus. Too slow for latency-critical sensor data — never put IMU on I2C in a production AI drone. Max useful cable length ~1 m.</td>
@@ -82,7 +82,7 @@ export default `
                 <td class="p-3 border border-slate-700 text-white font-bold">DroneCAN<br><span class="text-slate-500 text-xs font-normal">CAN 2.0B / CAN FD</span></td>
                 <td class="p-3 border border-slate-700">1 Mbps (2.0B)<br>8 Mbps (FD)</td>
                 <td class="p-3 border border-slate-700 text-emerald-400">Deterministic (&lt;1 ms)</td>
-                <td class="p-3 border border-slate-700">Smart ESCs (Zubax Myxa, Kotleta20), RTK GPS (Zubax GNSS 2.0), airspeed sensors, rangefinders. Highly EMI resistant — mandatory on large aircraft where motor wiring and power bus create interference. Up to 64 nodes. CAN FD extends payload to 64 bytes and up to 8 Mbps.</td>
+                <td class="p-3 border border-slate-700">Smart ESCs (Zubax Myxa, Kotleta20), RTK GPS (Zubax GNSS 2.0), airspeed sensors, rangefinders. Highly EMI resistant — mandatory on large aircraft where motor wiring and power bus create interference. Up to 127 nodes. CAN FD extends payload to 64 bytes and up to 8 Mbps.</td>
             </tr>
         </tbody>
     </table>
@@ -348,7 +348,7 @@ Port    = 14552
                 <li>• Transport: CAN 2.0B (29-bit extended IDs, 8-byte frames)</li>
                 <li>• Node IDs: 1–127 (dynamic allocation or manual)</li>
                 <li>• Key types: uavcan.equipment.esc.*, uavcan.equipment.gnss.*</li>
-                <li>• Max bus speed: 1 Mbps; max 64 nodes per segment</li>
+                <li>• Max bus speed: 1 Mbps; max 127 nodes per segment</li>
                 <li>• Hardware: Zubax Myxa ESC, Zubax GNSS 2.0, mRo GPS, Avionics Anonymous</li>
                 <li>• PX4: UAVCAN_ENABLE = 2 (sensors + outputs)</li>
             </ul>
@@ -930,7 +930,7 @@ sudo phc2sys -s eth0 -c CLOCK_REALTIME -w -O 0 -m 2&gt;&amp;1 | grep offset &amp
     <p>For stereo SLAM and camera-IMU tight coupling, software timestamping introduces ±half-frame uncertainty (~8 ms at 60 fps). Hardware trigger eliminates this: the IMU fires a GPIO trigger at a fixed rate (typically 200 Hz), the camera sensor captures on the rising edge, and the timestamp is taken at trigger issuance — reducing timing uncertainty to &lt;50 µs (IMU jitter). PX4 can output a camera trigger via CAM_TRIG_MODE parameter on any unused GPIO. OAK-D cameras expose a hardware sync connector natively.</p>
 
     <h3>8.11 C2 Link Design Patterns</h3>
-    <p>The Command and Control (C2) link carries MAVLink telemetry between the ground station and the aircraft. For BVLOS operations the link must be resilient: FAA Part 108 and EASA regulations require Detect and Avoid capability and a documented C2 link specification. Even for VLOS autonomous missions, an undetected C2 link loss must trigger failsafe RTL automatically, not a hover-and-wait that drains the battery.</p>
+    <p>The Command and Control (C2) link carries MAVLink telemetry between the ground station and the aircraft. For BVLOS operations the link must be resilient: FAA Part 107 BVLOS waiver requirements and EASA regulations require Detect and Avoid capability and a documented C2 link specification. Even for VLOS autonomous missions, an undetected C2 link loss must trigger failsafe RTL automatically, not a hover-and-wait that drains the battery.</p>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 text-sm">
         <div class="bg-slate-900 p-5 rounded border border-slate-700">
@@ -952,7 +952,7 @@ sudo phc2sys -s eth0 -c CLOCK_REALTIME -w -O 0 -m 2&gt;&amp;1 | grep offset &amp
                 <li>• Round-trip latency: 50–200 ms (LTE), 20–50 ms (5G)</li>
                 <li>• Backup: RFD900x SiK radio — automatic fail-back in mavlink-router</li>
                 <li>• Remote ID: OpenDroneID via WiFi NaN + BT 5.0 simultaneously</li>
-                <li>• Regulation (USA): FAA Part 108 DAA required above 400 ft AGL</li>
+                <li>• Regulation (USA): FAA Part 107 BVLOS waiver + DAA required for extended-range ops</li>
             </ul>
         </div>
     </div>
