@@ -312,8 +312,8 @@ export default `
                     <li>1 = Always RTL (safest — drone comes home regardless of mission state)</li>
                     <li>2 = Continue mission if in AUTO mode, else RTL</li>
                     <li>3 = Land (descend vertically at current position — used when RTL requires flying over obstacles)</li>
-                    <li>4 = Brake then Land</li>
-                    <li>5 = Terminate flight (cut motors — only for fixed-wing, NEVER for copter)</li>
+                    <li>4 = SmartRTL or RTL (replays GPS breadcrumb trail if available)</li>
+                    <li>5 = SmartRTL or Land</li>
                 </ul>
                 <p class="text-amber-400 mt-2">If armed but not yet flying: FS triggers Land immediately (no RTL — no home position established).</p>
             </div>
@@ -324,7 +324,7 @@ export default `
             <div class="font-mono text-xs text-slate-300 space-y-1">
                 <p>BATT_LOW_VOLT: First threshold (e.g., 21.0V for 6S = 3.5V/cell). Action: warn (beeper + GCS alert). Continue flight.</p>
                 <p>BATT_CRT_VOLT: Critical threshold (e.g., 19.8V for 6S = 3.3V/cell). Action: FS_BATT_ENABLE.</p>
-                <p>FS_BATT_ENABLE options: 1=Land immediately, 2=RTL, 3=SmartRTL (replays GPS bread-crumb trail), 4=Brake+Land.</p>
+                <p>FS_BATT_ENABLE options: 1=Land immediately, 2=RTL, 3=SmartRTL (replays GPS bread-crumb trail), 4=SmartRTL or Land.</p>
                 <p>BATT_LOW_MAH / BATT_CRT_MAH: Capacity-based thresholds (mAh consumed). More reliable than voltage because voltage sag depends on load and temperature. Set CRT_MAH to leave 20% capacity for RTL flight.</p>
             </div>
         </div>
@@ -359,27 +359,27 @@ export default `
     <p>ArduPilot will refuse to arm the motors until all pre-arm checks pass. These are not arbitrary gates — each check prevents a specific class of inflight failure. The ARMING_CHECK bitmask parameter controls which checks are active (default: all enabled = 1).</p>
 
     <div class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden mb-6">
-        <div class="px-4 py-3 bg-slate-800 text-xs font-mono text-slate-400 uppercase tracking-widest">ARMING_CHECK Bitmask</div>
+        <div class="px-4 py-3 bg-slate-800 text-xs font-mono text-slate-400 uppercase tracking-widest">ARMING_CHECK Bitmask (set to 1 to enable all; add values to enable specific checks)</div>
         <table class="w-full text-xs">
             <thead>
                 <tr class="bg-slate-800/50 text-slate-400">
-                    <th class="p-2 text-left">Bit</th>
+                    <th class="p-2 text-left">Value</th>
                     <th class="p-2 text-left">Check</th>
                     <th class="p-2 text-left">What It Verifies</th>
                 </tr>
             </thead>
             <tbody class="text-slate-300 font-mono">
-                <tr class="border-t border-slate-800"><td class="p-2 text-slate-500">0 (1)</td><td class="p-2 text-white">Board voltage</td><td class="p-2">Internal 5V within ±0.3V of nominal</td></tr>
-                <tr class="border-t border-slate-800 bg-slate-900/50"><td class="p-2 text-slate-500">1 (2)</td><td class="p-2 text-white">EEPROM CRC</td><td class="p-2">Parameter storage not corrupted</td></tr>
-                <tr class="border-t border-slate-800"><td class="p-2 text-slate-500">2 (4)</td><td class="p-2 text-white">RC calibration</td><td class="p-2">All channels within calibrated range</td></tr>
-                <tr class="border-t border-slate-800 bg-slate-900/50"><td class="p-2 text-slate-500">3 (8)</td><td class="p-2 text-rose-300">GPS lock</td><td class="p-2">3D fix, HDOP &lt; GPS_HDOP_GOOD (default 1.40)</td></tr>
-                <tr class="border-t border-slate-800"><td class="p-2 text-slate-500">4 (16)</td><td class="p-2 text-rose-300">Compass</td><td class="p-2">Calibration CRC valid, low variance between readings</td></tr>
-                <tr class="border-t border-slate-800 bg-slate-900/50"><td class="p-2 text-slate-500">5 (32)</td><td class="p-2 text-rose-300">IMU (INS)</td><td class="p-2">All IMUs agree, no high vibration pre-arm</td></tr>
-                <tr class="border-t border-slate-800"><td class="p-2 text-slate-500">6 (64)</td><td class="p-2 text-rose-300">RC failsafe</td><td class="p-2">Verifies FS_THR_VALUE actually triggers failsafe</td></tr>
-                <tr class="border-t border-slate-800 bg-slate-900/50"><td class="p-2 text-slate-500">7 (128)</td><td class="p-2 text-white">Fence</td><td class="p-2">GeoFence polygon valid and loaded</td></tr>
-                <tr class="border-t border-slate-800"><td class="p-2 text-slate-500">8 (256)</td><td class="p-2 text-white">Flight plan</td><td class="p-2">Mission loaded if AUTO mode selected</td></tr>
-                <tr class="border-t border-slate-800 bg-slate-900/50"><td class="p-2 text-slate-500">9 (512)</td><td class="p-2 text-amber-300">Logging</td><td class="p-2">SD card present and writable</td></tr>
-                <tr class="border-t border-slate-800"><td class="p-2 text-slate-500">10 (1024)</td><td class="p-2 text-amber-300">Battery</td><td class="p-2">BATT_ARMING_MIN voltage — enough charge to complete mission</td></tr>
+                <tr class="border-t border-slate-800"><td class="p-2 text-slate-500">1</td><td class="p-2 text-sky-300">All (default)</td><td class="p-2">Enables all arming checks — recommended for all builds</td></tr>
+                <tr class="border-t border-slate-800 bg-slate-900/50"><td class="p-2 text-slate-500">2</td><td class="p-2 text-white">Barometer</td><td class="p-2">Baro altitude reading valid and consistent with previous samples</td></tr>
+                <tr class="border-t border-slate-800"><td class="p-2 text-slate-500">4</td><td class="p-2 text-rose-300">Compass</td><td class="p-2">Calibration CRC valid, low variance between readings</td></tr>
+                <tr class="border-t border-slate-800 bg-slate-900/50"><td class="p-2 text-slate-500">8</td><td class="p-2 text-rose-300">GPS lock</td><td class="p-2">3D fix, HDOP &lt; GPS_HDOP_GOOD (default 1.40)</td></tr>
+                <tr class="border-t border-slate-800"><td class="p-2 text-slate-500">16</td><td class="p-2 text-rose-300">IMU (INS)</td><td class="p-2">All IMUs agree, no high vibration pre-arm</td></tr>
+                <tr class="border-t border-slate-800 bg-slate-900/50"><td class="p-2 text-slate-500">32</td><td class="p-2 text-white">Parameters</td><td class="p-2">EKF variance below threshold; required parameters in range</td></tr>
+                <tr class="border-t border-slate-800"><td class="p-2 text-slate-500">64</td><td class="p-2 text-rose-300">RC channels</td><td class="p-2">All channels within calibrated range; FS_THR_VALUE triggers failsafe</td></tr>
+                <tr class="border-t border-slate-800 bg-slate-900/50"><td class="p-2 text-slate-500">128</td><td class="p-2 text-white">Board voltage</td><td class="p-2">Internal 5V within ±0.3V of nominal</td></tr>
+                <tr class="border-t border-slate-800"><td class="p-2 text-slate-500">256</td><td class="p-2 text-amber-300">Battery</td><td class="p-2">BATT_ARMING_MIN voltage — enough charge to complete mission</td></tr>
+                <tr class="border-t border-slate-800 bg-slate-900/50"><td class="p-2 text-slate-500">1024</td><td class="p-2 text-amber-300">Logging</td><td class="p-2">SD card present and writable</td></tr>
+                <tr class="border-t border-slate-800"><td class="p-2 text-slate-500">2048</td><td class="p-2 text-white">HW safety switch</td><td class="p-2">Hardware arming switch pressed (if fitted); prevents accidental arm</td></tr>
             </tbody>
         </table>
     </div>
@@ -414,9 +414,9 @@ export default `
             </ul>
         </div>
         <div class="bg-slate-900 p-6 rounded border border-slate-700 text-sm">
-            <strong class="text-sky-400 block mb-3">Option 2: VIO via External Pose (VSLAM/T265)</strong>
+            <strong class="text-sky-400 block mb-3">Option 2: VIO via External Pose (VSLAM)</strong>
             <ul class="space-y-2 font-mono text-xs text-slate-300">
-                <li>> Hardware: Intel RealSense T265 or custom VSLAM on Companion Computer</li>
+                <li>> Hardware: Luxonis OAK-D, custom stereo VIO, or other VSLAM on Companion Computer (Intel RealSense T265 discontinued Aug 2022)</li>
                 <li>> Companion computer sends VISION_POSITION_ESTIMATE (MSG #102) or ODOMETRY (MSG #331) over MAVLink</li>
                 <li>> EK3_SRC1_POSXY = 6 (ExternalNav as XY position source)</li>
                 <li>> EK3_SRC1_VELXY = 6 (ExternalNav as velocity source)</li>
