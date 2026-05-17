@@ -386,7 +386,7 @@ export default `
                 <tr class="border-t border-slate-800 bg-slate-900/50"><td class="p-3 text-white">Li-Silicon SiCore (Amprius 2025)</td><td class="p-3 text-amber-400">450 – 500 Wh/kg</td><td class="p-3">300 – 800 W/kg</td><td class="p-3 text-amber-400">Early production</td><td class="p-3">AeroVironment, FLIR, DoD programs</td></tr>
                 <tr class="border-t border-slate-800"><td class="p-3 text-white">All-solid-state (CATL, QuantumScape)</td><td class="p-3 text-rose-400">~500 Wh/kg (cell)</td><td class="p-3">200 – 500 W/kg</td><td class="p-3 text-rose-400">Small batch 2027</td><td class="p-3">CATL targeting drones as first market</td></tr>
                 <tr class="border-t border-slate-800 bg-slate-900/50"><td class="p-3 text-white">H₂ PEM fuel cell (system-level)</td><td class="p-3 text-emerald-400">400 – 600 Wh/kg</td><td class="p-3">50 – 200 W/kg</td><td class="p-3 text-emerald-400">Commercial now</td><td class="p-3">Endurance; 7+ hr flight demonstrated</td></tr>
-                <tr class="border-t border-slate-800"><td class="p-3 text-white">Supercapacitor</td><td class="p-3 text-slate-500">0.09 – 0.10 Wh/kg</td><td class="p-3 text-emerald-400">10,000 – 75,000 W/kg</td><td class="p-3 text-emerald-400">Mature</td><td class="p-3">Transient burst buffer only, not primary</td></tr>
+                <tr class="border-t border-slate-800"><td class="p-3 text-white">Supercapacitor (EDLC)</td><td class="p-3 text-slate-500">1 – 10 Wh/kg</td><td class="p-3 text-emerald-400">5,000 – 50,000 W/kg</td><td class="p-3 text-emerald-400">Mature</td><td class="p-3">Transient burst buffer only, not primary</td></tr>
             </tbody>
         </table>
     </div>
@@ -480,7 +480,7 @@ export default `
                 <div class="text-sky-400 mb-1">Battery: 4S 10,000 mAh LiPo</div>
                 E_battery = 14.8 V × 10 Ah × 0.85 = <span class="text-white font-bold">125.8 Wh</span><br><br>
                 <div class="text-sky-400 mt-2 mb-1">P_aero (4× 12" props, FM = 0.70)</div>
-                P_aero ≈ <span class="text-white font-bold">88 W</span>
+                P_aero ≈ <span class="text-white font-bold">147 W</span>
             </div>
             <div>
                 <div class="text-sky-400 mb-1">P_avionics (FC + ESCs + GPS)</div>
@@ -490,7 +490,7 @@ export default `
             </div>
         </div>
         <div class="border-t border-slate-700 mt-4 pt-3 text-center text-emerald-400">
-            P_total ≈ 111.5 W &nbsp;→&nbsp; Endurance ≈ 67.7 min (theoretical) / <span class="font-bold">45–55 min real-world</span>
+            P_total ≈ 170.5 W &nbsp;→&nbsp; Endurance ≈ 44.3 min (theoretical) / <span class="font-bold">32–38 min real-world</span>
         </div>
     </div>
 
@@ -500,7 +500,7 @@ export default `
         v_optimal = v_h × 3<sup>1/4</sup> ≈ 1.32 × v_h<br>
         <span class="text-slate-400 text-xs">For the 2 kg example: v_h = sqrt(50 / 2.45) ≈ 4.5 m/s → v_opt ≈ 5.9 m/s (21 km/h)</span>
     </div>
-    <p class="text-sm text-slate-300 mb-4">At range-optimal speed, aero power is ~1.15–1.25× hover power, but the drone covers ground 5.9 m every second. Estimated max range on the 2 kg example: <strong>~20 km on a single 4S 10 Ah pack</strong>.</p>
+    <p class="text-sm text-slate-300 mb-4">At range-optimal speed, aero power is approximately 85% of hover power (translational lift benefit), but the drone covers ground 5.9 m every second. Estimated max range on the 2 kg example: <strong>~18 km on a single 4S 10 Ah pack</strong>.</p>
 
     <h4 class="text-sky-300">Typical 2 kg AI Drone Weight Budget</h4>
     <div class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden mb-6">
@@ -547,6 +547,6 @@ export default `
             </tbody>
         </table>
     </div>
-    <p class="text-sm text-slate-300">2024 research shows dynamically swapping to a lighter model (YOLOv8n INT8 vs YOLOv8m FP16) when SoC drops below a threshold achieves ~40% power reduction with only 3–5% mAP degradation — effectively recovering 4–8 minutes of flight time per mission. Implement via a ROS 2 node monitoring <code>/mavros/battery</code> and calling <code>sudo nvpmodel -m 1</code> at the threshold.</p>
+    <p class="text-sm text-slate-300">2024 research shows dynamically swapping to a lighter model (YOLOv8n INT8 vs YOLOv8m FP16) when SoC drops below a threshold achieves ~40% power reduction with only 3–5% mAP degradation — effectively recovering 4–8 minutes of flight time per mission. Implement via a ROS 2 node monitoring <code>/fmu/out/battery_status</code> (PX4 Micro XRCE-DDS) or <code>/mavros/battery</code> (MAVROS) and calling <code>sudo nvpmodel -m 1</code> at the threshold.</p>
 </div>
 `;
