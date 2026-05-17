@@ -42,7 +42,7 @@ export default `
     <ul class="text-slate-300 text-sm space-y-2">
         <li><strong>LoRa (Chirp Spread Spectrum):</strong> Encodes data by sweeping frequency across a bandwidth (Chirp). Spreading factor SF6–SF12 controls range/rate tradeoff. Superior interference rejection — can decode signals 20 dB below the noise floor. Used for maximum range, up to 500Hz.</li>
         <li><strong>FLRC (Fast Long Range Communication):</strong> Semtech's proprietary mode using GFSK with forward error correction. Lower receiver sensitivity than LoRa but significantly lower air-time per packet. Enables 1000Hz packet rates with lower latency. The SX1280 FLRC mode is unique to the 2.4GHz chip — not available in SX127x.</li>
-        <li><strong>DVDA (Dual VD Audio) modes:</strong> Hybrid variants with reduced jitter at cost of slightly higher latency than standard FLRC.</li>
+        <li><strong>DVDA (Deja Vu Diversity Aid) modes:</strong> D500 and D250 sub-modes transmit the same RC packet 2× (D500) or 4× (D250) across multiple frequencies, dramatically reducing packet loss in interference-heavy environments at the cost of effective new-command throughput.</li>
     </ul>
 
     <h4>ELRS Packet Rates & Link Latency</h4>
