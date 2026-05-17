@@ -46,11 +46,11 @@ export const workflowContent = {
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 text-xs">
             <div class="bg-slate-900 p-3 rounded border border-slate-700">
                 <strong class="text-white block mb-1">Jetson Orin Nano 8GB</strong>
-                <p class="text-slate-400">67 TOPS, 5–15 W, ~$500. The right choice for most AI drone builds. YOLOv8 runs at 30 Hz. Runs ROS 2 and TensorRT natively with JetPack.</p>
+                <p class="text-slate-400">40 TOPS, 5–15 W, ~$500. The right choice for most AI drone builds. YOLOv8 runs at 30 Hz. Runs ROS 2 and TensorRT natively with JetPack.</p>
             </div>
             <div class="bg-slate-900 p-3 rounded border border-slate-700">
                 <strong class="text-white block mb-1">Jetson AGX Orin 32GB</strong>
-                <p class="text-slate-400">275 TOPS, 15–40 W, ~$1,000. For workloads running depth mapping, detection, and navigation simultaneously. Too power-hungry for light builds under 2 kg.</p>
+                <p class="text-slate-400">200 TOPS, 15–40 W, ~$1,000. For workloads running depth mapping, detection, and navigation simultaneously. Too power-hungry for light builds under 2 kg.</p>
             </div>
             <div class="bg-slate-900 p-3 rounded border border-slate-700">
                 <strong class="text-white block mb-1">Raspberry Pi 5</strong>
