@@ -246,7 +246,7 @@ export default `
     <p>Optical flow sensors measure pixel displacement between frames. The EKF converts this to translational velocity using the gyro reading and a rangefinder distance to the ground. In GUIDED_NOGPS mode (ArduCopter), optical flow is the <strong>sole horizontal position reference</strong> — GPS states are disabled and the EKF relies entirely on flow + rangefinder for horizontal velocity bounding.</p>
 
     <h4>Visual Inertial Odometry (VIO) Integration via MAVLink</h4>
-    <p>Companion computers running VIO (e.g., Intel RealSense T265, ORB-SLAM3, VINS-Mono) feed position estimates to ArduPilot via MAVLink. The integration protocol:</p>
+    <p>Companion computers running VIO (e.g., Luxonis OAK-D, ORB-SLAM3, VINS-Mono) feed position estimates to ArduPilot via MAVLink. The integration protocol:</p>
     <ol class="text-slate-300 text-sm space-y-1 list-decimal pl-6 mt-2">
         <li>Send <code>SET_GPS_GLOBAL_ORIGIN</code> (MSG #48) once at startup — defines the NED origin for VIO coordinates</li>
         <li>Continuously send <code>VISION_POSITION_ESTIMATE</code> (MSG #102) at 15–30Hz — contains x, y, z in NED meters and roll, pitch, yaw from VIO</li>
