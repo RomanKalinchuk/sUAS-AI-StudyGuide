@@ -177,7 +177,7 @@ export default `
                     <strong class="text-amber-400 text-lg block mb-2">Axelera Metis M.2 <span class="text-xs bg-amber-900/50 px-2 py-0.5 rounded">214 TOPS IN M.2 2280</span></strong>
                     <ul class="space-y-1 font-mono text-slate-300">
                         <li>> Compute: 214 TOPS (INT8)</li>
-                        <li>> Power: 4–8W @ 15 TOPS/W efficiency</li>
+                        <li>> Power: 6–8W @ ~27–33 TOPS/W efficiency</li>
                         <li>> Memory: 1GB on-module DRAM</li>
                         <li>> Interface: PCIe Gen-3 x4 (M-Key)</li>
                         <li>> Architecture: Quad-core Metis AIPU, Digital In-Memory Computing (D-IMC), RISC-V control core</li>
@@ -221,7 +221,7 @@ export default `
                 <div class="bg-slate-900 p-4 rounded border border-slate-700">
                     <strong class="text-amber-400 text-lg block mb-2">Rockchip RK3576 <span class="text-xs bg-amber-900/50 px-2 py-0.5 rounded">2024 — MID-RANGE</span></strong>
                     <ul class="space-y-1 font-mono text-slate-300">
-                        <li>> CPU: Quad Cortex-A72 @ 2.2GHz + Quad Cortex-A53 @ 2.0GHz</li>
+                        <li>> CPU: Quad Cortex-A72 @ 2.2GHz + Quad Cortex-A53 @ 1.8GHz</li>
                         <li>> NPU: 6 TOPS (same tier as RK3588 NPU)</li>
                         <li>> GPU: Mali-G52 MC3 (OpenGL ES 3.2, Vulkan 1.2)</li>
                         <li>> Video: 4K H.265 @ 120fps, H.264 @ 60fps</li>
@@ -270,7 +270,7 @@ export default `
                         <li>> GNSS: Concurrent GPS/GLONASS/BeiDou/Galileo</li>
                     </ul>
                     <ul class="space-y-1">
-                        <li>> Framework: Qualcomm AI Stack (SNPE — supports ONNX, TFLite, Caffe2)</li>
+                        <li>> Framework: Qualcomm AI Stack (SNPE/QNN — supports ONNX, TFLite, PyTorch)</li>
                         <li>> OS: Ubuntu Linux (RB5 reference platform), Android (optional)</li>
                         <li>> Mission use cases: BVLOS with integrated 5G C2 link, 7-camera 360° perception, GPS-denied VIO</li>
                         <li>> Reality Check: The 5G modem is the differentiator. Drones needing cellular telemetry normally carry a separate LTE module (Sixfab, Quectel) adding 30–80g. The RB5 integrates this. SNPE toolchain is more mature for Snapdragon targets than RKNN but narrower than TensorRT. Primarily deployed in commercial delivery and inspection platforms, not hobbyist builds.</li>
