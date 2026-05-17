@@ -129,7 +129,7 @@ Particularly effective for trajectories with frequent brief occlusions (urban sc
                     <td class="px-3 py-2 text-right">63.9</td>
                     <td class="px-3 py-2 text-right">78.0</td>
                     <td class="px-3 py-2 text-right">1,950</td>
-                    <td class="px-3 py-2">42% fewer IDSW vs DeepSORT</td>
+                    <td class="px-3 py-2">~68% fewer IDSW vs DeepSORT</td>
                 </tr>
                 <tr class="border-t border-slate-700">
                     <td class="px-3 py-2">DeepSORT</td>
@@ -1474,7 +1474,7 @@ Track-to-Track Fusion protocol (multi-UAV scenario):
             </div>
             <div class="bg-slate-900 p-4 rounded border-l-4 border-emerald-500">
                 <strong class="text-emerald-400 block mb-2">Radar Detection</strong>
-                <p class="text-slate-300">Micro-Doppler signature: drone rotors produce distinctive sidebands in radar returns. Main body Doppler: v_drone (straight path). Rotor blade Doppler: ±v_tip = ±omega_rotor * R_blade. For a DJI Phantom (2 RPM ≈ 200 rad/s, 12cm radius): tip speed = 24 m/s → ±87 km/h Doppler sidebands. This "flash" pattern is distinctive even when the drone body is below radar noise floor.</p>
+                <p class="text-slate-300">Micro-Doppler signature: drone rotors produce distinctive sidebands in radar returns. Main body Doppler: v_drone (straight path). Rotor blade Doppler: ±v_tip = ±omega_rotor * R_blade. For a DJI Phantom (~2000 RPM ≈ 200 rad/s, 12cm radius): tip speed = 24 m/s → ±87 km/h Doppler sidebands. This "flash" pattern is distinctive even when the drone body is below radar noise floor.</p>
                 <p class="text-slate-400 mt-2">Systems: Thales GroundMaster 20, Leonardo Falcon Shield. Limitation: birds produce similar micro-Doppler — classification AI must distinguish flapping from rotating motion. Small drones (sub-250g) may have RCS &lt; 0.01 m^2 — below minimum detectable signal at 2 km.</p>
             </div>
             <div class="bg-slate-900 p-4 rounded border-l-4 border-amber-500">
