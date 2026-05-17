@@ -26,7 +26,7 @@ export default `
                 <li>> Battery: XT90 (90A continuous, 120A burst)</li>
                 <li>> ESC feeds: XT60 (60A cont.) or MR60 for 6S systems</li>
                 <li>> XT30: only for BEC outputs (&lt;30A)</li>
-                <li>> Bus capacitors: 4x 470µF 35V MLCC in parallel at main bus</li>
+                <li>> Bus capacitors: 4x 470µF 35V electrolytic in parallel at main bus</li>
                 <li>> Bulk: 2x 1000µF 35V Panasonic FR or Rubycon ZLH near battery input</li>
                 <li>> Total recommended: 2000–4700µF on the main +V rail</li>
                 <li>> Placement: within 5cm of ESC power inputs</li>
@@ -279,7 +279,7 @@ export default `
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-slate-300 text-xs">
                 <div>3 independent channels<br>Each: bus V + shunt V<br>Bus range: 0–26V</div>
                 <div>Use case: Monitor 5V FC rail + 12V Jetson rail + main battery current simultaneously from one I2C device</div>
-                <div>Alert outputs: per-channel and sum-of-channels critical alert<br>I2C address: 0x40 (1 fixed address with 4 pin variants)</div>
+                <div>Alert outputs: per-channel and sum-of-channels critical alert<br>I2C addresses: 0x40–0x43 (4 configurable via A0 pin tied to GND/VS/SDA/SCL)</div>
             </div>
         </div>
     </div>
