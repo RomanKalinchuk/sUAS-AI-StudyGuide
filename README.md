@@ -34,6 +34,7 @@ An interactive, self-paced study guide for engineers building AI-powered small U
 
 - **Thermal calculator** — sliders for compute thermal modeling (Module 2)
 - **Hardware comparison chart** — bubble chart of SoC performance vs. power draw (Module 4)
+- **Data bandwidth calculator** — model video, IMU, and MAVLink telemetry link requirements (Module 8)
 - **Live Boids swarm simulation** — tune separation, alignment, and cohesion in real time (Module 15)
 - **Implementation workflow stepper** — guided build process with expandable steps (Module 17)
 
