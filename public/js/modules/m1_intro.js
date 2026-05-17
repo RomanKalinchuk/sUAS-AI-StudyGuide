@@ -16,7 +16,7 @@ export default `
             </div>
             <div class="bg-slate-900 p-4 rounded border-l-4 border-amber-500">
                 <strong class="text-amber-400 block mb-2">Middleware: ROS 2 + DDS</strong>
-                <p class="text-slate-400 text-xs">ROS 1 (Noetic) reached End-of-Life in May 2025. All new development uses ROS 2 Humble (Ubuntu 22.04) or Jazzy (Ubuntu 24.04). The flight controller communication bridge has transitioned from MAVROS (ROS 1 serial bridge) to Micro XRCE-DDS — PX4 and ArduPilot now publish flight state directly to ROS 2 topics via DDS with substantially lower latency.</p>
+                <p class="text-slate-400 text-xs">ROS 1 (Noetic) reached End-of-Life in May 2025. All new development uses ROS 2 Humble (Ubuntu 22.04) or Jazzy (Ubuntu 24.04). The flight controller communication bridge has transitioned from MAVROS (MAVLink-ROS bridge, primarily UDP-based) to Micro XRCE-DDS — PX4 and ArduPilot now publish flight state directly to ROS 2 topics via DDS with substantially lower latency.</p>
             </div>
             <div class="bg-slate-900 p-4 rounded border-l-4 border-purple-500">
                 <strong class="text-purple-400 block mb-2">Simulation: Isaac Sim / Isaac Lab</strong>
@@ -25,7 +25,7 @@ export default `
         </div>
         <div class="mt-4 bg-slate-900 p-4 rounded border-l-4 border-rose-500">
             <strong class="text-rose-400 block mb-2">Defense Stack: Blue UAS / STANAG 4586 / Encrypted MAVLink 2</strong>
-            <p class="text-slate-400 text-xs">The DoD Defense Innovation Unit (DIU) Blue UAS Framework certifies commercial sUAS for DoD use — the 2024 cleared list includes Skydio X10D, Autel EVO Max 4T, BRINC Lemur 2, and Joby Uber Air (ISR variant). NATO STANAG 4586 defines the standard interface between a UCS (Universal Control Station) and multiple UAV types via CUCS/VSM software. All new DoD sUAS programs mandate MAVLink 2 with signed messages (HMAC-SHA256 per-packet authentication) and AES-256-GCM encrypted payloads. NVIDIA Jetson Orin supports hardware-fused Secure Boot (PKC key burned into OTP e-fuses), satisfying DoD firmware integrity requirements without external HSM hardware.</p>
+            <p class="text-slate-400 text-xs">The DoD Defense Innovation Unit (DIU) Blue UAS Framework certifies commercial sUAS for DoD use — the 2024 cleared list includes Skydio X10D, Autel EVO Max 4T, BRINC Lemur 2, and Teal 2 (Teledyne FLIR). NATO STANAG 4586 defines the standard interface between a UCS (Universal Control Station) and multiple UAV types via CUCS/VSM software. All new DoD sUAS programs mandate MAVLink 2 with signed messages (HMAC-SHA256 per-packet authentication) and AES-256-GCM encrypted payloads. NVIDIA Jetson Orin supports hardware-fused Secure Boot (PKC key burned into OTP e-fuses), satisfying DoD firmware integrity requirements without external HSM hardware.</p>
         </div>
     </div>
 
@@ -134,21 +134,21 @@ export default `
                     <tr class="border-b border-slate-800">
                         <td class="p-2 text-amber-400">PaliGemma 2 (3B)</td>
                         <td class="p-2">VLM</td>
-                        <td class="p-2">6.9 GB INT4</td>
+                        <td class="p-2">~2.0 GB INT4</td>
                         <td class="p-2 text-amber-400">~120 ms/query</td>
                         <td class="p-2">Scene VQA, grounded segmentation, activity classification</td>
                     </tr>
                     <tr class="border-b border-slate-800 bg-slate-900/30">
                         <td class="p-2 text-amber-400">Phi-3.5 Vision (4B)</td>
                         <td class="p-2">VLM</td>
-                        <td class="p-2">8.5 GB INT4</td>
+                        <td class="p-2">~2.5 GB INT4</td>
                         <td class="p-2 text-amber-400">~180 ms/query</td>
                         <td class="p-2">Multi-image temporal reasoning, OCR of markings/signage</td>
                     </tr>
                     <tr class="border-b border-slate-800">
                         <td class="p-2 text-purple-400">OpenVLA-7B</td>
                         <td class="p-2">VLA (action)</td>
-                        <td class="p-2">14 GB INT4</td>
+                        <td class="p-2">~4.0 GB INT4</td>
                         <td class="p-2 text-rose-400">~450 ms (Orin NX req.)</td>
                         <td class="p-2">Language-conditioned action policy — instruction directly to motor command</td>
                     </tr>
@@ -199,7 +199,7 @@ export default `
             </div>
             <div>
                 <strong class="text-white block mb-1">AI-Powered C-UAS is Operational</strong>
-                <p class="text-slate-400">Both sides field ML-based RF fingerprinting and acoustic detection to locate and classify drones. Ukraine's DELTA C-UAS system fuses radar, RF, and optical data via AI. Russia's Gyurza-M and Penicillin systems detect drones acoustically. Engineers must treat their platform's acoustic, thermal, and RF signature as an active targeting input for the adversary's AI systems.</p>
+                <p class="text-slate-400">Both sides field ML-based RF fingerprinting and acoustic detection to locate and classify drones. Ukraine's DELTA battlefield management system integrates radar, RF, and optical data to coordinate drone defense. Russia's Penicillin (1B75) acoustic-thermal system detects drones and artillery; the AI-driven Gyurza EW system actively jams drone C2 links. Engineers must treat their platform's acoustic, thermal, and RF signature as an active targeting input for the adversary's AI systems.</p>
             </div>
         </div>
     </div>
