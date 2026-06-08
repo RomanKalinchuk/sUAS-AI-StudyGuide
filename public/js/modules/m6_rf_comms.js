@@ -1,304 +1,465 @@
 export default `
 <div class="fade-in">
     <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 6</span>
-    <h2>RF Communications & Link Management for AI Drones</h2>
-    <p>Every autonomous drone mission is constrained by its communications architecture. The RF stack determines command latency, telemetry fidelity, video quality, and jamming resilience. This module dissects every layer — from the silicon transceiver to swarm-level spectrum coordination.</p>
+    <h2>RF Communications &amp; Link Management for AI Drones</h2>
+    <p>Every autonomous drone mission is constrained by its communications architecture. The RF stack determines command latency, telemetry fidelity, video quality, and jamming resilience. This module dissects every layer — from transceiver silicon to swarm-level spectrum coordination — covering both the hobbyist FPV domain and defense/BVLOS operational requirements.</p>
 
-    <h3>6.1 RC Link Architecture: ExpressLRS (ELRS)</h3>
-    <p>ExpressLRS is the dominant open-source RC link for performance applications, built on Semtech LoRa transceivers. The critical design decision is the transceiver chip per band. <span class="text-amber-400 font-bold">Current firmware: ELRS v4.0.0</span> (February 2025) — a major release that drops STM32-based hardware (ESP32/ESP8285 only) and introduces doubled telemetry bandwidth in Gemini mode. ELRS v4.0.0 is incompatible with all v3.x hardware/firmware; upgrade both TX and RX together.</p>
+    <!-- ================================================================
+         6.1 FREQUENCY BAND COMPARISON
+    ================================================================ -->
+    <h3>6.1 Frequency Band Engineering Tradeoffs</h3>
+    <p>RF band selection is not a preference — it is an engineering decision with direct consequences for link budget, antenna size, propagation physics, regulatory compliance, and anti-jam posture. The three bands used in drone operations each occupy a distinct point on the range-vs-data-rate tradeoff curve.</p>
+
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm text-left">
+        <thead class="bg-slate-700 text-slate-300">
+          <tr>
+            <th class="p-3">Parameter</th>
+            <th class="p-3">900 MHz (ISM 868/915)</th>
+            <th class="p-3">2.4 GHz (ISM)</th>
+            <th class="p-3">5.8 GHz (ISM)</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-700 text-xs font-mono">
+          <tr class="bg-slate-800">
+            <td class="p-3 text-slate-300 font-bold">Wavelength</td>
+            <td class="p-3 text-slate-300">~33 cm (dipole ~16.5 cm)</td>
+            <td class="p-3 text-slate-300">~12.5 cm (dipole ~6.25 cm)</td>
+            <td class="p-3 text-slate-300">~5.2 cm (patch ~2–3 cm)</td>
+          </tr>
+          <tr class="bg-slate-900">
+            <td class="p-3 text-slate-300 font-bold">FSPL @ 1 km</td>
+            <td class="p-3 text-emerald-400">91.5 dB</td>
+            <td class="p-3 text-amber-400">100.0 dB (+8.5 dB vs 900)</td>
+            <td class="p-3 text-rose-400">107.7 dB (+16.2 dB vs 900)</td>
+          </tr>
+          <tr class="bg-slate-800">
+            <td class="p-3 text-slate-300 font-bold">Obstacle penetration</td>
+            <td class="p-3 text-emerald-400">Superior — diffracts around terrain, trees, buildings</td>
+            <td class="p-3 text-amber-400">Moderate — absorbed by foliage and walls</td>
+            <td class="p-3 text-rose-400">Poor — absorbed by vegetation and concrete</td>
+          </tr>
+          <tr class="bg-slate-900">
+            <td class="p-3 text-slate-300 font-bold">Max legal TX power (US)</td>
+            <td class="p-3 text-slate-300">30 dBm / 1 W (FCC Part 15.247); 50 W+ with ham license</td>
+            <td class="p-3 text-slate-300">30 dBm / 1 W EIRP (FCC Part 15.247)</td>
+            <td class="p-3 text-slate-300">25 mW typical VTX; 1 W with Part 97 ham</td>
+          </tr>
+          <tr class="bg-slate-800">
+            <td class="p-3 text-slate-300 font-bold">ISM congestion</td>
+            <td class="p-3 text-emerald-400">Low (primarily telemetry, ISM devices)</td>
+            <td class="p-3 text-rose-400">Very high — WiFi 802.11 b/g/n/ax, BT, ZigBee, microwave ovens</td>
+            <td class="p-3 text-amber-400">Moderate — WiFi 802.11 a/n/ac/ax channels overlap</td>
+          </tr>
+          <tr class="bg-slate-900">
+            <td class="p-3 text-slate-300 font-bold">Primary drone use</td>
+            <td class="p-3 text-slate-300">Long-range RC (ELRS 900, Crossfire), MAVLink telemetry modems</td>
+            <td class="p-3 text-slate-300">RC control (ELRS 2.4, Crossfire Tracer), mesh data links</td>
+            <td class="p-3 text-slate-300">FPV video downlink (analog &amp; digital) — not RC control</td>
+          </tr>
+          <tr class="bg-slate-800">
+            <td class="p-3 text-slate-300 font-bold">Best for</td>
+            <td class="p-3 text-emerald-400">Long-range fixed-wing, BVLOS, military C2</td>
+            <td class="p-3 text-amber-400">Racing, freestyle, mesh swarms, 1000Hz FLRC</td>
+            <td class="p-3 text-rose-400">FPV goggles video only; avoid for control</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ================================================================
+         6.2 LINK BUDGET — WORKED EXAMPLE
+    ================================================================ -->
+    <h3>6.2 Link Budget: Worked Example</h3>
+    <p>A link budget accounts for every gain and loss in a radio path. The goal is to verify that the received signal power exceeds the receiver's sensitivity floor by a sufficient margin — the <strong>link margin</strong>. Positive margin means the link closes; negative margin means no comms.</p>
+
+    <div class="bg-slate-800/60 border border-sky-700/60 rounded-xl p-6 mb-6">
+      <h3 class="text-sky-400 font-bold text-lg mb-3">Link Budget Formula</h3>
+      <p class="text-slate-300 text-sm mb-4">The fundamental equation (all values in dB or dBm):</p>
+      <div class="bg-slate-900 rounded-lg p-4 font-mono text-sm text-center mb-4">
+        <span class="text-emerald-400">P_rx</span>
+        <span class="text-slate-300"> = </span>
+        <span class="text-sky-400">P_tx</span>
+        <span class="text-slate-400"> + </span>
+        <span class="text-amber-400">G_tx</span>
+        <span class="text-slate-400"> + </span>
+        <span class="text-amber-400">G_rx</span>
+        <span class="text-slate-400"> − </span>
+        <span class="text-rose-400">FSPL</span>
+        <span class="text-slate-400"> − </span>
+        <span class="text-rose-400">L_cable</span>
+        <span class="text-slate-400"> − </span>
+        <span class="text-rose-400">L_misc</span>
+      </div>
+      <div class="font-mono text-xs text-slate-400 mb-2">
+        Free-Space Path Loss: FSPL (dB) = 20·log<sub>10</sub>(d_km) + 20·log<sub>10</sub>(f_MHz) + 32.45
+      </div>
+      <div class="font-mono text-xs text-slate-400">
+        Link Margin = P_rx − Sensitivity_floor &nbsp;&nbsp;(must be &gt; 0 dB for reliable comms; &gt;10 dB recommended)
+      </div>
+    </div>
+
+    <div class="bg-slate-800/60 border border-amber-700/60 rounded-xl p-6 mb-6">
+      <h3 class="text-amber-400 font-bold text-lg mb-4">Worked Example — ELRS 900 MHz at 5 km</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm font-mono">
+          <thead class="text-slate-400 border-b border-slate-700">
+            <tr><th class="p-2 text-left">Parameter</th><th class="p-2 text-right">Value</th><th class="p-2 text-left pl-4">Notes</th></tr>
+          </thead>
+          <tbody class="divide-y divide-slate-700/50 text-slate-300">
+            <tr><td class="p-2 text-sky-400">TX Power (P_tx)</td><td class="p-2 text-right text-emerald-400">+30 dBm</td><td class="p-2 pl-4 text-slate-400">1 W — typical ELRS 900 max</td></tr>
+            <tr><td class="p-2 text-sky-400">TX Antenna Gain (G_tx)</td><td class="p-2 text-right text-emerald-400">+2 dBi</td><td class="p-2 pl-4 text-slate-400">Standard dipole on transmitter</td></tr>
+            <tr><td class="p-2 text-sky-400">RX Antenna Gain (G_rx)</td><td class="p-2 text-right text-emerald-400">+2 dBi</td><td class="p-2 pl-4 text-slate-400">Dipole on receiver/UAV</td></tr>
+            <tr><td class="p-2 text-rose-400">FSPL @ 5 km, 915 MHz</td><td class="p-2 text-right text-rose-400">−105.6 dB</td><td class="p-2 pl-4 text-slate-400">20·log(5)+20·log(915)+32.45</td></tr>
+            <tr><td class="p-2 text-rose-400">Cable &amp; connector losses</td><td class="p-2 text-right text-rose-400">−1 dB</td><td class="p-2 pl-4 text-slate-400">Typical short coax run</td></tr>
+            <tr class="border-t-2 border-slate-600 font-bold"><td class="p-2 text-white">Received Power (P_rx)</td><td class="p-2 text-right text-amber-400">−72.6 dBm</td><td class="p-2 pl-4 text-slate-400">30+2+2−105.6−1</td></tr>
+            <tr><td class="p-2 text-slate-300">RX Sensitivity (50 Hz LoRa)</td><td class="p-2 text-right text-slate-400">−123 dBm</td><td class="p-2 pl-4 text-slate-400">ELRS SX1276 at 50 Hz rate</td></tr>
+            <tr class="border-t-2 border-slate-600 font-bold"><td class="p-2 text-emerald-400">Link Margin</td><td class="p-2 text-right text-emerald-400 text-lg">+50.4 dB</td><td class="p-2 pl-4 text-amber-400">Robust — 50 dB headroom for obstacles</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-slate-400 text-xs mt-3">Key insight: every 6 dB of link margin doubles (or halves) the maximum range. With 50 dB of margin at 5 km, range extendable to theoretical ~16 km before reaching sensitivity floor — consistent with 30+ km ELRS 900 demonstrations using directional antennas.</p>
+    </div>
+
+    <!-- ================================================================
+         6.3 RC LINK ARCHITECTURE: ELRS AND CROSSFIRE
+    ================================================================ -->
+    <h3>6.3 RC Link Architecture: ExpressLRS (ELRS) and CRSF</h3>
+    <p>ExpressLRS is the dominant open-source RC link for performance and long-range applications, built on Semtech LoRa transceivers. The critical design decision is the transceiver chip per band.</p>
+
+    <div class="bg-slate-800/60 border border-sky-700/60 rounded-xl p-6 mb-6">
+      <h3 class="text-sky-400 font-bold text-lg mb-3">ELRS Firmware Milestones (2024–2025)</h3>
+      <ul class="text-slate-300 text-sm space-y-2">
+        <li><strong class="text-amber-400">ELRS 3.5.x (2024, Final STM32 release):</strong> Native MAVLink support — direct two-way MAVLink tunneling over the RC link, enabling Mission Planner telemetry, waypoint upload, and parameter changes in flight. FSK &#96;K&#96; modes added — SubGHz band jumps from 200 Hz to <strong>1000 Hz</strong> maximum packet rate. Last release to support STM32-based hardware (Happymodel PP, early NamimnoRC, FrSky ELRS).</li>
+        <li><strong class="text-amber-400">ELRS 4.0.x (February 2025):</strong> ESP32/ESP8285-only. Drops all STM32 hardware. Introduces doubled telemetry bandwidth in Gemini mode. Incompatible with v3.x hardware — upgrade both TX and RX together.</li>
+      </ul>
+    </div>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
         <h4 class="mt-0 border-none text-white">ELRS Transceiver Hardware Matrix</h4>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div class="bg-slate-900 p-4 rounded border-l-4 border-sky-500">
-                <strong class="text-sky-400 uppercase text-xs tracking-widest block mb-2">900MHz Band — SX127x (SX1276/SX1278)</strong>
+                <strong class="text-sky-400 uppercase text-xs tracking-widest block mb-2">900 MHz Band — SX127x (SX1276/SX1278)</strong>
                 <ul class="text-slate-300 text-xs space-y-1">
-                    <li>Chip: Semtech SX1276 or SX1278 (depending on exact frequency)</li>
-                    <li>Modulation: LoRa only (no FLRC support on SX127x)</li>
-                    <li>Max packet rate: 200Hz at 900MHz (legacy SX127x hardware)</li>
-                    <li>Receiver sensitivity: down to -123 dBm at 25Hz LoRa mode</li>
-                    <li>Sensitivity at 100Hz: -117 dBm; at 250Hz: -111 dBm</li>
-                    <li>Typical power: up to 1W (30 dBm) — varies by jurisdiction</li>
-                    <li>Range (50Hz, 1W, dipole): 30+ km demonstrated</li>
-                    <li class="text-amber-300">Next-gen: Semtech LR1121-based hardware (e.g., RadioMaster Nomad) achieves 1000Hz at 900MHz, matching 2.4GHz rates</li>
+                    <li>Chip: Semtech SX1276 or SX1278 depending on exact frequency</li>
+                    <li>Modulation: LoRa CSS only (no FLRC support on SX127x)</li>
+                    <li>Max packet rate: 200 Hz (SX127x) or <strong>1000 Hz with ELRS 3.5+ FSK K-modes</strong></li>
+                    <li>Receiver sensitivity: down to −123 dBm at 25 Hz LoRa mode</li>
+                    <li>Sensitivity at 100 Hz: −117 dBm; at 250 Hz: −111 dBm</li>
+                    <li>Typical power: up to 1 W (30 dBm) — varies by jurisdiction</li>
+                    <li>Range (50 Hz, 1 W, dipole): 30+ km demonstrated; 100+ km with directional antenna</li>
+                    <li class="text-amber-300">LR1121 hardware (e.g. RadioMaster Nomad): multi-band 868/915/2.4 GHz in one module</li>
                 </ul>
             </div>
             <div class="bg-slate-900 p-4 rounded border-l-4 border-amber-500">
-                <strong class="text-amber-400 uppercase text-xs tracking-widest block mb-2">2.4GHz Band — SX1280/SX1281/SX1282</strong>
+                <strong class="text-amber-400 uppercase text-xs tracking-widest block mb-2">2.4 GHz Band — SX1280/SX1281/SX1282</strong>
                 <ul class="text-slate-300 text-xs space-y-1">
-                    <li>Chip: Semtech SX1280 — operates in 2.400–2.500 GHz ISM band</li>
-                    <li>Modulation: LoRa AND FLRC (Fast Long Range Communication)</li>
-                    <li>FLRC uses GFSK (Gaussian FSK) internally — not the same as standard FSK</li>
-                    <li>Max packet rate: 500Hz (LoRa) or 1000Hz (FLRC)</li>
-                    <li>Sensitivity at 500Hz LoRa: -105 dBm; at 50Hz LoRa: -115 dBm</li>
-                    <li>Range (250Hz, 100mW, dipole): ~10 km demonstrated</li>
+                    <li>Chip: Semtech SX1280 — 2.400–2.500 GHz ISM band</li>
+                    <li>Modulation: LoRa CSS AND FLRC (Fast Long Range)</li>
+                    <li>FLRC uses GFSK internally — not standard FSK; unique to SX1280</li>
+                    <li>Max packet rate: 500 Hz (LoRa) or 1000 Hz (FLRC)</li>
+                    <li>Sensitivity at 500 Hz LoRa: −105 dBm; at 50 Hz LoRa: −115 dBm</li>
+                    <li>Range (250 Hz, 100 mW, dipole): ~10 km demonstrated</li>
                 </ul>
             </div>
         </div>
     </div>
 
-    <h4>Modulation Deep Dive: LoRa vs FLRC</h4>
-    <p>The choice between LoRa and FLRC within ELRS 2.4GHz is a latency-vs-range tradeoff at the modulation level:</p>
+    <h4>Modulation Deep Dive: LoRa vs FLRC vs FSK K-modes</h4>
     <ul class="text-slate-300 text-sm space-y-2">
-        <li><strong>LoRa (Chirp Spread Spectrum):</strong> Encodes data by sweeping frequency across a bandwidth (Chirp). Spreading factor SF6–SF12 controls range/rate tradeoff. Superior interference rejection — can decode signals 20 dB below the noise floor. Used for maximum range, up to 500Hz.</li>
-        <li><strong>FLRC (Fast Long Range Communication):</strong> Semtech's proprietary mode using GFSK with forward error correction. Lower receiver sensitivity than LoRa but significantly lower air-time per packet. Enables 1000Hz packet rates with lower latency. The SX1280 FLRC mode is unique to the 2.4GHz chip — not available in SX127x.</li>
-        <li><strong>DVDA (Deja Vu Diversity Aid) modes:</strong> D500 and D250 sub-modes transmit the same RC packet 2× (D500) or 4× (D250) across multiple frequencies, dramatically reducing packet loss in interference-heavy environments at the cost of effective new-command throughput.</li>
+        <li><strong>LoRa (Chirp Spread Spectrum):</strong> Encodes data by sweeping frequency across a bandwidth. Spreading factor SF6–SF12 controls range/rate tradeoff. Can decode signals 20 dB below the noise floor. Used for maximum range, up to 500 Hz on 2.4 GHz.</li>
+        <li><strong>FLRC (Fast Long Range Communication):</strong> Semtech's SX1280 proprietary mode using GFSK with forward error correction. Lower receiver sensitivity than LoRa but significantly lower air-time per packet. Enables 1000 Hz packet rates. Not available on SX127x.</li>
+        <li><strong>FSK K-modes (ELRS 3.5+):</strong> Added to SubGHz band, enabling 1000 Hz packet rates on 900 MHz hardware — previously limited to 200 Hz. Trades some sensitivity for higher update rates.</li>
+        <li><strong>Diversity modes (D500/D250):</strong> Same RC packet transmitted 2× (D500) or 4× (D250) across multiple frequencies, reducing packet loss in interference-heavy environments at cost of effective throughput.</li>
     </ul>
 
-    <h4>ELRS Packet Rates & Link Latency</h4>
-    <p>Packet rate directly defines link latency. At 500Hz, the packet interval is 1/500 = 2ms. This is the fundamental link update period — not round-trip latency to the flight controller, but the interval between successive RC command packets reaching the receiver.</p>
+    <h4>ELRS Packet Rates &amp; Link Latency</h4>
+    <p>Packet rate directly defines link latency. At 500 Hz, the packet interval is 1/500 = 2 ms. Total system latency from stick to motor response: stick ADC (~1 ms) + TX processing (~0.5 ms) + air packet interval + RX UART output (~0.5 ms) + FC loop (~2.5 ms at 400 Hz) = ~6.5 ms total at 500 Hz.</p>
 
     <div class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden mb-6">
         <div class="px-4 py-3 bg-slate-800 text-xs font-mono text-slate-400 uppercase tracking-widest">Packet Rate vs Link Latency</div>
-        <div class="flex text-xs font-mono">
-            <div class="flex-1 p-3 text-center border-r border-slate-800">
+        <div class="flex text-xs font-mono flex-wrap">
+            <div class="flex-1 p-3 text-center border-r border-slate-800 min-w-[70px]">
+                <div class="text-emerald-400 font-bold text-base">1000 Hz</div><div class="text-slate-400">1.0 ms</div>
+            </div>
+            <div class="flex-1 p-3 text-center border-r border-slate-800 min-w-[70px]">
                 <div class="text-emerald-400 font-bold text-base">500 Hz</div><div class="text-slate-400">2.0 ms</div>
             </div>
-            <div class="flex-1 p-3 text-center border-r border-slate-800">
+            <div class="flex-1 p-3 text-center border-r border-slate-800 min-w-[70px]">
                 <div class="text-emerald-300 font-bold text-base">250 Hz</div><div class="text-slate-400">4.0 ms</div>
             </div>
-            <div class="flex-1 p-3 text-center border-r border-slate-800">
+            <div class="flex-1 p-3 text-center border-r border-slate-800 min-w-[70px]">
                 <div class="text-amber-400 font-bold text-base">150 Hz</div><div class="text-slate-400">6.7 ms</div>
             </div>
-            <div class="flex-1 p-3 text-center border-r border-slate-800">
+            <div class="flex-1 p-3 text-center border-r border-slate-800 min-w-[70px]">
                 <div class="text-amber-300 font-bold text-base">100 Hz</div><div class="text-slate-400">10 ms</div>
             </div>
-            <div class="flex-1 p-3 text-center border-r border-slate-800">
+            <div class="flex-1 p-3 text-center border-r border-slate-800 min-w-[70px]">
                 <div class="text-rose-400 font-bold text-base">50 Hz</div><div class="text-slate-400">20 ms</div>
             </div>
-            <div class="flex-1 p-3 text-center">
+            <div class="flex-1 p-3 text-center min-w-[70px]">
                 <div class="text-rose-500 font-bold text-base">25 Hz</div><div class="text-slate-400">40 ms</div>
             </div>
         </div>
     </div>
 
-    <p>Total system latency from stick input to motor response includes: stick ADC sampling (~1ms) + transmitter processing (~0.5ms) + air packet interval (2ms at 500Hz) + receiver UART output (~0.5ms) + flight controller loop (~2.5ms at 400Hz) = ~6.5ms total at 500Hz. Crossfire at 150Hz contributes ~6.7ms for the RF interval alone.</p>
-
-    <h4>Telemetry Ratio</h4>
-    <p>ELRS multiplexes downlink telemetry (RSSI, LQ, voltage, GPS position) into the same RF channel as uplink RC commands. The telemetry ratio controls how often a telemetry packet is substituted for a command packet. A ratio of 1:128 means 1 telemetry packet per 128 command packets. At 500Hz with 1:64 ratio, telemetry arrives at ~7.8Hz. Higher telemetry frequency degrades command link headroom and increases latency jitter. For racing, set ratio to Off or 1:256. For autonomous missions requiring telemetry, 1:16 or 1:32 is typical.</p>
-
-    <h4>ELRS vs Crossfire (CRSF) vs FrSky R9: Technical Comparison</h4>
-    <table class="w-full text-left border-collapse mt-4 mb-6 text-sm">
-        <thead>
-            <tr class="bg-slate-800 text-sky-400">
-                <th class="p-3 border border-slate-700">Parameter</th>
-                <th class="p-3 border border-slate-700">ELRS 2.4GHz</th>
-                <th class="p-3 border border-slate-700">ELRS 900MHz</th>
-                <th class="p-3 border border-slate-700">TBS Crossfire</th>
-                <th class="p-3 border border-slate-700">FrSky R9</th>
-            </tr>
+    <h4>RC Link Comparison: ELRS vs Crossfire vs FrSky R9</h4>
+    <div class="overflow-x-auto my-4">
+      <table class="w-full text-sm text-left">
+        <thead class="bg-slate-700 text-slate-300">
+          <tr>
+            <th class="p-3">Parameter</th>
+            <th class="p-3">ELRS 2.4 GHz</th>
+            <th class="p-3">ELRS 900 MHz</th>
+            <th class="p-3">TBS Crossfire</th>
+            <th class="p-3">FrSky R9</th>
+          </tr>
         </thead>
-        <tbody class="text-slate-300 font-mono text-xs">
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white">Transceiver</td>
-                <td class="p-3 border border-slate-700">SX1280</td>
-                <td class="p-3 border border-slate-700">SX1276/78</td>
-                <td class="p-3 border border-slate-700">SX1272 (LoRa), proprietary</td>
-                <td class="p-3 border border-slate-700">SX1276</td>
-            </tr>
-            <tr>
-                <td class="p-3 border border-slate-700 text-white">Max Packet Rate</td>
-                <td class="p-3 border border-slate-700 text-emerald-400">1000 Hz (FLRC)</td>
-                <td class="p-3 border border-slate-700 text-emerald-400">200 Hz</td>
-                <td class="p-3 border border-slate-700 text-amber-400">150 Hz (CRSF Shot)</td>
-                <td class="p-3 border border-slate-700 text-amber-400">50 Hz</td>
-            </tr>
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white">Link Interval @max</td>
-                <td class="p-3 border border-slate-700 text-emerald-400">1ms (1000Hz)</td>
-                <td class="p-3 border border-slate-700 text-emerald-400">5ms (200Hz)</td>
-                <td class="p-3 border border-slate-700 text-amber-400">6.7ms</td>
-                <td class="p-3 border border-slate-700 text-rose-400">20ms</td>
-            </tr>
-            <tr>
-                <td class="p-3 border border-slate-700 text-white">Max TX Power</td>
-                <td class="p-3 border border-slate-700">250mW typical</td>
-                <td class="p-3 border border-slate-700">1W (varies by region)</td>
-                <td class="p-3 border border-slate-700 text-emerald-400">2W (2000mW)</td>
-                <td class="p-3 border border-slate-700">1W</td>
-            </tr>
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white">Encryption</td>
-                <td class="p-3 border border-slate-700 text-rose-400">None</td>
-                <td class="p-3 border border-slate-700 text-rose-400">None</td>
-                <td class="p-3 border border-slate-700 text-emerald-400">AES-128</td>
-                <td class="p-3 border border-slate-700 text-rose-400">None</td>
-            </tr>
-            <tr>
-                <td class="p-3 border border-slate-700 text-white">Open Source</td>
-                <td class="p-3 border border-slate-700 text-emerald-400">Yes</td>
-                <td class="p-3 border border-slate-700 text-emerald-400">Yes</td>
-                <td class="p-3 border border-slate-700 text-rose-400">No (proprietary)</td>
-                <td class="p-3 border border-slate-700 text-rose-400">No</td>
-            </tr>
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white">Protocol to FC</td>
-                <td class="p-3 border border-slate-700">CRSF (UART 400k baud)</td>
-                <td class="p-3 border border-slate-700">CRSF</td>
-                <td class="p-3 border border-slate-700">CRSF</td>
-                <td class="p-3 border border-slate-700">SBUS / F.Port</td>
-            </tr>
-            <tr>
-                <td class="p-3 border border-slate-700 text-white">Channels</td>
-                <td class="p-3 border border-slate-700">12 ch (Hybrid/Wide)</td>
-                <td class="p-3 border border-slate-700">12 ch</td>
-                <td class="p-3 border border-slate-700">16 ch</td>
-                <td class="p-3 border border-slate-700">16 ch</td>
-            </tr>
+        <tbody class="divide-y divide-slate-700 text-xs font-mono">
+          <tr class="bg-slate-800">
+            <td class="p-3 text-white font-bold">Transceiver</td>
+            <td class="p-3 text-slate-300">Semtech SX1280</td>
+            <td class="p-3 text-slate-300">Semtech SX1276/78</td>
+            <td class="p-3 text-slate-300">SX1272 (LoRa), proprietary</td>
+            <td class="p-3 text-slate-300">SX1276</td>
+          </tr>
+          <tr class="bg-slate-900">
+            <td class="p-3 text-white font-bold">Max Packet Rate</td>
+            <td class="p-3 text-emerald-400">1000 Hz (FLRC)</td>
+            <td class="p-3 text-emerald-400">1000 Hz (FSK, ELRS 3.5+); 200 Hz (LoRa)</td>
+            <td class="p-3 text-amber-400">150 Hz (CRSF Shot)</td>
+            <td class="p-3 text-amber-400">50 Hz</td>
+          </tr>
+          <tr class="bg-slate-800">
+            <td class="p-3 text-white font-bold">Link Interval @ max</td>
+            <td class="p-3 text-emerald-400">1 ms</td>
+            <td class="p-3 text-emerald-400">1 ms / 5 ms (FSK/LoRa)</td>
+            <td class="p-3 text-amber-400">6.7 ms</td>
+            <td class="p-3 text-rose-400">20 ms</td>
+          </tr>
+          <tr class="bg-slate-900">
+            <td class="p-3 text-white font-bold">Max TX Power</td>
+            <td class="p-3 text-slate-300">250 mW typical</td>
+            <td class="p-3 text-slate-300">1 W (region-dependent)</td>
+            <td class="p-3 text-emerald-400">2 W (2000 mW)</td>
+            <td class="p-3 text-slate-300">1 W</td>
+          </tr>
+          <tr class="bg-slate-800">
+            <td class="p-3 text-white font-bold">Encryption</td>
+            <td class="p-3 text-rose-400">None (plaintext)</td>
+            <td class="p-3 text-rose-400">None (plaintext)</td>
+            <td class="p-3 text-emerald-400">AES-128</td>
+            <td class="p-3 text-rose-400">None</td>
+          </tr>
+          <tr class="bg-slate-900">
+            <td class="p-3 text-white font-bold">MAVLink support</td>
+            <td class="p-3 text-emerald-400">Native (ELRS 3.5+)</td>
+            <td class="p-3 text-emerald-400">Native (ELRS 3.5+)</td>
+            <td class="p-3 text-amber-400">Via CRSF passthrough</td>
+            <td class="p-3 text-rose-400">No</td>
+          </tr>
+          <tr class="bg-slate-800">
+            <td class="p-3 text-white font-bold">Open Source</td>
+            <td class="p-3 text-emerald-400">Yes (GPL)</td>
+            <td class="p-3 text-emerald-400">Yes (GPL)</td>
+            <td class="p-3 text-rose-400">No (proprietary)</td>
+            <td class="p-3 text-rose-400">No</td>
+          </tr>
+          <tr class="bg-slate-900">
+            <td class="p-3 text-white font-bold">Protocol to FC</td>
+            <td class="p-3 text-slate-300">CRSF (400 kbaud UART)</td>
+            <td class="p-3 text-slate-300">CRSF (400 kbaud UART)</td>
+            <td class="p-3 text-slate-300">CRSF (400 kbaud UART)</td>
+            <td class="p-3 text-slate-300">SBUS / F.Port</td>
+          </tr>
+          <tr class="bg-slate-800">
+            <td class="p-3 text-white font-bold">Channels</td>
+            <td class="p-3 text-slate-300">12 ch (Hybrid/Wide)</td>
+            <td class="p-3 text-slate-300">12 ch</td>
+            <td class="p-3 text-slate-300">16 ch</td>
+            <td class="p-3 text-slate-300">16 ch</td>
+          </tr>
         </tbody>
-    </table>
-
-    <h3>6.2 Frequency Bands and Engineering Tradeoffs</h3>
-    <p>The choice of RF band is not a preference — it is an engineering decision with direct consequences for link budget, antenna size, propagation physics, and regulatory compliance.</p>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
-        <div class="bg-slate-900 p-4 rounded border-l-4 border-amber-500">
-            <strong class="text-amber-400 uppercase text-xs tracking-widest block mb-3">900 MHz (ELRS 900)</strong>
-            <ul class="text-slate-300 text-xs space-y-2">
-                <li><strong class="text-slate-100">Wavelength:</strong> ~33 cm — antenna dipole ~16.5 cm</li>
-                <li><strong class="text-slate-100">Free-space path loss (1km):</strong> ~91 dB</li>
-                <li><strong class="text-slate-100">Obstacle penetration:</strong> Superior — lower frequency diffracts around terrain, trees, buildings. Fresnel zone is larger.</li>
-                <li><strong class="text-slate-100">Max legal power (US/FCC Part 97):</strong> 1W ERP in unlicensed bands; up to 100W with ham license (916 MHz)</li>
-                <li><strong class="text-slate-100">Congestion:</strong> Lower than 2.4GHz (fewer consumer devices)</li>
-                <li><strong class="text-slate-100">Limitation:</strong> Max 200Hz packet rate with ELRS. Larger antennas on compact racing quads.</li>
-                <li><strong class="text-slate-100">Best use:</strong> Long-range fixed-wing, survey UAV, FPV wings beyond visual line of sight</li>
-            </ul>
-        </div>
-        <div class="bg-slate-900 p-4 rounded border-l-4 border-sky-500">
-            <strong class="text-sky-400 uppercase text-xs tracking-widest block mb-3">2.4 GHz (ELRS 2.4)</strong>
-            <ul class="text-slate-300 text-xs space-y-2">
-                <li><strong class="text-slate-100">Wavelength:</strong> ~12.5 cm — antenna dipole ~6.25 cm</li>
-                <li><strong class="text-slate-100">Free-space path loss (1km):</strong> ~100 dB (9 dB worse than 900MHz)</li>
-                <li><strong class="text-slate-100">Obstacle penetration:</strong> Weaker — more absorption by leaves, walls, human bodies</li>
-                <li><strong class="text-slate-100">Max legal power (US/FCC Part 15.247):</strong> 1W EIRP (30 dBm)</li>
-                <li><strong class="text-slate-100">Congestion:</strong> High — shared with WiFi 802.11 b/g/n, Bluetooth, microwave ovens, ZigBee</li>
-                <li><strong class="text-slate-100">Advantage:</strong> 1000Hz packet rate (FLRC), smallest antennas, ideal for racing</li>
-                <li><strong class="text-slate-100">Best use:</strong> FPV racing (sub-1km), freestyle, indoor, applications requiring minimum latency</li>
-            </ul>
-        </div>
-        <div class="bg-slate-900 p-4 rounded border-l-4 border-rose-500">
-            <strong class="text-rose-400 uppercase text-xs tracking-widest block mb-3">5.8 GHz (Video Only)</strong>
-            <ul class="text-slate-300 text-xs space-y-2">
-                <li><strong class="text-slate-100">Wavelength:</strong> ~5.2 cm — patch/cloverleaf antenna ~2–3 cm</li>
-                <li><strong class="text-slate-100">Free-space path loss (1km):</strong> ~113 dB (22 dB worse than 900MHz)</li>
-                <li><strong class="text-slate-100">Obstacle penetration:</strong> Very poor — absorbed by vegetation and concrete</li>
-                <li><strong class="text-slate-100">Max legal power (US):</strong> 25 mW typical VTX; up to 1W with Part 97 ham license</li>
-                <li><strong class="text-slate-100">Primary use:</strong> FPV video downlink only — NOT used for RC control</li>
-                <li><strong class="text-slate-100">Range:</strong> Typically 300m–2km depending on terrain and power</li>
-                <li><strong class="text-slate-100">Channels:</strong> 40 standard channels (25 MHz spacing) — channel selection critical to avoid WiFi overlap</li>
-            </ul>
-        </div>
+      </table>
     </div>
 
-    <div class="insight-box mb-4">
-        <div class="insight-label">Link Budget Basics</div>
-        <p class="text-slate-200 text-sm mt-1">Link budget = TX power + TX antenna gain + RX antenna gain − free-space path loss. Higher frequency = higher path loss at the same distance. ELRS 900MHz at 1km has a 65.5 dB link margin above its receiver sensitivity floor — enough headroom to punch through most real-world obstructions.</p>
+    <p class="text-slate-400 text-sm mt-2">
+      External references:
+      <a href="https://www.expresslrs.org/" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">ExpressLRS documentation</a> |
+      <a href="https://github.com/tbs-fpv/tbs-crsf-spec" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">TBS CRSF Protocol Spec (GitHub)</a>
+    </p>
+
+    <!-- FHSS Diagram -->
+    <figure class="my-6">
+      <img src="images/m6_fhss_diagram.jpg" alt="Frequency Hopping Spread Spectrum (FHSS) diagram showing carrier frequency jumping across time slots" class="rounded-lg w-full max-w-2xl mx-auto">
+      <figcaption class="text-gray-400 text-sm text-center mt-2">FHSS: carrier frequency hops pseudo-randomly across time, making the signal resistant to narrowband jamming. Source: <a href="https://commons.wikimedia.org/wiki/File:Frequency_Hopping_Spread_Spectrum.JPG" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">Wikimedia Commons</a> (public domain)</figcaption>
+    </figure>
+
+    <!-- ================================================================
+         6.4 SPREAD SPECTRUM: FHSS, DSSS, LPI/LPD
+    ================================================================ -->
+    <h3>6.4 Spread Spectrum: FHSS, DSSS, and Anti-Jam Techniques</h3>
+
+    <h4>FHSS (Frequency Hopping Spread Spectrum)</h4>
+    <p>FHSS pseudo-randomly hops the carrier frequency across a pre-agreed channel list on each packet. Both TX and RX must share the same pseudo-random number seed (the "hop sequence") and stay synchronized. A narrowband jammer fixed on one frequency disrupts only the fraction of packets landing on that channel. A broadband noise jammer must spread power across the entire hop bandwidth, dramatically reducing effective jamming power spectral density (PSD).</p>
+    <div class="bg-slate-800/60 border border-amber-700/40 rounded-xl p-5 mb-4">
+      <p class="text-slate-300 text-sm"><strong class="text-amber-400">FHSS Jam Resistance Example:</strong> A SiK 900 MHz radio hopping across 50 × 125 kHz channels spreads its signal over 6.25 MHz. A narrowband jammer fixed to one channel disrupts only 2% of packets (1/50). A broadband jammer must spread its power across all 6.25 MHz, reducing its effective power spectral density by 17 dB compared to targeting a fixed-frequency link. <strong>Caveat:</strong> FHSS reduces but does not eliminate jamming vulnerability. A wideband receiver can still capture and decode the hop sequence.</p>
     </div>
-    <div class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden mb-6">
-        <div class="px-4 py-3 bg-slate-800 text-xs font-mono text-slate-400 uppercase tracking-widest">Free-Space Path Loss at 1km</div>
-        <table class="w-full text-xs font-mono">
-            <thead><tr class="bg-slate-800/50 text-slate-400"><th class="p-3 text-left">Frequency</th><th class="p-3 text-left">Path Loss @ 1km</th><th class="p-3 text-left">ELRS Link Margin (30dBm TX)</th><th class="p-3 text-left">Notes</th></tr></thead>
-            <tbody class="text-slate-300">
-                <tr class="border-t border-slate-800"><td class="p-3 text-white">900 MHz</td><td class="p-3 text-emerald-400">91.5 dB</td><td class="p-3 text-emerald-300 font-bold">65.5 dB</td><td class="p-3 text-slate-400">Best penetration, longest range</td></tr>
-                <tr class="border-t border-slate-800 bg-slate-900/50"><td class="p-3 text-white">2.4 GHz</td><td class="p-3 text-amber-400">100.0 dB</td><td class="p-3 text-amber-300 font-bold">~57 dB</td><td class="p-3 text-slate-400">Balanced — 1000Hz FLRC available</td></tr>
-                <tr class="border-t border-slate-800"><td class="p-3 text-white">5.8 GHz</td><td class="p-3 text-rose-400">107.7 dB</td><td class="p-3 text-rose-300 font-bold">~49 dB</td><td class="p-3 text-slate-400">Video-only; 22dB worse than 900MHz</td></tr>
-            </tbody>
-        </table>
-    </div>
 
-    <h3>6.3 FPV Video Links: Analog vs Digital</h3>
-    <p>The FPV video link is entirely separate from the RC control link. It operates in the opposite direction (drone to pilot) and uses completely different modulation and encoding. The latency characteristics fundamentally determine which applications each system suits.</p>
+    <h4>DSSS (Direct Sequence Spread Spectrum)</h4>
+    <p>DSSS multiplies the data signal with a high-rate pseudo-random noise (PN) code, spreading the signal across a wide bandwidth. The receiver correlates the incoming signal with the same PN code to extract data, rejecting interference signals that are not correlated. DSSS provides better resistance to wideband noise than FHSS and is used in GPS, CDMA cellular, and IEEE 802.11b WiFi. In the RC world, systems marketed as "FHSS" (Futaba FASST, Spektrum DSM2/DSMX) are technically a hybrid agile-DSSS — they hop channels but also use DSSS-style PN spreading within each channel.</p>
 
-    <h4>Analog FPV (NTSC/PAL Composite Video)</h4>
-    <p>Analog video transmission sends raw composite video (interlaced 480i/576i) from the camera VTX (Video Transmitter) directly to the goggles without any digital encoding. There is no frame buffer, no compression codec, and no processing delay. The signal propagates at the speed of light through the RF chain. Glass-to-glass latency is dominated by the camera sensor exposure time and the phosphor/LCD response of the goggle display — typically <strong>3–5ms total</strong>, with the RF propagation contributing ~1ms or less at typical FPV ranges.</p>
-    <ul class="text-slate-300 text-sm space-y-1 mt-2">
-        <li><strong>Video standard:</strong> NTSC (29.97 fps) or PAL (25 fps) composite, 480i or 576i</li>
-        <li><strong>VTX power:</strong> 25mW to 1000mW at 5.8GHz (1W requires ham license)</li>
-        <li><strong>Latency:</strong> ~3–5ms glass-to-glass</li>
-        <li><strong>Image quality:</strong> Low — susceptible to multipath interference manifesting as color noise, horizontal bars</li>
-        <li><strong>Why still used for racing:</strong> Zero codec latency jitter (latency is always constant), extremely low cost, universal goggle compatibility, signal degrades gracefully (snow) vs digital cliff effect</li>
-    </ul>
-
-    <h4>Digital FPV Systems: Architecture and Latency</h4>
-    <table class="w-full text-left border-collapse mt-4 mb-6 text-sm">
-        <thead>
-            <tr class="bg-slate-800 text-sky-400">
-                <th class="p-3 border border-slate-700">System</th>
-                <th class="p-3 border border-slate-700">Resolution</th>
-                <th class="p-3 border border-slate-700">Latency (glass-to-glass)</th>
-                <th class="p-3 border border-slate-700">Architecture</th>
-                <th class="p-3 border border-slate-700">Primary Use</th>
-            </tr>
+    <div class="overflow-x-auto my-4">
+      <table class="w-full text-sm text-left">
+        <thead class="bg-slate-700 text-slate-300">
+          <tr>
+            <th class="p-3">Property</th>
+            <th class="p-3">FHSS</th>
+            <th class="p-3">DSSS</th>
+          </tr>
         </thead>
-        <tbody class="text-slate-300 text-xs">
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white font-bold">DJI O3</td>
-                <td class="p-3 border border-slate-700">1080p / 60fps</td>
-                <td class="p-3 border border-slate-700 text-amber-400">~22ms standard; Race Mode not available on O3</td>
-                <td class="p-3 border border-slate-700">Proprietary SDR waveform. DJI P1/S1 chipset with ARM cores (Linux), CEVA DSP for RF baseband. H.264/H.265 encoding.</td>
-                <td class="p-3 border border-slate-700">Freestyle, cinematic, inspection</td>
-            </tr>
-            <tr>
-                <td class="p-3 border border-slate-700 text-white font-bold">DJI O4 Air Unit <span class="text-xs text-emerald-400 block font-normal">Jan 2025</span></td>
-                <td class="p-3 border border-slate-700">1080p / 60fps; 4K/120fps recording; 1/1.3" sensor integrated</td>
-                <td class="p-3 border border-slate-700 text-emerald-400">~15ms (O4 Pro Race Mode); ~20ms (standard); 40–60ms (4K recording)</td>
-                <td class="p-3 border border-slate-700">Latest DJI system (released January 9, 2025). Integrated 4K camera vs O3's separate camera approach. Supports 8 aircraft simultaneously in Race Mode. 15km max range.</td>
-                <td class="p-3 border border-slate-700">Racing (Race Mode), cinematic</td>
-            </tr>
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white font-bold">HDZero</td>
-                <td class="p-3 border border-slate-700">1080p / 60fps; 720p / 60fps</td>
-                <td class="p-3 border border-slate-700 text-emerald-400">~16ms glass-to-glass; effectively analog-comparable</td>
-                <td class="p-3 border border-slate-700">Joint source-channel coding — encodes video and FEC in one pass, eliminating separate codec buffer. One-way (no bidirectional link negotiation). 5.8GHz.</td>
-                <td class="p-3 border border-slate-700">Racing (consistent latency), freestyle</td>
-            </tr>
-            <tr>
-                <td class="p-3 border border-slate-700 text-white font-bold">Walksnail Avatar</td>
-                <td class="p-3 border border-slate-700">1080p / 60fps</td>
-                <td class="p-3 border border-slate-700 text-amber-400">~22–30ms standard mode</td>
-                <td class="p-3 border border-slate-700">Based on Caddx technology. H.264 encoding. Bidirectional link for OSD injection. 5.8GHz.</td>
-                <td class="p-3 border border-slate-700">Freestyle, general HD</td>
-            </tr>
+        <tbody class="divide-y divide-slate-700 text-xs">
+          <tr class="bg-slate-800"><td class="p-3 text-white font-bold">Mechanism</td><td class="p-3 text-slate-300">Carrier hops across N channels over time</td><td class="p-3 text-slate-300">Data XORed with PN code, spreads bandwidth</td></tr>
+          <tr class="bg-slate-900"><td class="p-3 text-white font-bold">Best against</td><td class="p-3 text-emerald-400">Narrowband jamming, selective fading</td><td class="p-3 text-emerald-400">Wideband noise, multipath interference</td></tr>
+          <tr class="bg-slate-800"><td class="p-3 text-white font-bold">Weakness</td><td class="p-3 text-rose-400">Wideband jammer, if hop sequence known</td><td class="p-3 text-rose-400">Narrowband strong interferer can saturate front-end</td></tr>
+          <tr class="bg-slate-900"><td class="p-3 text-white font-bold">Sync requirement</td><td class="p-3 text-slate-300">Hop sequence + timing synchronization</td><td class="p-3 text-slate-300">PN code + chip timing synchronization</td></tr>
+          <tr class="bg-slate-800"><td class="p-3 text-white font-bold">Drone examples</td><td class="p-3 text-slate-300">ELRS, SiK telemetry, RFD900x</td><td class="p-3 text-slate-300">GPS L1/L2, legacy Spektrum DSM2</td></tr>
         </tbody>
-    </table>
+      </table>
+    </div>
 
-    <p><strong>Engineering rationale for analog in racing:</strong> Competitive FPV racing requires deterministic, jitter-free latency. DJI O3/O4 standard mode latency can vary frame-to-frame by ±5ms due to codec pipeline variations and channel adaptation. HDZero and analog maintain near-constant latency. For inspection, infrastructure survey, or BVLOS operations, digital systems are mandatory: they provide sufficient resolution to identify structural defects (cracks, corrosion), GPS coordinates embedded in the OSD, and superior link reliability before the signal cliff.</p>
-
-    <h3>6.4 Ground Data Links and Telemetry Modems</h3>
-    <p>Separate from the RC control link, long-range MAVLink telemetry uses dedicated radio modems operating on 900MHz or 433MHz for ground station (GCS) connectivity over kilometers.</p>
-
-    <h4>RFDesign RFD900x</h4>
-    <p>The RFD900x is the de-facto standard long-range telemetry modem for professional ArduPilot deployments. Key specifications:</p>
-    <ul class="text-slate-300 text-sm space-y-1">
-        <li><strong>Band:</strong> 902–928 MHz (US) — FCC approved</li>
-        <li><strong>Output power:</strong> Up to 1W (30 dBm)</li>
-        <li><strong>Receiver sensitivity:</strong> -121 dBm</li>
-        <li><strong>Demonstrated range:</strong> 40+ km with directional antennas</li>
-        <li><strong>Air data rates:</strong> Selectable: 4, 8, 16, 19, 24, 32, 48, 64, 96, 128, 192, 250 kbps</li>
-        <li><strong>UART baud rates:</strong> 9600 to 921600 baud (57600 default)</li>
-        <li><strong>Firmware:</strong> SiK (open-source) — custom fork with enhanced features; 32-bit ARM processor on board</li>
-        <li><strong>Network topologies:</strong> Point-to-point, multipoint asynchronous mesh</li>
-        <li><strong>Spread spectrum:</strong> FHSS (Frequency Hopping Spread Spectrum) — configurable hop channels</li>
-        <li><strong>MAVLink framing:</strong> Native — the modem understands MAVLink packet boundaries, avoids mid-packet fragmentation</li>
+    <h4>LPI/LPD and Anti-Jam Techniques for Military Operations</h4>
+    <p>Defense-grade links go beyond commercial FHSS to prevent detection and interception:</p>
+    <ul class="text-slate-300 text-sm space-y-2">
+        <li><strong>LPI (Low Probability of Intercept):</strong> Transmit at very low power, spread over wide bandwidth, use directional antennas. Power spectral density falls below the thermal noise floor over any narrow measurement band. An intercept receiver cannot distinguish the signal from noise without knowing the PN sequence.</li>
+        <li><strong>LPD (Low Probability of Detection):</strong> Similar to LPI but focused on energy detection — no signal feature that an energy detector can latch onto. Requires waveform design that minimizes spectral peaks.</li>
+        <li><strong>MIMO Spatial Multiplexing:</strong> Multiple antennas transmit independent data streams simultaneously in the same band, exploiting spatial diversity to increase throughput without increasing bandwidth or power. 2×2 MIMO doubles effective throughput; 4×4 MIMO quadruples it.</li>
+        <li><strong>Adaptive Beamforming:</strong> Phased array antennas steer the transmitted beam toward the intended receiver while placing nulls in the direction of jammers. Requires real-time direction-of-arrival estimation (MUSIC, ESPRIT algorithms). Silvus StreamCaster, Rajant BreadCrumb, and Doodle Labs Mesh Rider radios all implement variants of this.</li>
+        <li><strong>Frequency Agility / Cognitive Radio:</strong> Onboard spectrum sensing (SDR) detects occupied channels; the radio dynamically moves to clear spectrum. Requires &lt;50 ms channel assessment and switching time for practical BVLOS operations.</li>
     </ul>
 
-    <h4>SiK Firmware and Holybro/mRo SiK Radios</h4>
-    <p>SiK (Silicon Labs radio firmware) is the open-source firmware powering the 3DR, Holybro, and mRo telemetry radios. The Holybro SiK V3 and mRo SiK are lower-cost alternatives to RFD900x, using the HM-TRP module (SiLabs Si1000 chip):</p>
-    <ul class="text-slate-300 text-sm space-y-1">
-        <li><strong>Power:</strong> 20 dBm (100mW maximum)</li>
-        <li><strong>Sensitivity:</strong> -121 dBm</li>
-        <li><strong>Air data rate:</strong> Up to 250 kbps</li>
-        <li><strong>Range:</strong> ~300m to 2km typical with dipole antennas; several km with directional patch</li>
-        <li><strong>FHSS:</strong> Synchronous adaptive TDM with frequency hopping — the two radios synchronize hop patterns at startup</li>
-        <li><strong>Bands:</strong> 915 MHz (US) or 433 MHz (EU/Asia)</li>
-        <li><strong>Configuration:</strong> Via AT commands over serial — same AT command set as Hayes modem standard</li>
-    </ul>
+    <!-- ================================================================
+         6.5 MAVLink 2 SECURITY
+    ================================================================ -->
+    <h3>6.5 MAVLink 2 Security: Signed Messages and HMAC-SHA256</h3>
+    <p>MAVLink is the de-facto telemetry protocol for ArduPilot and PX4 autopilots. MAVLink 1 transmits in plaintext with no authentication. <strong>MAVLink 2</strong> (2017+) adds an optional 13-byte signature field providing message authentication.</p>
 
-    <h4>MAVLink Telemetry Bandwidth Requirements</h4>
-    <p>Sizing the telemetry link requires understanding the MAVLink message stream. A standard ArduPilot telemetry stream contains:</p>
+    <div class="bg-slate-800/60 border border-sky-700/60 rounded-xl p-6 mb-6">
+      <h3 class="text-sky-400 font-bold text-lg mb-3">MAVLink 2 Signature Architecture</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div>
+          <p class="text-slate-300 mb-2"><strong class="text-amber-400">Algorithm:</strong> SHA-256 truncated to 48 bits (6 bytes). Not a full HMAC-SHA256 — it is a keyed hash using the first 48 bits of the SHA-256 output.</p>
+          <p class="text-slate-300 mb-2"><strong class="text-amber-400">Signature input:</strong></p>
+          <div class="bg-slate-900 rounded p-3 font-mono text-xs text-slate-400 mb-2">
+            sig = sha256_48(<br>
+            &nbsp;&nbsp;secret_key (32 bytes)<br>
+            &nbsp;&nbsp;+ MAVLink header<br>
+            &nbsp;&nbsp;+ payload<br>
+            &nbsp;&nbsp;+ CRC<br>
+            &nbsp;&nbsp;+ link_id (1 byte)<br>
+            &nbsp;&nbsp;+ timestamp (6 bytes, 10µs units since 2015-01-01)
+            )
+          </div>
+        </div>
+        <div>
+          <p class="text-slate-300 mb-2"><strong class="text-amber-400">Key management:</strong> 32-byte binary secret key. Distribute via SETUP_SIGNING message over a physically secure link (USB or wired Ethernet only — never over the air link).</p>
+          <p class="text-slate-300 mb-2"><strong class="text-amber-400">Rejection rules — a packet is dropped if:</strong></p>
+          <ul class="text-slate-400 text-xs space-y-1">
+            <li>Timestamp older than previous packet from same stream (replay protection)</li>
+            <li>Computed 48-bit signature does not match packet signature</li>
+            <li>Timestamp more than 1 minute behind local system clock</li>
+            <li>Signing key not configured on receiving end</li>
+          </ul>
+          <p class="text-rose-400 text-xs mt-2"><strong>Important:</strong> MAVLink 2 signing provides authentication and replay protection — it does <em>not</em> provide confidentiality (encryption). The payload is still plaintext.</p>
+        </div>
+      </div>
+    </div>
 
+    <p class="text-slate-400 text-sm">
+      Reference:
+      <a href="https://mavlink.io/en/guide/message_signing.html" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">MAVLink Message Signing specification</a> |
+      <a href="https://mavlink.io/en/guide/mavlink_2.html" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">MAVLink 2 protocol guide</a>
+    </p>
+
+    <!-- ================================================================
+         6.6 VIDEO LINKS
+    ================================================================ -->
+    <h3>6.6 FPV Video Links: Analog vs Digital</h3>
+    <p>The FPV video link operates entirely separately from the RC control link. It runs drone-to-pilot (downlink) and uses completely different modulation. Latency characteristics determine which applications each system suits.</p>
+
+    <h4>Analog FPV</h4>
+    <p>Analog sends raw composite video (NTSC 480i / PAL 576i) from the VTX directly to goggles without digital encoding. No frame buffer, no codec, no processing delay. Glass-to-glass latency: <strong>3–5 ms</strong>. Still preferred for competitive racing because latency is deterministic (zero codec jitter) and signal degrades gracefully (noise/snow) rather than a digital cliff-effect dropout.</p>
+
+    <h4>Digital FPV Systems</h4>
+    <div class="overflow-x-auto my-4">
+      <table class="w-full text-sm text-left">
+        <thead class="bg-slate-700 text-slate-300">
+          <tr>
+            <th class="p-3">System</th>
+            <th class="p-3">Resolution</th>
+            <th class="p-3">Latency (glass-to-glass)</th>
+            <th class="p-3">Max Range</th>
+            <th class="p-3">Primary Use</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-700 text-xs">
+          <tr class="bg-slate-800">
+            <td class="p-3 text-white font-bold">DJI O3 Air Unit</td>
+            <td class="p-3 text-slate-300">1080p/100fps; 4K/60fps recording</td>
+            <td class="p-3 text-amber-400">~28 ms standard</td>
+            <td class="p-3 text-slate-300">10 km</td>
+            <td class="p-3 text-slate-300">Freestyle, cinematic, inspection</td>
+          </tr>
+          <tr class="bg-slate-900">
+            <td class="p-3 text-white font-bold">DJI O4 Air Unit Pro <span class="text-emerald-400">(Jan 2025)</span></td>
+            <td class="p-3 text-slate-300">1080p/120fps FPV; 4K/60fps recording; 1/1.3" CMOS integrated</td>
+            <td class="p-3 text-emerald-400">~15 ms (Race Mode); ~25 ms standard</td>
+            <td class="p-3 text-slate-300">15 km</td>
+            <td class="p-3 text-slate-300">Racing (Race Mode), cinematic; 40 Mbps video bitrate</td>
+          </tr>
+          <tr class="bg-slate-800">
+            <td class="p-3 text-white font-bold">HDZero</td>
+            <td class="p-3 text-slate-300">1080p/60fps; 720p/60fps</td>
+            <td class="p-3 text-emerald-400">~16 ms — analog-comparable</td>
+            <td class="p-3 text-slate-300">~2 km (5.8 GHz)</td>
+            <td class="p-3 text-slate-300">Racing — consistent latency, open ecosystem</td>
+          </tr>
+          <tr class="bg-slate-900">
+            <td class="p-3 text-white font-bold">Walksnail Avatar</td>
+            <td class="p-3 text-slate-300">1080p/60fps</td>
+            <td class="p-3 text-amber-400">~22–30 ms standard</td>
+            <td class="p-3 text-slate-300">~4 km</td>
+            <td class="p-3 text-slate-300">Freestyle, general HD FPV</td>
+          </tr>
+          <tr class="bg-slate-800">
+            <td class="p-3 text-white font-bold">Connex ProSight HX</td>
+            <td class="p-3 text-slate-300">720p/60fps uncompressed</td>
+            <td class="p-3 text-emerald-400">&lt;1 ms (uncompressed WHDI)</td>
+            <td class="p-3 text-slate-300">300–1000 m LOS</td>
+            <td class="p-3 text-slate-300">Uncompressed latency-free — legacy racing</td>
+          </tr>
+          <tr class="bg-slate-900">
+            <td class="p-3 text-white font-bold">COFDM (military/pro)</td>
+            <td class="p-3 text-slate-300">HD/4K depending on system</td>
+            <td class="p-3 text-amber-400">200–500 ms (H.264 codec pipeline)</td>
+            <td class="p-3 text-slate-300">10–50 km (directional antenna)</td>
+            <td class="p-3 text-slate-300">ISR, law enforcement, NLOS penetration</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ================================================================
+         6.7 GROUND DATA LINKS, TELEMETRY, BLOS
+    ================================================================ -->
+    <h3>6.7 Ground Data Links: Telemetry, BLOS, and C2</h3>
+
+    <h4>RFDesign RFD900x — Long-Range Telemetry Modem</h4>
+    <p>The RFD900x is the de-facto standard long-range MAVLink telemetry modem for professional ArduPilot deployments. Key specs: 902–928 MHz (US FCC approved), 1 W output, −121 dBm sensitivity, 40+ km with directional antennas, selectable 4–250 kbps air data rate, SiK firmware (open-source), FHSS across configurable hop channels, native MAVLink framing (no mid-packet fragmentation), multipoint mesh topology support.</p>
+
+    <h4>MAVLink Telemetry Bandwidth Budget</h4>
     <div class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden mb-6">
-        <div class="px-4 py-3 bg-slate-800 text-xs font-mono text-slate-400 uppercase tracking-widest">MAVLink Bandwidth Budget — Typical GCS Stream</div>
+        <div class="px-4 py-3 bg-slate-800 text-xs font-mono text-slate-400 uppercase tracking-widest">Typical ArduPilot GCS Stream</div>
         <table class="w-full text-xs font-mono">
             <thead><tr class="bg-slate-800/50 text-slate-400"><th class="p-3 text-left">Message</th><th class="p-3 text-left">Rate</th><th class="p-3 text-left">Size</th><th class="p-3 text-left">Bandwidth</th></tr></thead>
             <tbody class="text-slate-300">
@@ -312,129 +473,297 @@ export default `
             </tbody>
         </table>
         <div class="p-3 bg-slate-800/30 text-xs font-mono text-slate-400 border-t border-slate-700 grid grid-cols-3 gap-3">
-            <div><span class="text-white">Minimum viable:</span> ~2400 baud (1Hz streams)</div>
-            <div><span class="text-white">Standard GCS:</span> ~9600 baud (10Hz pos/att)</div>
-            <div><span class="text-emerald-400">Recommended:</span> 57600 baud (full logging)</div>
+            <div><span class="text-white">Minimum viable:</span> ~2400 baud</div>
+            <div><span class="text-white">Standard GCS:</span> ~9600 baud</div>
+            <div><span class="text-emerald-400">Recommended:</span> 57600 baud</div>
         </div>
     </div>
 
-    <h3>6.5 Encrypted and Secure RF Links</h3>
-    <p>Standard consumer RC links (ELRS, FrSky) transmit in plaintext. An adversary with a spectrum analyzer can decode control packets. For professional and defense applications, purpose-built encrypted links are required.</p>
-
-    <h4>Why Standard RC Links Are Not Encrypted</h4>
-    <p>AES-128 encryption adds computational overhead and complicates key management. For hobby RC use, the threat model does not include adversarial interception. Crossfire (TBS) is an exception — it implements AES-128, but this is a proprietary implementation. ELRS explicitly documents that it provides no encryption and is not jam-resistant.</p>
-
-    <h4>Military and Professional Encrypted Links</h4>
-    <ul class="text-slate-300 text-sm space-y-2">
-        <li><strong>Silvus Technologies StreamCaster (SC4400E, SC4200EP):</strong> MANET (Mobile Ad-hoc Network) radios for UAV swarms. AES-256 + FIPS 140-3 Level 2 certified encryption. Proprietary MN-MIMO waveform. Up to 10W TX power. Spectrum Dominance 2.0 suite: LPI/LPD (Low Probability of Intercept/Detection), anti-jamming, advanced threat protection. DoD certified for US military drone operations. Supports hundreds of nodes simultaneously. Used in intelligence, surveillance, and reconnaissance (ISR) platforms.</li>
-        <li><strong>DragonLink:</strong> Long-range RC link with AES-128 encryption, 433MHz, 1.3GHz or 900MHz operation, marketed for professional BVLOS.</li>
-        <li><strong>DJI Lightbridge / OcuSync:</strong> Proprietary SDR-based link with encryption, used in commercial DJI platforms. Not openly documented.</li>
+    <h4>4G LTE / 5G Cellular BLOS C2 Links</h4>
+    <p>Cellular networks provide beyond-line-of-sight (BLOS) C2 without dedicated RF infrastructure. The FAA approved 203 BVLOS waivers in 2024 (25% of all Part 107 waivers). Key characteristics:</p>
+    <ul class="text-slate-300 text-sm space-y-1">
+        <li><strong>LTE latency:</strong> 30–100 ms one-way — acceptable for autonomous waypoint following but marginal for manual control</li>
+        <li><strong>5G Sub-6 GHz latency:</strong> 10–30 ms one-way; 5G mmWave: &lt;10 ms but requires line-of-sight to base station</li>
+        <li><strong>Coverage limitation:</strong> Cellular coverage exists at ground level, not necessarily at altitude. At 120 m AGL, drone may connect to multiple cell towers simultaneously — can cause handoff issues</li>
+        <li><strong>Reliability requirement:</strong> FAA C2 link design requires &lt;500 ms command latency for most BVLOS operations. LTE meets this; network congestion can violate it</li>
+        <li><strong>Best practice:</strong> Use LTE as primary BLOS link with 900 MHz FHSS radio as redundant backup. Dual-modem approach (LTE + RC) is standard for professional BVLOS platforms</li>
     </ul>
 
-    <h4>FHSS for Jam Resistance</h4>
-    <p>Frequency Hopping Spread Spectrum (FHSS) pseudo-randomly hops the carrier frequency across a pre-agreed channel list on each packet. A narrowband jammer on a single frequency can only block the fraction of time spent on that frequency. A broadband noise jammer must spread power across the entire hop bandwidth, dramatically reducing effective jamming power spectral density (PSD).</p>
-
-    <div class="insight-box mb-6">
-        <div class="insight-label">FHSS Jam Resistance</div>
-        <p class="text-slate-200 text-sm mt-1">A SiK radio hopping across 50 × 125kHz channels spreads its signal over 6.25MHz. A narrowband jammer on a single channel only disrupts 1/50th of the packets. A broadband jammer must spread its power across all 6.25MHz, gaining only 17 dB of processing gain advantage against it. <strong>Important caveat:</strong> FHSS reduces but does not eliminate jamming effectiveness, and does not prevent detection or decoding by a sophisticated adversary with a wideband receiver.</p>
+    <h4>Satellite Links: Iridium 9603 and Starlink</h4>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+      <div class="bg-slate-900 p-4 rounded border-l-4 border-sky-500">
+        <strong class="text-sky-400 uppercase text-xs tracking-widest block mb-2">Iridium 9603 SBD</strong>
+        <ul class="text-slate-300 text-xs space-y-1">
+          <li><strong>Constellation:</strong> 66 LEO satellites — true polar global coverage</li>
+          <li><strong>Protocol:</strong> Short Burst Data (SBD) — packet-based, not streaming</li>
+          <li><strong>Message size:</strong> MO: 340 bytes max; MT: 270 bytes max</li>
+          <li><strong>Latency:</strong> 20–60 seconds per message; 30 s minimum interval between transmissions</li>
+          <li><strong>Power:</strong> 1.5–1.8 W peak TX; ~34 mA standby</li>
+          <li><strong>Module dimensions:</strong> 42.8 × 29.0 × 7.0 mm — world's smallest satellite module</li>
+          <li><strong>Use on drones:</strong> RockBLOCK integration with ArduPilot for telemetry-over-satellite in oceanic/polar BLOS operations; heartbeat and position reports only — not suitable for realtime control</li>
+        </ul>
+      </div>
+      <div class="bg-slate-900 p-4 rounded border-l-4 border-emerald-500">
+        <strong class="text-emerald-400 uppercase text-xs tracking-widest block mb-2">Starlink (LEO Broadband)</strong>
+        <ul class="text-slate-300 text-xs space-y-1">
+          <li><strong>Constellation:</strong> 6,000+ LEO satellites at ~550 km orbit</li>
+          <li><strong>Latency:</strong> 20–50 ms typical; engineering target 20 ms (2025+)</li>
+          <li><strong>Throughput:</strong> 50–250 Mbps down; 10–40 Mbps up typical</li>
+          <li><strong>Aviation:</strong> Demonstrated 64 Mbps down, 24 Mbps up in-flight; suitable for real-time HD video downlink from UAV</li>
+          <li><strong>Terminal weight:</strong> Starlink Maritime/Aviation — too heavy for small UAV (3.5 kg terminal). Mini terminal announced for mobile platforms</li>
+          <li><strong>Use on UAV:</strong> Large MALE/HALE UAVs (Predator-class), persistent ISR platforms; not yet viable for sub-25 kg UAVs</li>
+        </ul>
+      </div>
     </div>
 
-    <h3>6.6 Software Defined Radio (SDR) for RF Awareness</h3>
-    <p>A drone equipped with an SDR can monitor its own RF environment — detecting interference sources, identifying occupied channels, and even sniffing RF emissions from nearby threats. SDR moves RF signal processing from dedicated hardware into software running on a general-purpose CPU or GPU.</p>
+    <!-- ================================================================
+         6.8 MESH NETWORKING
+    ================================================================ -->
+    <h3>6.8 Mesh Networking for UAV Swarms</h3>
+    <p>A mesh network allows every node to relay traffic for other nodes, creating a self-healing topology where no single link failure can isolate a node. This is critical for drone swarms operating beyond the range of a single GCS radio.</p>
 
-    <h4>SDR Hardware Platforms</h4>
-    <table class="w-full text-left border-collapse mt-4 mb-6 text-sm">
-        <thead>
-            <tr class="bg-slate-800 text-sky-400">
-                <th class="p-3 border border-slate-700">Platform</th>
-                <th class="p-3 border border-slate-700">Frequency Range</th>
-                <th class="p-3 border border-slate-700">Sample Rate</th>
-                <th class="p-3 border border-slate-700">TX Capable</th>
-                <th class="p-3 border border-slate-700">Cost</th>
-                <th class="p-3 border border-slate-700">Key Notes</th>
-            </tr>
-        </thead>
-        <tbody class="text-slate-300 text-xs">
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white font-bold">RTL-SDR</td>
-                <td class="p-3 border border-slate-700">24 MHz – 1.766 GHz</td>
-                <td class="p-3 border border-slate-700">2.56 Msps</td>
-                <td class="p-3 border border-slate-700 text-rose-400">No (RX only)</td>
-                <td class="p-3 border border-slate-700 text-emerald-400">~$30</td>
-                <td class="p-3 border border-slate-700">RTL2832U + R820T2 tuner. Originally DVB-T USB dongle. Ideal for spectrum monitoring, ADS-B, ACARS. Cannot cover 5.8GHz.</td>
-            </tr>
-            <tr>
-                <td class="p-3 border border-slate-700 text-white font-bold">HackRF One</td>
-                <td class="p-3 border border-slate-700">1 MHz – 6 GHz</td>
-                <td class="p-3 border border-slate-700">20 Msps</td>
-                <td class="p-3 border border-slate-700 text-emerald-400">Yes (half-duplex)</td>
-                <td class="p-3 border border-slate-700 text-amber-400">~$300</td>
-                <td class="p-3 border border-slate-700">Open hardware. Covers entire 5.8GHz FPV band. Half-duplex (cannot TX and RX simultaneously). Max TX: 10–15 dBm.</td>
-            </tr>
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white font-bold">ADALM-PLUTO</td>
-                <td class="p-3 border border-slate-700">325 MHz – 3.8 GHz (hack: ~70 MHz–6 GHz)</td>
-                <td class="p-3 border border-slate-700">61.44 Msps</td>
-                <td class="p-3 border border-slate-700 text-emerald-400">Yes (full-duplex)</td>
-                <td class="p-3 border border-slate-700 text-amber-400">~$250</td>
-                <td class="p-3 border border-slate-700">Analog Devices AD9361 transceiver. Full-duplex simultaneous TX+RX. Excellent for 900MHz and 2.4GHz drone bands. MATLAB/Python SDK. Best for on-drone RF sensing.</td>
-            </tr>
-        </tbody>
-    </table>
+    <figure class="my-6">
+      <img src="images/m6_mesh_topology.svg" alt="Mesh network topology showing nodes connected to multiple peers with redundant paths" class="rounded-lg w-full max-w-xl mx-auto bg-white p-4">
+      <figcaption class="text-gray-400 text-sm text-center mt-2">Full mesh topology: every node maintains direct links to all peers, providing maximum redundancy. In UAV swarms, partial mesh (each node links to 2–4 neighbors) is more practical. Source: <a href="https://commons.wikimedia.org/wiki/File:NetworkTopology-Mesh.svg" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">Wikimedia Commons</a> (public domain, Foobaz/Rehua)</figcaption>
+    </figure>
 
-    <h4>Software Stacks for RF Monitoring</h4>
-    <ul class="text-slate-300 text-sm space-y-2">
-        <li><strong>GNU Radio:</strong> The standard open-source signal processing framework. Python + C++ flowgraph model. Block-based processing pipeline. Can run on embedded Linux (Raspberry Pi, Jetson) at reduced sample rates. Use case: custom signal detectors for specific drone RC protocols.</li>
-        <li><strong>SDRAngel:</strong> Full-featured open-source TX/RX SDR application. Supports RTL-SDR, HackRF, ADALM-PLUTO, LimeSDR. Built-in demodulators for AM, FM, SSB, LoRa, ADS-B, AIS. Key for on-drone spectrum awareness: can detect ELRS, Crossfire, 5.8GHz FPV channels in real-time, flag occupied channels.</li>
-        <li><strong>Deployment on drone:</strong> ADALM-PLUTO via USB 2.0 to Jetson Orin NX. GNU Radio flowgraph monitors 2.4GHz and 5.8GHz simultaneously using spectrum sensing. Detected interference triggers automatic channel migration in the ground station link.</li>
+    <h4>Doodle Labs Mesh Rider Radio (RM-2450)</h4>
+    <p>The Doodle Labs RM-2450 is the most widely deployed commercial drone mesh radio as of 2025, used in defense, infrastructure inspection, and public safety UAV platforms.</p>
+    <ul class="text-slate-300 text-sm space-y-1">
+        <li><strong>Band:</strong> 2.4–2.482 GHz (WiFi band); also available in 900 MHz (RM-915) and 4.9/5.8 GHz variants</li>
+        <li><strong>MIMO:</strong> 2×2 MIMO — two independent spatial streams</li>
+        <li><strong>Throughput:</strong> 100 Mbps (40 MHz channel), 80 Mbps (20 MHz), 40 Mbps (10 MHz)</li>
+        <li><strong>Latency:</strong> 3–30 ms for command &amp; control channel (URLLC mode)</li>
+        <li><strong>Range:</strong> Field-proven &gt;100 km (LOS, directional antennas)</li>
+        <li><strong>Topology modes:</strong> Mesh, AP, Client, Bridge, Internet Gateway — reconfigurable in flight</li>
+        <li><strong>Security:</strong> AES encryption, MIL-spec rugged construction, IP66</li>
+        <li><strong>SWaP:</strong> Low size-weight-power-cost (SWaP-C) — optimized for drone integration</li>
+        <li><strong>Protocol:</strong> Doodle Labs proprietary Mesh Rider protocol — not standard 802.11 mesh (802.11s)</li>
+    </ul>
+    <p class="text-slate-400 text-sm mt-2">Reference: <a href="https://doodlelabs.com" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">Doodle Labs product catalog</a></p>
+
+    <h4>Rajant Kinetic Mesh (BreadCrumb Radios)</h4>
+    <p>Rajant's BreadCrumb radios use InstaMesh protocol — a patented multi-radio, multi-hop MANET architecture used extensively in US military and mining operations. Key attributes:</p>
+    <ul class="text-slate-300 text-sm space-y-1">
+        <li><strong>Finch module (DX5):</strong> 47 g without heatsinks — designed for UAV swarm integration</li>
+        <li><strong>DX Series:</strong> Up to 1.7 Gbps aggregate throughput with 2×2 MIMO; 2.2 GHz high-power radio delivers 6 W TX</li>
+        <li><strong>Frequency agility:</strong> Simultaneously operates on multiple frequency bands (900 MHz, 2.4 GHz, 5.8 GHz) using separate radios per node</li>
+        <li><strong>Security:</strong> AES-256, FIPS 140-2, SNMPv3, TLS</li>
+        <li><strong>Self-healing:</strong> InstaMesh autonomously re-routes within milliseconds of link failure — no GCS coordination required</li>
+        <li><strong>Military use:</strong> US Army, USMC, NATO partners; used in ISR drone swarms and autonomous ground vehicle comms</li>
     </ul>
 
-    <h3>6.7 Multi-Drone RF Spectrum Management</h3>
-    <p>Operating swarms of drones in the same airspace creates a self-interference problem: multiple drones sharing the same RF band must coordinate to avoid packet collisions and mutual jamming.</p>
+    <h4>RF Link Comparison: ELRS vs Crossfire vs Doodle Labs vs 4G LTE</h4>
+    <div class="overflow-x-auto my-4">
+      <table class="w-full text-sm text-left">
+        <thead class="bg-slate-700 text-slate-300">
+          <tr>
+            <th class="p-3">Parameter</th>
+            <th class="p-3">ELRS 900 MHz</th>
+            <th class="p-3">TBS Crossfire</th>
+            <th class="p-3">Doodle Labs RM-2450</th>
+            <th class="p-3">4G LTE Cellular</th>
+            <th class="p-3">Rajant Finch</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-700 text-xs">
+          <tr class="bg-slate-800">
+            <td class="p-3 text-white font-bold">Primary use</td>
+            <td class="p-3 text-slate-300">RC control</td>
+            <td class="p-3 text-slate-300">RC control</td>
+            <td class="p-3 text-slate-300">Data / mesh / video</td>
+            <td class="p-3 text-slate-300">BLOS C2 + data</td>
+            <td class="p-3 text-slate-300">Military mesh</td>
+          </tr>
+          <tr class="bg-slate-900">
+            <td class="p-3 text-white font-bold">Typical range</td>
+            <td class="p-3 text-emerald-400">30+ km</td>
+            <td class="p-3 text-emerald-400">40+ km</td>
+            <td class="p-3 text-emerald-400">100+ km (LOS)</td>
+            <td class="p-3 text-amber-400">Coverage-dependent</td>
+            <td class="p-3 text-emerald-400">Multi-hop unlimited</td>
+          </tr>
+          <tr class="bg-slate-800">
+            <td class="p-3 text-white font-bold">Throughput</td>
+            <td class="p-3 text-slate-300">~1 kbps telemetry</td>
+            <td class="p-3 text-slate-300">~1 kbps telemetry</td>
+            <td class="p-3 text-emerald-400">100 Mbps</td>
+            <td class="p-3 text-emerald-400">10–150 Mbps</td>
+            <td class="p-3 text-emerald-400">1.7 Gbps aggregate</td>
+          </tr>
+          <tr class="bg-slate-900">
+            <td class="p-3 text-white font-bold">Latency</td>
+            <td class="p-3 text-emerald-400">1–40 ms</td>
+            <td class="p-3 text-emerald-400">6.7 ms (150 Hz)</td>
+            <td class="p-3 text-emerald-400">3–30 ms</td>
+            <td class="p-3 text-amber-400">30–100 ms</td>
+            <td class="p-3 text-emerald-400">&lt;10 ms</td>
+          </tr>
+          <tr class="bg-slate-800">
+            <td class="p-3 text-white font-bold">Encryption</td>
+            <td class="p-3 text-rose-400">None</td>
+            <td class="p-3 text-amber-400">AES-128</td>
+            <td class="p-3 text-emerald-400">AES</td>
+            <td class="p-3 text-emerald-400">LTE/5G built-in</td>
+            <td class="p-3 text-emerald-400">AES-256 FIPS 140-2</td>
+          </tr>
+          <tr class="bg-slate-900">
+            <td class="p-3 text-white font-bold">Infrastructure needed</td>
+            <td class="p-3 text-emerald-400">None (P2P)</td>
+            <td class="p-3 text-emerald-400">None (P2P)</td>
+            <td class="p-3 text-emerald-400">Self-forming mesh</td>
+            <td class="p-3 text-rose-400">Carrier towers</td>
+            <td class="p-3 text-emerald-400">Self-forming mesh</td>
+          </tr>
+          <tr class="bg-slate-800">
+            <td class="p-3 text-white font-bold">Cost</td>
+            <td class="p-3 text-emerald-400">~$20–100</td>
+            <td class="p-3 text-amber-400">~$200–400</td>
+            <td class="p-3 text-rose-400">~$1,500–3,000</td>
+            <td class="p-3 text-amber-400">~$50–200 + SIM</td>
+            <td class="p-3 text-rose-400">$5,000–15,000+</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-    <h4>TDMA (Time Division Multiple Access) in UAV Swarms</h4>
-    <p>TDMA divides time into fixed slots and assigns each drone exclusive use of the channel during its slot. A Ground Control Station (GCS) or elected master node allocates slots via a centralized schedule. Dynamic TDMA adapts slot allocation in real-time based on data demand and Quality of Service (QoS) requirements. Critical requirement: clock synchronization — all nodes must share a common time reference (typically GPS PPS signal, ±100ns accuracy) to respect slot boundaries. Doppler frequency shift in fast-moving UAVs can cause slot boundary drift, requiring guard intervals between slots.</p>
-
-    <h4>FDMA (Frequency Division Multiple Access)</h4>
-    <p>FDMA assigns each drone a separate sub-channel within the available spectrum. Simpler than TDMA (no synchronization required), but each node gets a narrower bandwidth slice, reducing throughput per node. Typical approach: divide the 2.4GHz ISM band into non-overlapping FHSS channel groups, with each drone or sub-swarm assigned a disjoint group. Interference between groups is bounded by adjacent-channel rejection of the transceiver front-end.</p>
-
-    <h4>Cognitive Radio and Dynamic Spectrum Access</h4>
-    <p>The state-of-the-art for large swarms uses Cognitive Radio Network (CRN) principles: each drone monitors spectrum occupancy in real-time (using onboard SDR or spectrum scanner), and the system opportunistically uses clear channels. A centralized spectrum coordinator (GCS or elected cluster head) collects occupancy data from all nodes and runs a spectrum allocation algorithm — essentially a constraint satisfaction problem minimizing inter-node interference while satisfying per-link throughput requirements. Silvus StreamCaster radios implement this via their MN-MIMO waveform with spatial multiplexing: multiple MIMO streams can coexist spatially because directional antenna beams provide spatial isolation.</p>
+    <!-- ================================================================
+         6.9 SPECTRUM MANAGEMENT IN SWARMS
+    ================================================================ -->
+    <h3>6.9 Multi-Drone RF Spectrum Management</h3>
+    <p>Operating drone swarms in the same airspace creates a self-interference problem. Multiple drones sharing the same RF band must coordinate to avoid packet collisions and mutual jamming.</p>
 
     <div class="interactive-panel">
-        <h4 class="mt-0 text-white border-none">Swarm RF Architecture Decision Matrix</h4>
+        <h4 class="mt-0 text-white border-none">Swarm RF Access Strategy Matrix</h4>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
             <div class="bg-slate-900 p-3 rounded border border-slate-700">
-                <strong class="text-sky-400 block mb-2">TDMA — Best For</strong>
+                <strong class="text-sky-400 block mb-2">TDMA (Time Division)</strong>
+                <p class="text-slate-400 mb-2">Fixed time slots per node. Requires GPS PPS ±100 ns sync. Deterministic latency — ideal for military C2.</p>
                 <ul class="text-slate-400 space-y-1">
-                    <li>Deterministic latency requirements</li>
-                    <li>GPS-synchronized nodes</li>
-                    <li>Known, fixed swarm size</li>
-                    <li>Low-mobility ground nodes</li>
-                    <li>Military command/control links</li>
+                    <li>Best: known fixed swarm size, low-mobility ground nodes</li>
+                    <li>Weakness: slot waste when idle, clock drift in fast UAVs</li>
                 </ul>
             </div>
             <div class="bg-slate-900 p-3 rounded border border-slate-700">
-                <strong class="text-amber-400 block mb-2">FDMA — Best For</strong>
+                <strong class="text-amber-400 block mb-2">FDMA (Frequency Division)</strong>
+                <p class="text-slate-400 mb-2">Disjoint FHSS channel groups per sub-swarm. No sync required. Bandwidth per node decreases as swarm grows.</p>
                 <ul class="text-slate-400 space-y-1">
-                    <li>Simple implementation</li>
-                    <li>No synchronization infrastructure</li>
-                    <li>Small swarms (&lt;10 drones)</li>
-                    <li>Heterogeneous hardware</li>
-                    <li>Consumer-grade FPV swarms</li>
+                    <li>Best: small swarms (&lt;10), heterogeneous hardware</li>
+                    <li>Weakness: fixed allocation, spectrum inefficient at scale</li>
                 </ul>
             </div>
             <div class="bg-slate-900 p-3 rounded border border-slate-700">
-                <strong class="text-emerald-400 block mb-2">CDMA/Cognitive — Best For</strong>
+                <strong class="text-emerald-400 block mb-2">Cognitive / CDMA</strong>
+                <p class="text-slate-400 mb-2">Onboard SDR monitors occupancy. Centralized spectrum coordinator allocates channels dynamically. MIMO spatial multiplexing for co-channel isolation.</p>
                 <ul class="text-slate-400 space-y-1">
-                    <li>Large swarms (100+ nodes)</li>
-                    <li>Dynamic entry/exit of nodes</li>
-                    <li>Contested RF environments</li>
-                    <li>Maximum spectrum efficiency</li>
-                    <li>ISR and defense applications</li>
+                    <li>Best: 100+ nodes, contested RF environments, ISR/defense</li>
+                    <li>Weakness: computational overhead, requires coordination infrastructure</li>
                 </ul>
             </div>
         </div>
     </div>
+
+    <!-- ================================================================
+         6.10 SHORT-RANGE: BLUETOOTH 5 AND UWB
+    ================================================================ -->
+    <h3>6.10 Short-Range RF: Bluetooth 5 Coded PHY and UWB Precision Landing</h3>
+
+    <h4>Bluetooth 5 LE Coded PHY (Long Range)</h4>
+    <p>Bluetooth 5.0 introduced the LE Coded PHY mode specifically for long-range, low-bandwidth applications. The physical layer uses 1 Mchip/s but encodes data at lower rates using forward error correction:</p>
+    <ul class="text-slate-300 text-sm space-y-1">
+        <li><strong>LE Coded S=2 (500 kbps):</strong> Each data bit encoded as 2 chips. ~2× range vs BLE 1M PHY. Sensitivity improvement ~4 dB.</li>
+        <li><strong>LE Coded S=8 (125 kbps):</strong> Each data bit encoded as 8 chips. ~4× range vs BLE 1M PHY. Sensitivity improvement ~6 dB. Range of 1 km+ demonstrated in open field.</li>
+        <li><strong>Drone telemetry use:</strong> 125 kbps is sufficient for slow telemetry (position, battery, status) from a nearby base station. Not suitable for video or high-rate MAVLink streams. Used in precision landing beacons, companion computer-to-phone configuration interfaces, and sUAS asset tracking.</li>
+    </ul>
+    <div class="bg-slate-800/60 border border-rose-700/40 rounded-xl p-4 mb-4">
+      <p class="text-rose-400 text-sm font-bold mb-1">Common Error to Avoid</p>
+      <p class="text-slate-300 text-sm">BT5 Coded PHY data rates are <strong>125 kbps or 500 kbps</strong> — not higher. The underlying chip rate is 1 Mchip/s but this is not the data rate. Any source citing BT5 Coded PHY rates above 500 kbps is incorrect. Standard BLE 1M and 2M PHY modes (1 Mbps and 2 Mbps) are different modes without the extended range FEC coding.</p>
+    </div>
+
+    <h4>UWB (Ultra-Wideband) for Precision Landing</h4>
+    <p>UWB uses nanosecond pulses spread across &gt;500 MHz bandwidth (IEEE 802.15.4a/4z standard, 3.1–10.6 GHz). The wide bandwidth enables time-of-flight ranging with centimeter-level precision — unachievable with narrowband RF.</p>
+    <ul class="text-slate-300 text-sm space-y-1">
+        <li><strong>Ranging precision:</strong> ±10 cm (Decawave/Qorvo DW1000, DWM1000 modules)</li>
+        <li><strong>Range:</strong> 10–100 m typical for drone landing applications</li>
+        <li><strong>Typical architecture:</strong> 3–4 UWB anchors placed around the landing pad; 1 UWB tag on the drone. Two-way ranging (TWR) or Time Difference of Arrival (TDoA) computes 3D position.</li>
+        <li><strong>GNSS-denied operation:</strong> UWB works indoors, in GPS-denied urban canyons, and under signal jamming — key for military precision landing on ship decks or inside hangars</li>
+        <li><strong>ArduPilot integration:</strong> UWB position estimates fed into EKF as beacon-based position source via MAVLink LANDING_TARGET messages</li>
+        <li><strong>Modules:</strong> Qorvo DW1000/DW3000 (formerly Decawave), NXP SR040, Apple/Google U1 chip (consumer variant)</li>
+    </ul>
+
+    <!-- ================================================================
+         VIDEO EMBEDS
+    ================================================================ -->
+    <h3>6.11 Video Resources</h3>
+
+    <div class="my-8">
+      <h3 class="text-xl font-bold text-white mb-3">The Ultimate ExpressLRS Range Test — 100 km</h3>
+      <p class="text-slate-400 text-sm mb-3">A field demonstration pushing ELRS 900 MHz to extreme range, illustrating the link budget principles covered in this module — receiver sensitivity, FSPL, and antenna gain all visible in practice.</p>
+      <div class="relative w-full" style="padding-bottom: 56.25%;">
+        <iframe class="absolute inset-0 w-full h-full rounded-lg" src="https://www.youtube.com/embed/CYJ2UOrlXgM" title="The Ultimate ExpressLRS Range Test - 100KM" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+      </div>
+    </div>
+
+    <div class="my-8">
+      <h3 class="text-xl font-bold text-white mb-3">Link Budget Explained — Formula and Calculation</h3>
+      <p class="text-slate-400 text-sm mb-3">Fundamental RF link budget methodology — FSPL formula, received power calculation, and link margin — directly applicable to drone RF system design covered in Section 6.2.</p>
+      <div class="relative w-full" style="padding-bottom: 56.25%;">
+        <iframe class="absolute inset-0 w-full h-full rounded-lg" src="https://www.youtube.com/embed/M4uwV8HUDOI" title="Link Budget Explained | Formula and Calculation | Wireless Communication" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+      </div>
+    </div>
+
+    <!-- ================================================================
+         6.12 SDR FOR RF AWARENESS
+    ================================================================ -->
+    <h3>6.12 Software Defined Radio (SDR) for RF Awareness</h3>
+    <p>A drone equipped with an SDR can monitor its own RF environment — detecting interference sources, identifying occupied channels, and sniffing RF emissions from threats. SDR moves RF signal processing from dedicated hardware into software on a general-purpose CPU or GPU.</p>
+
+    <div class="overflow-x-auto my-4">
+      <table class="w-full text-sm text-left">
+        <thead class="bg-slate-700 text-slate-300">
+          <tr>
+            <th class="p-3">Platform</th>
+            <th class="p-3">Frequency Range</th>
+            <th class="p-3">Sample Rate</th>
+            <th class="p-3">TX Capable</th>
+            <th class="p-3">Cost</th>
+            <th class="p-3">Key Notes</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-700 text-xs">
+          <tr class="bg-slate-800">
+            <td class="p-3 text-white font-bold">RTL-SDR v3</td>
+            <td class="p-3 text-slate-300">500 kHz–1.766 GHz</td>
+            <td class="p-3 text-slate-300">2.56 Msps</td>
+            <td class="p-3 text-rose-400">No (RX only)</td>
+            <td class="p-3 text-emerald-400">~$30</td>
+            <td class="p-3 text-slate-300">RTL2832U + R820T2. ADS-B, ACARS, ELRS monitoring. Cannot cover 5.8 GHz.</td>
+          </tr>
+          <tr class="bg-slate-900">
+            <td class="p-3 text-white font-bold">HackRF One</td>
+            <td class="p-3 text-slate-300">1 MHz–6 GHz</td>
+            <td class="p-3 text-slate-300">20 Msps</td>
+            <td class="p-3 text-emerald-400">Yes (half-duplex)</td>
+            <td class="p-3 text-amber-400">~$300</td>
+            <td class="p-3 text-slate-300">Open hardware. Covers 5.8 GHz FPV band. Max TX 10–15 dBm.</td>
+          </tr>
+          <tr class="bg-slate-800">
+            <td class="p-3 text-white font-bold">ADALM-PLUTO</td>
+            <td class="p-3 text-slate-300">325 MHz–3.8 GHz (hacked: ~70 MHz–6 GHz)</td>
+            <td class="p-3 text-slate-300">61.44 Msps</td>
+            <td class="p-3 text-emerald-400">Yes (full-duplex)</td>
+            <td class="p-3 text-amber-400">~$250</td>
+            <td class="p-3 text-slate-300">AD9361 transceiver. Simultaneous TX+RX. Best for on-drone RF sensing at 900 MHz and 2.4 GHz.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="text-slate-400 text-sm">
+      Deployment pattern: ADALM-PLUTO via USB 2.0 to Jetson Orin NX. GNU Radio flowgraph monitors 2.4 GHz and 5.8 GHz simultaneously. Detected interference triggers automatic channel migration in the ground station link. References:
+      <a href="https://www.rtl-sdr.com" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">RTL-SDR project</a> |
+      <a href="https://greatscottgadgets.com/hackrf/" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">HackRF One (Great Scott Gadgets)</a>
+    </p>
+
 </div>
 `;

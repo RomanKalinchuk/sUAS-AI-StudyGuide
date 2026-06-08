@@ -41,6 +41,14 @@ export default `
     </ul>
     <p>With all five rules, the swarm autonomously flows around buildings, maintains safe spacing, and converges on a target — purely from local per-drone computation with no ground station involvement during execution.</p>
 
+    <div class="my-8">
+        <h3 class="text-xl font-bold text-white mb-3">How Flocking Works: Boids & Murmurations (Smarter Every Day)</h3>
+        <div class="relative w-full" style="padding-bottom: 56.25%;">
+            <iframe class="absolute inset-0 w-full h-full rounded-lg" src="https://www.youtube.com/embed/4LWmRuB-uNU" title="How Flocking Birds Make Amazing Murmurations (Boids Algorithm) — Smarter Every Day 234" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+        <p class="text-gray-400 text-sm mt-2">Destin Sandlin (Smarter Every Day 234) explains the Boids model with live murmuration footage and live simulation — the same three rules powering every drone swarm simulator.</p>
+    </div>
+
     <h3>15.2 Advanced Swarm Algorithms</h3>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
@@ -52,7 +60,7 @@ export default `
         <div class="bg-slate-900 p-4 rounded border-l-4 border-emerald-500">
             <strong class="text-emerald-400 uppercase tracking-widest text-xs block mb-2">Artificial Potential Fields (APF)</strong>
             <p class="text-sm text-slate-300">Assigns each drone an artificial force field: attractive forces pull toward waypoints, repulsive forces push away from obstacles and neighbors. The drone follows the net force vector. Computation is O(N) per drone — fast enough for real-time onboard execution at 100+ Hz.</p>
-            <p class="text-sm text-slate-300 mt-2"><em>Known weakness:</em> local minima (drone gets stuck in a force-balanced dead zone). The Quantum-Enhanced APF (Scientific Reports, 2025) adds quantum-inspired probabilistic exploration to escape local minima, demonstrating <strong>37% faster formation convergence</strong> and <strong>42% better disturbance rejection</strong> compared to standard APF in simulation. <em class="text-amber-400">Note: results are simulation-only from a single 2025 paper — this technique is pre-production research, not a deployable algorithm.</em></p>
+            <p class="text-sm text-slate-300 mt-2"><em>Known weakness:</em> local minima (drone gets stuck in a force-balanced dead zone). The Quantum-Enhanced APF (Scientific Reports, 2025) adds quantum-inspired probabilistic exploration to escape local minima, demonstrating <strong>37% faster formation convergence</strong> and <strong>42% better disturbance rejection</strong> compared to standard APF in simulation. <em class="text-amber-400">Note: results are simulation-only — this technique is pre-production research, not a deployable algorithm.</em></p>
         </div>
         <div class="bg-slate-900 p-4 rounded border-l-4 border-amber-500">
             <strong class="text-amber-400 uppercase tracking-widest text-xs block mb-2">Ant Colony Optimization (ACO)</strong>
@@ -64,6 +72,51 @@ export default `
             <p class="text-sm text-slate-300">Allow N drones to agree on shared state (formation centroid, target location, task assignment) without a central authority. Each drone broadcasts its local estimate; neighbors exchange and average values. After O(log N) communication rounds, all drones converge to the same value.</p>
             <p class="text-sm text-slate-300 mt-2"><strong>SwarmRaft</strong> (arXiv, 2025) adapts the Raft distributed consensus algorithm for GPS-degraded environments, tolerating Byzantine (malicious/faulty) nodes without any centralized fusion authority. Hierarchical consensus protocols (2024) maintain formation integrity under <strong>30% packet loss</strong> — critical for jammed or urban-canyon environments. Typical convergence: 1–5 seconds at 10 Hz — acceptable for task allocation, too slow for collision avoidance (handled locally).</p>
         </div>
+    </div>
+
+    <h4 class="mt-6">15.2.1 Consensus Algorithm Comparison</h4>
+    <p class="text-sm text-slate-300 mb-3">Choosing a consensus protocol involves tradeoffs between Byzantine fault tolerance, message complexity, and latency. The table below compares the primary options used in swarm research (2024–2025):</p>
+    <div class="interactive-panel bg-[#0d1320] border-slate-700 mt-2">
+        <div class="overflow-x-auto">
+            <div class="grid text-xs font-mono min-w-[600px]" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr;">
+                <div class="text-slate-400 border-b border-slate-700 pb-1 font-bold">Protocol</div>
+                <div class="text-slate-400 border-b border-slate-700 pb-1 font-bold">Byzantine Tolerance</div>
+                <div class="text-slate-400 border-b border-slate-700 pb-1 font-bold">Message Complexity</div>
+                <div class="text-slate-400 border-b border-slate-700 pb-1 font-bold">Latency</div>
+                <div class="text-slate-400 border-b border-slate-700 pb-1 font-bold">Best Use Case</div>
+
+                <div class="text-sky-400 py-1 border-b border-slate-800">Average Consensus</div>
+                <div class="text-slate-300 py-1 border-b border-slate-800">None</div>
+                <div class="text-slate-300 py-1 border-b border-slate-800">O(N&middot;k) per round</div>
+                <div class="text-slate-300 py-1 border-b border-slate-800">1–5 s</div>
+                <div class="text-slate-300 py-1 border-b border-slate-800">Formation centroid agreement, trusted nodes</div>
+
+                <div class="text-emerald-400 py-1 border-b border-slate-800">Raft / SwarmRaft</div>
+                <div class="text-slate-300 py-1 border-b border-slate-800">Crash-tolerant (N/2+1)</div>
+                <div class="text-slate-300 py-1 border-b border-slate-800">O(N) per round</div>
+                <div class="text-slate-300 py-1 border-b border-slate-800">100–500 ms</div>
+                <div class="text-slate-300 py-1 border-b border-slate-800">GNSS-degraded task allocation, leader election</div>
+
+                <div class="text-amber-400 py-1 border-b border-slate-800">PBFT</div>
+                <div class="text-slate-300 py-1 border-b border-slate-800">Byzantine (N &gt; 3f+1)</div>
+                <div class="text-slate-300 py-1 border-b border-slate-800">O(N&sup2;) — impractical &gt;20 nodes</div>
+                <div class="text-slate-300 py-1 border-b border-slate-800">High</div>
+                <div class="text-slate-300 py-1 border-b border-slate-800">High-value decisions, small swarms only</div>
+
+                <div class="text-purple-400 py-1 border-b border-slate-800">Gossip / Epidemic</div>
+                <div class="text-slate-300 py-1 border-b border-slate-800">Partial (weighting)</div>
+                <div class="text-slate-300 py-1 border-b border-slate-800">O(log N) rounds</div>
+                <div class="text-slate-300 py-1 border-b border-slate-800">Seconds</div>
+                <div class="text-slate-300 py-1 border-b border-slate-800">Large swarms, intermittent connectivity</div>
+
+                <div class="text-rose-400 py-1">RCA-SI (2025)</div>
+                <div class="text-slate-300 py-1">Partial</div>
+                <div class="text-slate-300 py-1">O(N&middot;k)</div>
+                <div class="text-slate-300 py-1">&lt;200 ms</div>
+                <div class="text-slate-300 py-1">Unstable networks, rapid task realloc</div>
+            </div>
+        </div>
+        <p class="text-[10px] text-slate-500 mt-2">Sources: SwarmRaft (arXiv 2025), RCA-SI (ScienceDirect 2025), ResearchSquare RLR vs Raft benchmark (2025)</p>
     </div>
 
     <div class="bg-slate-800 p-4 rounded border-l-4 border-rose-500 text-sm text-slate-300 mt-4">
@@ -137,7 +190,7 @@ export default `
         <strong>Task allocation / replanning:</strong> &lt;500 ms acceptable.<br>
         <strong>LoRa telemetry:</strong> 500–2000 ms — formation control impossible, telemetry only.<br>
         <strong>Hop accumulation:</strong> each additional mesh hop adds 5–20 ms; 5-hop chains are the practical real-time limit.<br>
-        <strong>Topology scaling:</strong> sparse k-nearest-neighbor topology limits bandwidth demand to O(N·k) vs. O(N²) for fully-connected — mandatory for large swarms.
+        <strong>Topology scaling:</strong> sparse k-nearest-neighbor topology limits bandwidth demand to O(N&middot;k) vs. O(N&sup2;) for fully-connected — mandatory for large swarms.
     </div>
 
     <h3>15.4 Formation Control & Task Allocation</h3>
@@ -150,7 +203,7 @@ export default `
         </div>
         <div class="bg-slate-900 p-4 rounded border-l-4 border-emerald-500">
             <strong class="text-emerald-400 uppercase tracking-widest text-xs block mb-2">Leader-Follower</strong>
-            <p class="text-sm text-slate-300">A designated leader executes the planned trajectory; followers maintain fixed offset from their predecessor. Simple and low-computation. Critical vulnerability: leader failure collapses the chain. Mitigated with automatic consensus-based leader re-election. Chain topologies (A→B→C→D) accumulate position error along the chain; direct-to-leader topologies avoid this at the cost of all-to-one communications bandwidth.</p>
+            <p class="text-sm text-slate-300">A designated leader executes the planned trajectory; followers maintain fixed offset from their predecessor. Simple and low-computation. Critical vulnerability: leader failure collapses the chain. Mitigated with automatic consensus-based leader re-election. Chain topologies (A&#8594;B&#8594;C&#8594;D) accumulate position error along the chain; direct-to-leader topologies avoid this at the cost of all-to-one communications bandwidth.</p>
         </div>
         <div class="bg-slate-900 p-4 rounded border-l-4 border-purple-500">
             <strong class="text-purple-400 uppercase tracking-widest text-xs block mb-2">Fully Distributed</strong>
@@ -166,11 +219,11 @@ export default `
         <p class="text-slate-200 text-sm mt-1">Each drone independently bids on tasks based on reward minus travel cost. Agents then share bids with neighbors, yielding any task where a neighbor bid higher. This bid + consensus loop repeats until stable — converging in rounds proportional to the network diameter. Expand below to see the algorithm pseudocode.</p>
     </div>
     <details class="code-expand">
-    <summary>Technical Details ▼</summary>
+    <summary>Technical Details &#9660;</summary>
 <div class="math-block">
 CBBA Phase 1 — Bundle Building (each agent independently):
   For each unassigned task t:
-    score(t) = reward(t) - travel_cost(current_pos → t) - deadline_penalty(t)
+    score(t) = reward(t) - travel_cost(current_pos -> t) - deadline_penalty(t)
     if score(t) > 0: append t to bundle, update current position estimate
   Broadcast (bundle, bid scores, winning_agent_ids) to neighbors
 
@@ -195,12 +248,12 @@ CBBA Phase 2 — Consensus (repeat until stable):
         <li><strong>Voronoi partitioning:</strong> Each drone is assigned the set of points closest to it (its Voronoi cell). Adapts naturally to drone starting positions; cells are then covered individually with lawnmower patterns.</li>
         <li><strong>ACO-CPP (ScienceDirect, 2025):</strong> ACO optimizes full routing for irregular field shapes with no-fly zones, outperforming A* and genetic algorithms. The pheromone trails encode learned good route structures across many simulation runs.</li>
     </ul>
-    <p class="text-sm mt-2">Typical performance: <strong>4–8 drones cover 1 km² in 10–20 minutes</strong> at 10 m/s cruise speed with 80 m sensor swath. In-flight replanning (Journal of Field Robotics, 2024) handles mid-mission drone failure by redistributing uncovered cells to surviving drones within seconds.</p>
+    <p class="text-sm mt-2">Typical performance: <strong>4–8 drones cover 1 km&sup2; in 10–20 minutes</strong> at 10 m/s cruise speed with 80 m sensor swath. In-flight replanning (Journal of Field Robotics, 2024) handles mid-mission drone failure by redistributing uncovered cells to surviving drones within seconds.</p>
 
     <h3>15.5 Multi-Agent AI & Machine Learning</h3>
 
     <h4>15.5.1 Multi-Agent Reinforcement Learning (MARL)</h4>
-    <p>MARL is the dominant paradigm for learned swarm control. Each drone is an agent that learns a policy (observation → action) by maximizing cumulative reward in a shared environment. The three most common cooperative MARL algorithms in drone research (2023–2025):</p>
+    <p>MARL is the dominant paradigm for learned swarm control. Each drone is an agent that learns a policy (observation &#8594; action) by maximizing cumulative reward in a shared environment. The three most common cooperative MARL algorithms in drone research (2023–2025):</p>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3 text-xs">
         <div class="bg-slate-900 p-3 rounded border border-slate-700">
             <strong class="text-sky-400 block mb-1">MAPPO</strong>
@@ -230,7 +283,7 @@ CBBA Phase 2 — Consensus (repeat until stable):
     <p>Training drone swarm policies in simulation before deploying on real hardware is the standard workflow. Key platforms:</p>
     <ul class="space-y-2 text-sm mt-2">
         <li><strong>NVIDIA Isaac Sim + Pegasus Simulator:</strong> Photorealistic physics simulation with full PX4/ArduPilot integration. Pegasus Simulator (open-source, 2023) supports parallel simulation of multiple aerial vehicles in a single Isaac environment.</li>
-        <li><strong>Aerial Gym (Isaac Gym):</strong> Trains swarm RL policies by simulating hundreds of drones in parallel — dramatically faster than sequential simulation. Standard pipeline: Isaac Gym training → ONNX model export → Gazebo SITL validation → real hardware deployment.</li>
+        <li><strong>Aerial Gym (Isaac Gym):</strong> Trains swarm RL policies by simulating hundreds of drones in parallel — dramatically faster than sequential simulation. Standard pipeline: Isaac Gym training &#8594; ONNX model export &#8594; Gazebo SITL validation &#8594; real hardware deployment.</li>
         <li><strong>Webots (Cyberbotics):</strong> Lighter-weight open-source simulator. Widely used in published swarm research for 100–1,000 simulated drones when Isaac compute is unavailable.</li>
         <li><strong>Domain randomization:</strong> Vary mass, motor constants, and wind during training so learned policies are robust to real-world parameter mismatch — the primary cause of sim-to-real failure.</li>
     </ul>
@@ -241,48 +294,85 @@ CBBA Phase 2 — Consensus (repeat until stable):
 
     <h3>15.6 Military Programs & Combat Applications</h3>
 
-    <h4>15.6.1 DARPA OFFSET — Urban Swarm Tactics</h4>
-    <p>OFFSET (OFFensive Swarm-Enabled Tactics) was DARPA's flagship urban swarm program, aiming to equip squad-level infantry with swarms of 250+ heterogeneous air and ground robots for close combat in cities.</p>
+    <figure class="my-6">
+        <img src="images/m15_drone_swarm_formation.jpg" alt="US Army drone swarm prepared for formation flight during Marne Focus 2024 at Fort Stewart, Georgia" class="rounded-lg w-full">
+        <figcaption class="text-gray-400 text-sm text-center mt-2">A drone swarm operated by the Threat System Management Office prepares to fly in formation during Marne Focus 2024 at Fort Stewart, Georgia, April 7, 2024. Source: <a href="https://www.dvidshub.net/image/8334790/marne-focus-2024-drone-swarm" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">DVIDS / Staff Sgt. Jacob Slaymaker, U.S. Army (Public Domain)</a></figcaption>
+    </figure>
+
+    <h4>15.6.1 DARPA OFFSET — Urban Swarm Tactics (Final Results)</h4>
+    <p>OFFSET (OFFensive Swarm-Enabled Tactics) ran from 2017 to 2022 as DARPA's flagship urban swarm program, aiming to equip squad-level infantry with swarms of 250+ heterogeneous air and ground robots for close combat in cities. The six field experiments (FX-1 through FX-6) produced concrete, published results:</p>
     <div class="bg-slate-900 p-4 rounded border border-slate-700 mt-3">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs text-center">
             <div>
-                <span class="text-sky-400 font-bold block mb-1">Max Demonstrated</span>
-                <span class="text-white text-2xl font-mono block">130</span>
-                <span class="text-slate-400">drones, single operator</span>
+                <span class="text-sky-400 font-bold block mb-1">FX-6 Max Platforms</span>
+                <span class="text-white text-2xl font-mono block">300+</span>
+                <span class="text-slate-400">combined air + ground, two integrators</span>
             </div>
             <div>
-                <span class="text-sky-400 font-bold block mb-1">Task Accuracy</span>
-                <span class="text-white text-2xl font-mono block">90%</span>
-                <span class="text-slate-400">voice + VR pointing interface</span>
+                <span class="text-sky-400 font-bold block mb-1">Physical Drones</span>
+                <span class="text-white text-2xl font-mono block">130</span>
+                <span class="text-slate-400">single operator (Raytheon FX-5, Fort Campbell)</span>
             </div>
             <div>
                 <span class="text-sky-400 font-bold block mb-1">Tactics Library</span>
                 <span class="text-white text-2xl font-mono block">100+</span>
-                <span class="text-slate-400">documented swarm tactics</span>
+                <span class="text-slate-400">documented, operationally relevant swarm tactics</span>
             </div>
             <div>
-                <span class="text-sky-400 font-bold block mb-1">Program Ended</span>
+                <span class="text-sky-400 font-bold block mb-1">Program Concluded</span>
                 <span class="text-white text-2xl font-mono block">2022</span>
-                <span class="text-slate-400">→ classified follow-on work</span>
+                <span class="text-slate-400">&#8594; classified follow-on transition</span>
             </div>
         </div>
     </div>
-    <p class="text-sm mt-3">The OFFSET human-swarm interface used a <strong>VR headset</strong>: an operator pointed and spoke to command 130 drones through urban scenarios, with AI decomposing intent ("clear the block," "establish overwatch at building 4") into individual drone assignments automatically. Johns Hopkins APL demonstrated fixed-wing UAVs conducting aggressive maneuvers in tight urban corridors with onboard collision avoidance. Sentien Robotics contributed the HiveXL "drone carrier" ground vehicle that automatically launched, recovered, and recharged up to 80 drones without human intervention.</p>
+    <p class="text-sm mt-3">Key OFFSET findings:</p>
+    <ul class="space-y-2 text-sm mt-1">
+        <li><strong>Human-swarm interface:</strong> VR headset, AR tablet, sketch tablet, and mobile phone interfaces all demonstrated 90%+ task accuracy for commanding 100+ drones via intent ("clear the block," "establish overwatch at building 4") decomposed automatically into individual assignments. The voice + VR pointing interface proved most operator-friendly.</li>
+        <li><strong>Virtual-physical hybrid operations:</strong> FX-6 (Fort Campbell, November 2021) combined 300+ total platforms by running "virtual" simulated swarm agents alongside physical robots in the same mission — allowing a small physical test force to stand in for a full 250-drone squad.</li>
+        <li><strong>HiveXL drone carrier (Sentien Robotics):</strong> A ground vehicle autonomously launched, recovered, and recharged up to 80 drones — demonstrating logistics-free sustained swarm operations without human intervention on the recharge/relaunch loop.</li>
+        <li><strong>Johns Hopkins APL:</strong> Demonstrated fixed-wing UAVs performing aggressive maneuvers in tight urban corridors with onboard collision avoidance — proving high-speed fixed-wing viability in GPS-degraded urban canyons.</li>
+        <li><strong>Transition outcome:</strong> DARPA program manager Timothy Chung stated "these swarm capabilities are rapidly nearing availability for future operations" at FX-6 conclusion. Specific transition recipients were not publicly disclosed.</li>
+    </ul>
 
     <h4 class="mt-4">15.6.2 Perdix — First Combat Swarm from Fighter Aircraft</h4>
-    <p>In October 2016, three US Navy F/A-18 Super Hornets released <strong>103 Perdix micro-UAVs</strong> over China Lake, California — the world's largest autonomous swarm demonstration at the time. Each Perdix had a wingspan under 30 cm and weighed 290 g, designed for low-cost mass production (target under $20,000 per unit).</p>
-    <p class="text-sm mt-2">What distinguished Perdix was its <em>shared autonomy</em> architecture: drones had no pre-programmed behaviors. They negotiated behaviors collectively in real time — demonstrating adaptive formation flight and self-healing (when drones dropped out, the swarm reorganized automatically with no operator input). Developed at MIT Lincoln Laboratory. After the public demonstration the program transitioned to classified follow-on development.</p>
+    <p>In October 2016, three US Navy F/A-18 Super Hornets released <strong>103 Perdix micro-UAVs</strong> over China Lake, California — the world's largest autonomous swarm demonstration at the time. Each Perdix was 6.5 inches long, weighed 290 g, and had a wingspan under 12 inches, designed for low-cost mass production. Drones survived Mach 0.6 ejection speeds and -10&deg;C temperatures.</p>
+    <p class="text-sm mt-2">What distinguished Perdix was its <em>shared autonomy</em> architecture: drones had no pre-programmed behaviors. They negotiated behaviors collectively in real time — demonstrating adaptive formation flight and self-healing (when drones dropped out, the swarm reorganized automatically with no operator input). "Perdix are not pre-programmed synchronized individuals, they are a collective organism, sharing one distributed brain for decision-making." Developed at MIT Lincoln Laboratory; after the public demonstration the program transitioned to classified follow-on development.</p>
 
     <h4 class="mt-4">15.6.3 US Navy LOCUST — Tube-Launched Swarms</h4>
-    <p>The Office of Naval Research (ONR) LOCUST (Low-Cost UAV Swarming Technology) program demonstrated <strong>31 Coyote UAVs tube-launched in 40 seconds</strong> from a naval vessel in June 2016. The Coyote (Raytheon) launches from a standard sonobuoy-type tube launcher, unfolds its wings, and autonomously joins the swarm. ONR awarded Raytheon a $29.7M development contract in 2018. LOCUST capabilities were absorbed into the broader "Super Swarm" mission by ~2021.</p>
+    <p>The Office of Naval Research (ONR) LOCUST (Low-Cost UAV Swarming Technology) program demonstrated <strong>30 Coyote UAVs tube-launched in rapid succession</strong> from a naval vessel in 2016. The <strong>Coyote</strong> (manufacturer: <strong>Raytheon / RTX</strong>) launches from a sonobuoy-type pneumatic canister — wings unfold immediately after ejection, and the drone autonomously joins the swarm.</p>
+    <div class="bg-slate-900 p-4 rounded border border-slate-700 mt-3 text-xs">
+        <strong class="text-sky-400 block mb-2">Coyote UAS Family — Key Variants</strong>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="border-l-2 border-sky-500 pl-2">
+                <strong class="text-sky-300 block">Block 1 / 1B</strong>
+                <p class="text-slate-300">Original; electric motor; ~5.9 kg; 1.5 m wingspan; sonobuoy canister launch; ISR/EW payload; 55 kt cruise, 70 kt dash; ~90 min endurance. LOCUST program demonstrator.</p>
+            </div>
+            <div class="border-l-2 border-emerald-500 pl-2">
+                <strong class="text-emerald-300 block">Block 2C</strong>
+                <p class="text-slate-300">Jet-powered upgrade; 555–595 km/h (345–370 mph); kinetic C-UAS interceptor with RF seeker. US Army purchased 600 units ($75M, January 2024); 6,000 more on order for 2025–2029.</p>
+            </div>
+            <div class="border-l-2 border-purple-500 pl-2">
+                <strong class="text-purple-300 block">Block 3NK / Coyote LE SR</strong>
+                <p class="text-purple-300 font-semibold">Non-kinetic, recoverable, reusable</p>
+                <p class="text-slate-300">Non-kinetic/RF warhead defeats drone swarms without fragmentation. Recoverable and reusable — fundamentally changes cost-per-engagement economics. Renamed "Coyote LE SR" in 2025. Test-fired from M2 Bradley TOW launcher and Modular Effects Launcher rack (March 2025).</p>
+            </div>
+        </div>
+    </div>
+    <p class="text-sm mt-3">ONR awarded Raytheon a $29.7M LOCUST development contract in 2018. LOCUST capabilities were absorbed into the broader Navy counter-swarm mission by ~2021. By 2025, Coyote is also integrated aboard Arleigh Burke-class destroyers (USS Bainbridge, USS Winston S. Churchill) for fleet air defense.</p>
 
-    <h4 class="mt-4">15.6.4 Pentagon Replicator — Industrial-Scale Attritable Drones</h4>
+    <h4 class="mt-4">15.6.4 Pentagon Replicator &#8594; DAWG (2023–2025)</h4>
     <p>Announced August 2023, Replicator aimed to field <strong>thousands of all-domain attritable autonomous systems (ADA2)</strong> by August 2025. Replicator 1 targeted small air/surface/undersea systems for Pacific deterrence; Replicator 2 (announced September 2024) focused on counter-sUAS.</p>
     <div class="bg-slate-800 p-4 rounded border-l-4 border-rose-500 text-sm text-slate-300 mt-2">
-        <strong class="text-rose-400">Outcome vs. Ambition:</strong> By 2025, DoD delivered "hundreds" rather than thousands of systems. Hardware procurement was tractable; the hard problem was the <em>software</em> to command and coordinate large numbers of heterogeneous platforms at operational tempo. In November 2024, the Defense Innovation Unit (DIU) contracted seven firms for two parallel software programs: <strong>ORIENT</strong> (Opportunistic, Resilient and Innovative Expeditionary Network Topology — mesh networking for heterogeneous swarms) and <strong>ACT</strong> (Autonomous Collaborative Teaming — swarm autonomy algorithms). These contracts reveal where the real technical difficulty lies: not procurement, but coordination intelligence.
+        <strong class="text-rose-400">Outcome, Organizational Change &amp; Scale-Up:</strong><br><br>
+        By August 2025, DoD fielded <strong>"hundreds" not thousands</strong> of systems — hardware procurement was tractable but software coordination of heterogeneous platforms at operational tempo remained the hard bottleneck. The Pentagon dissolved Replicator in late 2025, absorbing it into the <strong>Defense Autonomous Warfare Group (DAWG)</strong>. DAWG is now conducting wargames targeting larger, longer-range attack UAS.<br><br>
+        In November 2024, DIU contracted seven firms for two parallel software programs: <strong>ORIENT</strong> (mesh networking for heterogeneous swarms) and <strong>ACT</strong> (Autonomous Collaborative Teaming algorithms). These contracts reveal where the real technical difficulty lies: not procurement, but coordination intelligence. In FY2026, the White House requested <strong>$54.6 billion for DAWG</strong> — a ~24,000% single-year increase — signaling the strategic priority of autonomous mass in the Indo-Pacific.
     </div>
 
-    <h4 class="mt-4">15.6.5 China Atlas Drone Swarm System</h4>
+    <h4 class="mt-4">15.6.5 Auterion — First Multi-Manufacturer Combat Drone Swarm (2025)</h4>
+    <p>In December 2025, Swiss-American company Auterion completed the <strong>world's first live demonstration of a combat drone swarm made up of aircraft from multiple manufacturers</strong>, conducted in Munich for government customers. The hybrid swarm comprised eight short-range FPV munitions and two medium-range fixed-wing platforms from three different manufacturers — executing a full end-to-end kill chain from target detection to strike under Auterion's <strong>Nemyx</strong> autonomous coordination engine.</p>
+    <p class="text-sm mt-2">In a follow-on January 2026 demonstration at Camp Blanding, Florida — the <strong>first kinetic drone swarm on American soil</strong> — a single US military operator commanded three types of FPV drones equipped with kinetic payloads to strike multiple targets near-simultaneously using a common communication network. Both demonstrations mark a decisive shift: interoperability across manufacturers is now a solved problem at the software layer, removing the last major procurement barrier to heterogeneous swarm deployment.</p>
+
+    <h4 class="mt-4">15.6.6 China Atlas Drone Swarm System</h4>
     <p>CETC (China Electronics Technology Group Corporation) demonstrated 119 fixed-wing drones in 2017 (then a world record) and 200 drones in 2020. The <strong>Atlas (Swarm-2) system</strong> debuted publicly at Airshow China 2024 (Zhuhai):</p>
     <ul class="space-y-1 text-sm mt-2">
         <li>A single Swarm-2 <strong>ground combat vehicle</strong> carries and launches <strong>48 fixed-wing drones</strong></li>
@@ -292,7 +382,15 @@ CBBA Phase 2 — Consensus (repeat until stable):
         <li>March 2026 full-process demonstration: system autonomously conducted reconnaissance, identified a command vehicle, opened the launcher, and initiated launch — described as "algorithm-driven combat" requiring no per-target human approval in the engagement loop</li>
     </ul>
 
-    <h4 class="mt-4">15.6.6 Ukraine War — Real-World Swarm-Adjacent Lessons</h4>
+    <div class="my-8">
+        <h3 class="text-xl font-bold text-white mb-3">China's Atlas Drone Swarm System — Live Demonstration</h3>
+        <div class="relative w-full" style="padding-bottom: 56.25%;">
+            <iframe class="absolute inset-0 w-full h-full rounded-lg" src="https://www.youtube.com/embed/Tv6KVjyjaY0" title="China Unveils Atlas Drone Swarm System | WION" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+        <p class="text-gray-400 text-sm mt-2">WION coverage of China's Atlas/Swarm-2 system debut at Airshow China 2024 (Zhuhai) — showing the ground-vehicle launcher, 48-drone payload, and autonomous coordination software.</p>
+    </div>
+
+    <h4 class="mt-4">15.6.7 Ukraine War — Real-World Swarm-Adjacent Lessons</h4>
     <p>The Russia-Ukraine conflict (2022–present) is the most significant real-world proving ground for mass drone operations, providing hard lessons on what swarm-like tactics actually look like under live combat conditions.</p>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
         <div class="bg-slate-900 p-4 rounded border-l-4 border-rose-500">
@@ -300,7 +398,7 @@ CBBA Phase 2 — Consensus (repeat until stable):
             <p class="text-sm text-slate-300">FPV kamikaze drones became the dominant casualty-causing weapon at squad level by 2023 — responsible for ~90% of wounds near the front in areas like Chasiv Yar. FPV drones disabled 800+ Russian main battle tanks worth over $1.5B — at $500–$2,000 per drone vs. $3–5M per tank. This cost asymmetry is strategically transformative: a country can field tens of thousands of attack drones for the price of a single MBT.</p>
         </div>
         <div class="bg-slate-900 p-4 rounded border-l-4 border-amber-500">
-            <strong class="text-amber-400 uppercase tracking-widest text-xs block mb-2">Electronic Warfare & Fiber-Optic Bypass</strong>
+            <strong class="text-amber-400 uppercase tracking-widest text-xs block mb-2">Electronic Warfare &amp; Fiber-Optic Bypass</strong>
             <p class="text-sm text-slate-300">GPS jamming became so pervasive that by 2024 both sides deployed <strong>fiber-optic guided FPV drones</strong> — control signals travel through a physical cable that pays out during flight, making them completely jam-proof at ranges up to ~10 km. Implication for swarm designers: any swarm operating in contested EW environments must assume GPS will be intermittently denied and design visual/inertial fallback navigation as the default, not an edge case.</p>
         </div>
         <div class="bg-slate-900 p-4 rounded border-l-4 border-sky-500">
@@ -312,6 +410,11 @@ CBBA Phase 2 — Consensus (repeat until stable):
             <p class="text-sm text-slate-300">NATO exercise demonstrated that <strong>10 Ukrainian operators with drones</strong> could neutralize two conventional battalions in a single day. This force-ratio inversion — 10 operators defeating thousands of troops — represents the strategic shock that is driving every major military's urgent investment in both swarm offense and counter-swarm defense.</p>
         </div>
     </div>
+
+    <figure class="my-6">
+        <img src="images/m15_combined_resolve_swarm.jpg" alt="US soldiers react to a simulated drone swarm attack during Exercise Combined Resolve 24-2, Hohenfels Germany, May 2024" class="rounded-lg w-full">
+        <figcaption class="text-gray-400 text-sm text-center mt-2">U.S. Soldiers (101st Airborne Division) react to a drone swarm attack simulation during Exercise Combined Resolve 24-2 at the Joint Multinational Readiness Center, Hohenfels, Germany, May 29, 2024. Counter-swarm training is now a standard element of NATO brigade-level exercises. Source: <a href="https://www.dvidshub.net/image/8436784/combined-resolve-24-2-drone-swarm-attack" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">DVIDS / Sgt. 1st Class Brandon Nelson, 109th MPAD (Public Domain)</a></figcaption>
+    </figure>
 
     <h3>15.7 Civilian & Commercial Deployments</h3>
 
@@ -333,7 +436,7 @@ CBBA Phase 2 — Consensus (repeat until stable):
     <ul class="space-y-3 text-sm mt-2">
         <li><strong>NASA FireTech project:</strong> AI-enabled drone swarms for wildfire detection, mapping, and fire behavior modeling. Hierarchical heterogeneous architecture — fast fixed-wing scouts map the fire perimeter; quadrotor relay drones maintain communications in mountainous terrain; persistent monitoring drones track fire spread over multi-hour missions. Active project under NASA Earth Science and Technology Office.</li>
         <li><strong>FAA Reauthorization Act 2024, Section 910:</strong> Directed the FAA to expand UAS integration in wildfire response and develop standardized airspace coordination procedures — formally acknowledging that the regulatory bottleneck, not the technology, is blocking operational swarm deployment over populated areas.</li>
-        <li><strong>SAR status (2024):</strong> Drone swarm SAR remains largely in research/prototype stage. Algorithms are proven; regulatory approval for fully autonomous BVLOS swarm operations remains the primary barrier. Typical research systems demonstrate 3–8 heterogeneous drones (scout + relay + searcher roles) covering 1 km² in 8–15 minutes.</li>
+        <li><strong>SAR status (2024):</strong> Drone swarm SAR remains largely in research/prototype stage. Algorithms are proven; regulatory approval for fully autonomous BVLOS swarm operations remains the primary barrier. Typical research systems demonstrate 3–8 heterogeneous drones (scout + relay + searcher roles) covering 1 km&sup2; in 8–15 minutes.</li>
     </ul>
 
     <h3>15.8 Security & Resilience</h3>
@@ -360,28 +463,32 @@ CBBA Phase 2 — Consensus (repeat until stable):
     </div>
 
     <h4 class="mt-4">15.8.3 Byzantine Fault Tolerance</h4>
-    <p>A Byzantine fault is a node that sends incorrect or conflicting information — due to hardware failure, software bug, or deliberate adversary compromise. Classic BFT (PBFT) requires N &gt; 3f+1 total nodes when f nodes may be Byzantine, but requires O(N²) messages — impractical beyond ~20 nodes in a mobile network.</p>
+    <p>A Byzantine fault is a node that sends incorrect or conflicting information — due to hardware failure, software bug, or deliberate adversary compromise. Classic BFT (PBFT) requires N &gt; 3f+1 total nodes when f nodes may be Byzantine, but requires O(N&sup2;) messages — impractical beyond ~20 nodes in a mobile network.</p>
     <p class="text-sm mt-2"><strong>SwarmRaft</strong> (arXiv, 2025) adapts the Raft consensus algorithm for drone swarms: fully decentralized (no central fusion authority), tolerates Byzantine nodes under mild density assumptions, and reduces communication overhead to O(N log N). <strong>BCoD (Blockchain of Drones)</strong> applies a blockchain-style append-only ledger for swarm identity management and command authentication, addressing the low throughput and high latency limitations of classic PBFT in mobile ad-hoc environments.</p>
 
-    <h4 class="mt-4">15.8.4 Counter-Swarm Systems (C-UAS)</h4>
-    <p>Defending against drone swarms requires layered "detect-track-defeat" capability. No single technology addresses all threat types — HPM handles mass targets; kinetic handles fast maneuvering drones; RF jamming handles commercially-linked drones:</p>
+    <h4 class="mt-4">15.8.4 Counter-Swarm Systems (C-UAS) — Layered Defense</h4>
+    <p>Defending against drone swarms requires layered "detect-track-defeat" capability. No single technology addresses all threat types — HPM handles mass targets simultaneously; kinetic handles fast maneuvering drones; RF jamming handles commercially-linked drones. The 2024–2026 generation of systems has matured rapidly under operational pressure from Ukraine and Middle East conflicts:</p>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
         <div class="bg-slate-900 p-4 rounded border-l-4 border-sky-500">
-            <strong class="text-sky-400 uppercase tracking-widest text-xs block mb-2">Kinetic Interceptors</strong>
-            <p class="text-sm text-slate-300"><strong>Raytheon Coyote Block 2C:</strong> Rail-launched; 555–595 km/h; 15 km range from ground. US Army purchased 600 units ($75M, January 2024); awarded a <strong>$5 billion</strong> long-term Coyote contract in September 2025 — the largest C-UAS contract in history. Limitation: one interceptor per target; insufficient throughput against swarms of hundreds.</p>
+            <strong class="text-sky-400 uppercase tracking-widest text-xs block mb-2">Kinetic Interceptors — Coyote Block 2C</strong>
+            <p class="text-sm text-slate-300"><strong>Raytheon Coyote Block 2C:</strong> Jet-powered; 555–595 km/h; kinetic RF-seeker warhead; 15+ km range from ground launcher. US Army purchased 600 units ($75M, January 2024); separately awarded Raytheon a <strong>$5.04 billion</strong> long-term contract (September 2025) covering Coyote Block 2C interceptors and KuRFS radars — the largest C-UAS contract in history. Limitation: one interceptor per target; insufficient throughput against swarms of hundreds.</p>
         </div>
         <div class="bg-slate-900 p-4 rounded border-l-4 border-emerald-500">
-            <strong class="text-emerald-400 uppercase tracking-widest text-xs block mb-2">Non-Kinetic Interceptors</strong>
-            <p class="text-sm text-slate-300"><strong>Coyote Block 3NK (renamed Coyote LE SR, 2025):</strong> Directed-energy/RF warhead; <em>recoverable and reusable</em>; avoids fragmentation collateral damage in urban environments. Defeated multiple simultaneous drone swarms in February 2026 demonstration. The reusability fundamentally changes cost-per-engagement economics vs. one-shot kinetic interceptors.</p>
+            <strong class="text-emerald-400 uppercase tracking-widest text-xs block mb-2">Non-Kinetic Interceptors — Coyote LE SR (Block 3NK)</strong>
+            <p class="text-sm text-slate-300"><strong>Raytheon Coyote LE SR</strong> (formerly Block 3NK): Non-kinetic/RF warhead; <em>recoverable and reusable</em>; avoids fragmentation collateral damage in urban environments. Defeated multiple simultaneous drone swarms in February 2026 US Army demonstration. Launches from Bradley TOW launcher and Modular Effects Launcher (demonstrated March 2025). The reusability changes cost-per-engagement economics vs. one-shot kinetic interceptors. DoD plans to procure 700 units through 2029.</p>
         </div>
         <div class="bg-slate-900 p-4 rounded border-l-4 border-amber-500">
-            <strong class="text-amber-400 uppercase tracking-widest text-xs block mb-2">High-Power Microwave (HPM)</strong>
-            <p class="text-sm text-slate-300"><strong>Epirus Leonidas:</strong> HPM system with area effect — simultaneously disables electronics of multiple drones within its beam cone. Uniquely effective against swarms because one trigger can defeat 5–50 drones at once, bypassing the one-interceptor-per-target throughput limit of all kinetic and non-kinetic point-kill systems.</p>
+            <strong class="text-amber-400 uppercase tracking-widest text-xs block mb-2">High-Power Microwave (HPM) — Epirus Leonidas</strong>
+            <p class="text-sm text-slate-300"><strong>Epirus Leonidas:</strong> Gallium nitride solid-state HPM system with area effect — defeated a <strong>49-drone swarm with a single electromagnetic pulse</strong> (100% success rate, live-fire demonstration 2024). Neutralized 61-of-61 drones across five scenarios in August 2024 testing. Uniquely effective against swarms because one trigger can defeat 5–50 drones simultaneously, bypassing the one-interceptor-per-target throughput limit of all kinetic systems. US Army awarded Epirus $43.5M contract (July 2025) for next-generation systems. ExDECS variant under contract with US Navy for Marine Corps.</p>
         </div>
         <div class="bg-slate-900 p-4 rounded border-l-4 border-purple-500">
             <strong class="text-purple-400 uppercase tracking-widest text-xs block mb-2">High-Energy Laser (HEL)</strong>
             <p class="text-sm text-slate-300"><strong>Lockheed HELIOS (60 kW), RTX HEL:</strong> ~$1 cost per shot once installed. Effective against slow small drones in clear weather. Limitations: beam divergence in rain or smoke; 1–5 second engagement time per drone limits throughput against large fast-moving swarms. Best used in combination with HPM as layered defeat.</p>
         </div>
+    </div>
+    <div class="bg-slate-800 p-4 rounded border-l-4 border-rose-500 text-sm text-slate-300 mt-3">
+        <strong class="text-rose-400">Critical C-UAS Insight — Fiber-Optic Drones Bypass EW</strong><br><br>
+        High-Power Microwave (HPM) is the <strong>only technology effective against fiber-optic guided drones</strong>. These drones, now common in Ukraine (10 km range, zero RF signature), cannot be jammed because there is no wireless link to disrupt. Leonidas HPM overloads drone electronics directly through the electromagnetic field — no reliance on any RF signature. This makes HPM a foundational capability for any C-UAS architecture facing peer-adversary drone swarms.
     </div>
 
     <h3>15.9 Hardware Platforms & Scale Reference</h3>
@@ -443,7 +550,7 @@ CBBA Phase 2 — Consensus (repeat until stable):
 
                 <div class="text-amber-400 py-1 border-b border-slate-800">PSO (offline planning)</div>
                 <div class="text-slate-300 py-1 border-b border-slate-800">10–50</div>
-                <div class="text-slate-300 py-1 border-b border-slate-800">O(N²) compute — run on ground station, not onboard</div>
+                <div class="text-slate-300 py-1 border-b border-slate-800">O(N&sup2;) compute — run on ground station, not onboard</div>
 
                 <div class="text-purple-400 py-1 border-b border-slate-800">ACO (coverage)</div>
                 <div class="text-slate-300 py-1 border-b border-slate-800">5–30</div>
@@ -451,7 +558,7 @@ CBBA Phase 2 — Consensus (repeat until stable):
 
                 <div class="text-sky-400 py-1 border-b border-slate-800">CBBA</div>
                 <div class="text-slate-300 py-1 border-b border-slate-800">30–100</div>
-                <div class="text-slate-300 py-1 border-b border-slate-800">O(tasks × agents) communication rounds for consensus</div>
+                <div class="text-slate-300 py-1 border-b border-slate-800">O(tasks &times; agents) communication rounds for consensus</div>
 
                 <div class="text-emerald-400 py-1 border-b border-slate-800">TLC-CBBA (clustered)</div>
                 <div class="text-slate-300 py-1 border-b border-slate-800">100–500</div>
@@ -478,9 +585,9 @@ CBBA Phase 2 — Consensus (repeat until stable):
         <strong>Outdoor research:</strong> 10–50 drones (GPS-dependent) |
         <strong>Commercial agriculture:</strong> 3–20 per coordinated mission |
         <strong>Commercial light shows:</strong> 100–10,000 (Nova Sky Stories) |
-        <strong>Military demonstrations:</strong> 30–200 (OFFSET 130, Perdix 103, China 200) |
-        <strong>Military programs (target):</strong> 250–1,000+ (Replicator aimed for thousands; delivered hundreds) |
-        <strong>Future projections:</strong> 1,000–10,000+ (US Navy Super Swarm vision; China Atlas roadmap)
+        <strong>Military demonstrations:</strong> 30–200 (OFFSET 130 physical / 300+ hybrid, Perdix 103, China 200) |
+        <strong>Military programs (target):</strong> 250–1,000+ (DAWG aims for thousands; Replicator delivered hundreds) |
+        <strong>Future projections:</strong> 1,000–10,000+ (US DAWG $54.6B program; China Atlas roadmap)
     </div>
 </div>
 `;

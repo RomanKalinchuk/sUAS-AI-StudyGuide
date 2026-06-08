@@ -8,84 +8,97 @@ export default `
     <h3>8.1 Physical Interface Standards</h3>
     <p>Internal drone communication spans several physical layers, each optimised for a different tradeoff: bandwidth, determinism, cable reach, power draw, and EMI tolerance. Choosing the wrong interface for a sensor creates hard-to-diagnose bottlenecks that only surface at full flight rate.</p>
 
-    <table class="w-full text-left border-collapse mt-6 mb-8 text-sm">
-        <thead>
-            <tr class="bg-slate-800 text-sky-400">
-                <th class="p-3 border border-slate-700">Protocol</th>
-                <th class="p-3 border border-slate-700">Bandwidth</th>
-                <th class="p-3 border border-slate-700">Latency</th>
-                <th class="p-3 border border-slate-700">Primary Drone Use Case</th>
+    <div class="overflow-x-auto my-6">
+    <table class="w-full text-sm text-left">
+        <thead class="bg-slate-700 text-slate-300">
+            <tr>
+                <th class="p-3">Protocol</th>
+                <th class="p-3">Bandwidth</th>
+                <th class="p-3">Latency</th>
+                <th class="p-3">Primary Drone Use Case</th>
             </tr>
         </thead>
-        <tbody class="text-slate-300 font-mono">
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white font-bold">MIPI CSI-2<br><span class="text-slate-500 text-xs font-normal">D-PHY v1.2</span></td>
-                <td class="p-3 border border-slate-700">Up to 10 Gbps<br><span class="text-slate-400 text-xs">(4-lane D-PHY)</span></td>
-                <td class="p-3 border border-slate-700 text-emerald-400">Microseconds</td>
-                <td class="p-3 border border-slate-700">Direct camera-to-SoC connection. Bypasses USB overhead entirely. Mandatory for high-speed VSLAM. Max cable length ~15 cm. Jetson Orin AGX supports 16 CSI-2 lanes (8 virtual channels) feeding the dedicated ISP in hardware.</td>
+        <tbody class="divide-y divide-slate-700">
+            <tr class="bg-slate-800">
+                <td class="p-3 text-slate-300 font-bold">MIPI CSI-2<br><span class="text-slate-500 text-xs font-normal">D-PHY v1.2</span></td>
+                <td class="p-3 text-slate-300">Up to 10 Gbps<br><span class="text-slate-400 text-xs">(4-lane D-PHY)</span></td>
+                <td class="p-3 text-emerald-400">Microseconds</td>
+                <td class="p-3 text-slate-300">Direct camera-to-SoC connection. Bypasses USB overhead entirely. Mandatory for high-speed VSLAM. Max cable length ~15 cm. Jetson Orin AGX supports 16 CSI-2 lanes (8 virtual channels) feeding the dedicated ISP in hardware. Each D-PHY lane delivers 2.5 Gbps; 4-lane = 10 Gbps raw, enough for 4K@60fps RAW10 from a single sensor.</td>
             </tr>
-            <tr>
-                <td class="p-3 border border-slate-700 text-white font-bold">MIPI CSI-2<br><span class="text-slate-500 text-xs font-normal">C-PHY v2.0</span></td>
-                <td class="p-3 border border-slate-700">Up to 40 Gbps<br><span class="text-slate-400 text-xs">(4-lane C-PHY)</span></td>
-                <td class="p-3 border border-slate-700 text-emerald-400">Microseconds</td>
-                <td class="p-3 border border-slate-700">Next-gen: 4K 120fps multi-camera arrays. C-PHY uses 3-phase signalling on 2 wires per lane — higher bit density than D-PHY. Required for 8-camera AI perception suites on large autonomous platforms.</td>
+            <tr class="bg-slate-900">
+                <td class="p-3 text-slate-300 font-bold">MIPI CSI-2<br><span class="text-slate-500 text-xs font-normal">C-PHY v2.0</span></td>
+                <td class="p-3 text-slate-300">Up to 40 Gbps<br><span class="text-slate-400 text-xs">(4-trio C-PHY)</span></td>
+                <td class="p-3 text-emerald-400">Microseconds</td>
+                <td class="p-3 text-slate-300">Next-gen: 4K 120 fps multi-camera arrays. C-PHY uses 3-phase signalling on 3-wire trios — higher bit density than D-PHY per pin. Required for 8-camera AI perception suites on large autonomous platforms. Each trio delivers up to 6.5 Gbps.</td>
             </tr>
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white font-bold">MIPI A-PHY<br><span class="text-slate-500 text-xs font-normal">v1.1 (2022)</span></td>
-                <td class="p-3 border border-slate-700">Up to 16 Gbps<br><span class="text-slate-400 text-xs">(per lane, 32 Gbps dual)</span></td>
-                <td class="p-3 border border-slate-700 text-emerald-400">Microseconds</td>
-                <td class="p-3 border border-slate-700">Long-reach camera links up to 15 m over shielded cable. Automotive-grade EMI immunity. Used in VTOL fixed-wings where the nose camera is physically distant from the avionics bay. Carries CSI-2 + I2C control + power over one cable.</td>
+            <tr class="bg-slate-800">
+                <td class="p-3 text-slate-300 font-bold">MIPI A-PHY<br><span class="text-slate-500 text-xs font-normal">v1.1 (2022)</span></td>
+                <td class="p-3 text-slate-300">Up to 16 Gbps<br><span class="text-slate-400 text-xs">(per lane, 32 Gbps dual)</span></td>
+                <td class="p-3 text-emerald-400">Microseconds</td>
+                <td class="p-3 text-slate-300">Long-reach camera links up to 15 m over shielded cable. Automotive-grade EMI immunity. Used in VTOL fixed-wings where the nose camera is physically distant from the avionics bay. Carries CSI-2 + I2C control + power over one cable.</td>
             </tr>
-            <tr>
-                <td class="p-3 border border-slate-700 text-white font-bold">USB 3.2<br><span class="text-slate-500 text-xs font-normal">Gen 2×2</span></td>
-                <td class="p-3 border border-slate-700">20 Gbps</td>
-                <td class="p-3 border border-slate-700 text-amber-400">1–5 ms</td>
-                <td class="p-3 border border-slate-700">Smart depth cameras (OAK-D Lite, RealSense D435i), USB SDRs, Hailo-8 USB AI accelerator. USB protocol overhead (~5% CPU, non-zero latency jitter) prevents use for raw high-speed streams but is fine for compressed or post-processed output.</td>
+            <tr class="bg-slate-900">
+                <td class="p-3 text-slate-300 font-bold">USB 3.2<br><span class="text-slate-500 text-xs font-normal">Gen 2×2</span></td>
+                <td class="p-3 text-slate-300">20 Gbps</td>
+                <td class="p-3 text-amber-400">1–5 ms</td>
+                <td class="p-3 text-slate-300">Smart depth cameras (OAK-D Pro, RealSense D435i), USB SDRs, Hailo-8 USB AI accelerator. USB protocol overhead (~5% CPU, non-zero latency jitter) prevents use for raw high-speed streams but is fine for compressed or post-processed output. OAK-D Pro outputs up to 4K@30fps over USB3 with onboard H.264 encode.</td>
             </tr>
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white font-bold">PCIe 3.0<br><span class="text-slate-500 text-xs font-normal">×4 / ×8</span></td>
-                <td class="p-3 border border-slate-700">32 Gbps (×4)<br>64 Gbps (×8)</td>
-                <td class="p-3 border border-slate-700 text-emerald-400">&lt;1 µs (DMA)</td>
-                <td class="p-3 border border-slate-700">M.2 NVMe logging drives (Sony PSLX → &gt;1 GB/s sustained write), M.2 AI accelerators (Hailo-8L M.2, Coral M.2). Jetson Orin AGX exposes PCIe 4.0 ×8; Orin NX exposes PCIe 3.0 ×4. Critical for full-fidelity multi-camera data recording.</td>
+            <tr class="bg-slate-800">
+                <td class="p-3 text-slate-300 font-bold">GigE Vision<br><span class="text-slate-500 text-xs font-normal">1000BASE-T / -TX</span></td>
+                <td class="p-3 text-slate-300">~750 Mbps effective</td>
+                <td class="p-3 text-amber-400">1–2 ms</td>
+                <td class="p-3 text-slate-300">Industrial machine-vision cameras on fixed-wing MALE-class UAVs (e.g., Basler ace2 series). Longer cable reach (up to 100 m). PTP-capable NICs provide hardware timestamps for tight image-IMU sync. Less power-efficient than CSI-2 — not used on small quadrotors. Prefer for EO/IR payload integration on larger platforms.</td>
             </tr>
-            <tr>
-                <td class="p-3 border border-slate-700 text-white font-bold">100BASE-T1<br><span class="text-slate-500 text-xs font-normal">IEEE 802.3bw</span></td>
-                <td class="p-3 border border-slate-700">100 Mbps FD</td>
-                <td class="p-3 border border-slate-700 text-emerald-400">Deterministic</td>
-                <td class="p-3 border border-slate-700">Single unshielded twisted pair (UTP), up to 15 m. Automotive-grade companion↔FC link on Pixhawk 6X (Holybro Ethernet adapter). Enables MAVLink over UDP at full bandwidth with no UART baud-rate ceiling. Also used for smart payload interfaces.</td>
+            <tr class="bg-slate-900">
+                <td class="p-3 text-slate-300 font-bold">PCIe 3.0<br><span class="text-slate-500 text-xs font-normal">×4 / ×8</span></td>
+                <td class="p-3 text-slate-300">32 Gbps (×4)<br>64 Gbps (×8)</td>
+                <td class="p-3 text-emerald-400">&lt;1 µs (DMA)</td>
+                <td class="p-3 text-slate-300">M.2 NVMe logging drives (&gt;1 GB/s sustained write), M.2 AI accelerators (Hailo-8L M.2, Coral M.2). Jetson Orin AGX exposes PCIe 4.0 ×8; Orin NX exposes PCIe 3.0 ×4. Critical for full-fidelity multi-camera data recording at rates that saturate GigE.</td>
             </tr>
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white font-bold">1000BASE-T1<br><span class="text-slate-500 text-xs font-normal">IEEE 802.3bp</span></td>
-                <td class="p-3 border border-slate-700">1 Gbps FD</td>
-                <td class="p-3 border border-slate-700 text-emerald-400">Deterministic</td>
-                <td class="p-3 border border-slate-700">Gigabit over single pair, up to 40 m. Preferred for high-bandwidth companion↔FC links on larger platforms. Enables Micro XRCE-DDS over UDP with zero-copy DMA between SoC NIC and DDS middleware. Pixhawk 6X supports this natively.</td>
+            <tr class="bg-slate-800">
+                <td class="p-3 text-slate-300 font-bold">100BASE-T1<br><span class="text-slate-500 text-xs font-normal">IEEE 802.3bw</span></td>
+                <td class="p-3 text-slate-300">100 Mbps FD</td>
+                <td class="p-3 text-emerald-400">Deterministic</td>
+                <td class="p-3 text-slate-300">Single unshielded twisted pair (UTP), up to 15 m. Automotive-grade companion↔FC link on Pixhawk 6X. Enables MAVLink over UDP at full bandwidth with no UART baud-rate ceiling. Also used for smart payload interfaces.</td>
             </tr>
-            <tr>
-                <td class="p-3 border border-slate-700 text-white font-bold">SPI<br><span class="text-slate-500 text-xs font-normal">up to 50 MHz</span></td>
-                <td class="p-3 border border-slate-700">~50 Mbps</td>
-                <td class="p-3 border border-slate-700 text-emerald-400">&lt;1 µs</td>
-                <td class="p-3 border border-slate-700">High-speed IMU (ICM-42688-P at 8 kHz ODR uses SPI at 24 MHz), barometers (BMP388), SPI NOR flash for blackbox logging. Used inside FC between STM32 and IMU silicon. Full-duplex synchronous. Max useful cable length ~30 cm without level shifters.</td>
+            <tr class="bg-slate-900">
+                <td class="p-3 text-slate-300 font-bold">1000BASE-T1<br><span class="text-slate-500 text-xs font-normal">IEEE 802.3bp</span></td>
+                <td class="p-3 text-slate-300">1 Gbps FD</td>
+                <td class="p-3 text-emerald-400">Deterministic</td>
+                <td class="p-3 text-slate-300">Gigabit over single pair, up to 40 m. Preferred for high-bandwidth companion↔FC links on larger platforms. Enables Micro XRCE-DDS over UDP with zero-copy DMA between SoC NIC and DDS middleware. Pixhawk 6X supports this natively.</td>
             </tr>
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white font-bold">I2C<br><span class="text-slate-500 text-xs font-normal">High-Speed Mode 3.4 MHz</span></td>
-                <td class="p-3 border border-slate-700">~3.4 Mbps</td>
-                <td class="p-3 border border-slate-700 text-amber-400">Low</td>
-                <td class="p-3 border border-slate-700">Magnetometers (IST8310, QMC5883L), external barometers (MS5611), battery fuel gauges (BQ40Z80). Up to 127 devices on one shared bus. Too slow for latency-critical sensor data — never put IMU on I2C in a production AI drone. Max useful cable length ~1 m.</td>
+            <tr class="bg-slate-800">
+                <td class="p-3 text-slate-300 font-bold">SPI<br><span class="text-slate-500 text-xs font-normal">up to 50 MHz</span></td>
+                <td class="p-3 text-slate-300">~50 Mbps</td>
+                <td class="p-3 text-emerald-400">&lt;1 µs</td>
+                <td class="p-3 text-slate-300">High-speed IMU (ICM-42688-P at 8 kHz ODR, 24 MHz SPI clock), barometers (BMP388), SPI NOR flash for blackbox logging. Full-duplex synchronous. Max useful cable length ~30 cm without level shifters. ICM-42688-P: gyro noise 2.8 mdps/√Hz, accel noise 70 µg/√Hz — best-in-class for FPV/AI drones.</td>
             </tr>
-            <tr>
-                <td class="p-3 border border-slate-700 text-white font-bold">UART<br><span class="text-slate-500 text-xs font-normal">921600 baud</span></td>
-                <td class="p-3 border border-slate-700">~1 Mbps</td>
-                <td class="p-3 border border-slate-700 text-amber-400">Byte-level (~1 ms)</td>
-                <td class="p-3 border border-slate-700">Legacy MAVLink bridge between FC and companion computer. Being supplanted by Micro XRCE-DDS on PX4 v1.14+ and ArduPilot 4.5+. Still required for ArduPilot GUIDED mode, serial-only GPS (NMEA), SiK radio modules, and some telemetry radios (RFD900x).</td>
+            <tr class="bg-slate-900">
+                <td class="p-3 text-slate-300 font-bold">I2C<br><span class="text-slate-500 text-xs font-normal">High-Speed Mode 3.4 MHz</span></td>
+                <td class="p-3 text-slate-300">~3.4 Mbps</td>
+                <td class="p-3 text-amber-400">Low</td>
+                <td class="p-3 text-slate-300">Magnetometers (IST8310, QMC5883L), external barometers (MS5611), battery fuel gauges (BQ40Z80). Up to 127 devices on one shared bus. Too slow for latency-critical sensor data — never put IMU on I2C in a production AI drone. Max useful cable length ~1 m.</td>
             </tr>
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white font-bold">DroneCAN<br><span class="text-slate-500 text-xs font-normal">CAN 2.0B / CAN FD</span></td>
-                <td class="p-3 border border-slate-700">1 Mbps (2.0B)<br>8 Mbps (FD)</td>
-                <td class="p-3 border border-slate-700 text-emerald-400">Deterministic (&lt;1 ms)</td>
-                <td class="p-3 border border-slate-700">Smart ESCs (Zubax Myxa, Kotleta20), RTK GPS (Zubax GNSS 2.0), airspeed sensors, rangefinders. Highly EMI resistant — mandatory on large aircraft where motor wiring and power bus create interference. Up to 127 nodes. CAN FD extends payload to 64 bytes and up to 8 Mbps.</td>
+            <tr class="bg-slate-800">
+                <td class="p-3 text-slate-300 font-bold">UART<br><span class="text-slate-500 text-xs font-normal">921600 baud</span></td>
+                <td class="p-3 text-slate-300">~1 Mbps</td>
+                <td class="p-3 text-amber-400">Byte-level (~1 ms)</td>
+                <td class="p-3 text-slate-300">Legacy MAVLink bridge between FC and companion computer. Being supplanted by Micro XRCE-DDS on PX4 v1.14+ and ArduPilot 4.5+. Still required for serial-only GPS (NMEA), SiK radio modules, and some telemetry radios (RFD900x).</td>
+            </tr>
+            <tr class="bg-slate-900">
+                <td class="p-3 text-slate-300 font-bold">DroneCAN<br><span class="text-slate-500 text-xs font-normal">CAN 2.0B / CAN FD</span></td>
+                <td class="p-3 text-slate-300">1 Mbps (2.0B)<br>8 Mbps (FD)</td>
+                <td class="p-3 text-emerald-400">Deterministic (&lt;1 ms)</td>
+                <td class="p-3 text-slate-300">Smart ESCs (Zubax Myxa, Kotleta20), RTK GPS (Zubax GNSS 2.0), airspeed sensors, rangefinders. Highly EMI resistant — mandatory on large aircraft where motor wiring creates interference. Up to 127 nodes. CAN FD extends payload to 64 bytes per frame at up to 8 Mbps.</td>
             </tr>
         </tbody>
     </table>
+    </div>
+
+    <div class="bg-sky-900/20 border border-sky-700/40 rounded-lg p-4 mb-6 text-sm">
+        <strong class="text-sky-400">USB 3 vs GigE for Cameras — Rule of Thumb:</strong>
+        <span class="text-slate-300"> Use <strong class="text-white">USB 3.x</strong> for small quadrotors and smart depth cameras (OAK-D, RealSense) — light cabling, plug-and-play. Use <strong class="text-white">GigE Vision</strong> for fixed-wing MALE-class platforms needing longer cable runs, PTP hardware timestamps, or industrial-grade EO/IR payloads. Never use USB 2.0 for uncompressed video above 640×480@30fps — the 480 Mbps ceiling is too tight.</span>
+    </div>
 
     <h3>8.2 Complete System Topology</h3>
     <p>The following diagram maps the canonical data flow architecture for a modern AI autonomous drone. Physical interfaces are labelled on each link. Sensor data flows upward through AI processing to external communication; actuation commands flow downward from the flight controller to motors and servos.</p>
@@ -122,7 +135,7 @@ export default `
         <!-- Bus label row -->
         <div class="text-xs font-mono mb-1" style="display:flex; justify-content:center; gap:2rem;">
             <span class="text-sky-400">CSI-2 (cameras)</span>
-            <span class="text-sky-400">USB 3.x (depth)</span>
+            <span class="text-sky-400">USB 3.x (depth) / GigE</span>
             <span class="text-amber-400">SPI 8 kHz (IMU)</span>
             <span class="text-amber-400">CAN/I2C (periph)</span>
         </div>
@@ -133,12 +146,13 @@ export default `
             <div class="text-sky-300 font-bold text-center mb-1">COMPANION COMPUTER (SoC)</div>
             <div class="text-xs text-slate-400 text-center mb-3">Jetson Orin AGX 64 GB — RK3588 — Intel Core Ultra 7</div>
             <div class="flex flex-wrap gap-2" style="justify-content:center;">
-                <span class="bg-sky-900/50 border border-sky-700 rounded px-2 py-1 text-sky-300 text-xs font-mono">ROS 2 Humble</span>
+                <span class="bg-sky-900/50 border border-sky-700 rounded px-2 py-1 text-sky-300 text-xs font-mono">ROS 2 Humble / Jazzy</span>
                 <span class="bg-sky-900/50 border border-sky-700 rounded px-2 py-1 text-sky-300 text-xs font-mono">CycloneDDS / FastDDS</span>
                 <span class="bg-sky-900/50 border border-sky-700 rounded px-2 py-1 text-sky-300 text-xs font-mono">TensorRT / ONNX RT</span>
                 <span class="bg-sky-900/50 border border-sky-700 rounded px-2 py-1 text-sky-300 text-xs font-mono">SLAM Pipeline</span>
                 <span class="bg-sky-900/50 border border-sky-700 rounded px-2 py-1 text-sky-300 text-xs font-mono">Path Planner</span>
                 <span class="bg-sky-900/50 border border-sky-700 rounded px-2 py-1 text-sky-300 text-xs font-mono">XRCE-DDS Agent</span>
+                <span class="bg-violet-900/50 border border-violet-700 rounded px-2 py-1 text-violet-300 text-xs font-mono">DeepStream / Holoscan</span>
             </div>
         </div>
 
@@ -238,72 +252,74 @@ export default `
 </details>
 
     <h4>Key MAVLink Message IDs for AI Integration</h4>
-    <table class="w-full text-left border-collapse mt-4 mb-8 text-sm">
-        <thead>
-            <tr class="bg-slate-800 text-sky-400">
-                <th class="p-3 border border-slate-700">MSG ID</th>
-                <th class="p-3 border border-slate-700">Name</th>
-                <th class="p-3 border border-slate-700">Direction</th>
-                <th class="p-3 border border-slate-700">AI Pipeline Role</th>
+    <div class="overflow-x-auto my-6">
+    <table class="w-full text-sm text-left">
+        <thead class="bg-slate-700 text-slate-300">
+            <tr>
+                <th class="p-3">MSG ID</th>
+                <th class="p-3">Name</th>
+                <th class="p-3">Direction</th>
+                <th class="p-3">AI Pipeline Role</th>
             </tr>
         </thead>
-        <tbody class="text-slate-300 font-mono text-xs">
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white">0</td>
-                <td class="p-3 border border-slate-700">HEARTBEAT</td>
-                <td class="p-3 border border-slate-700 text-sky-400">Bidirectional</td>
-                <td class="p-3 border border-slate-700">Must be sent at 1 Hz to maintain link presence. Contains autopilot type, base mode (armed flag), custom mode. AI companion node must also send HEARTBEAT using COMP_ID=191 (ONBOARD_COMPUTER) to be recognised on the MAVLink network.</td>
+        <tbody class="divide-y divide-slate-700 text-xs font-mono">
+            <tr class="bg-slate-800">
+                <td class="p-3 text-white">0</td>
+                <td class="p-3 text-slate-300">HEARTBEAT</td>
+                <td class="p-3 text-sky-400">Bidirectional</td>
+                <td class="p-3 text-slate-300">Must be sent at 1 Hz to maintain link presence. Contains autopilot type, base mode (armed flag), custom mode. AI companion node must also send HEARTBEAT using COMP_ID=191 (ONBOARD_COMPUTER) to be recognised on the MAVLink network.</td>
             </tr>
-            <tr>
-                <td class="p-3 border border-slate-700 text-white">30</td>
-                <td class="p-3 border border-slate-700">ATTITUDE</td>
-                <td class="p-3 border border-slate-700 text-sky-400">FC → CC</td>
-                <td class="p-3 border border-slate-700">Roll, pitch, yaw Euler angles + body rates (rad/s). Used as ground truth label source for manoeuvre classifiers and as EKF2 attitude feedback for companion-computer-based state estimators.</td>
+            <tr class="bg-slate-900">
+                <td class="p-3 text-white">30</td>
+                <td class="p-3 text-slate-300">ATTITUDE</td>
+                <td class="p-3 text-sky-400">FC → CC</td>
+                <td class="p-3 text-slate-300">Roll, pitch, yaw Euler angles + body rates (rad/s). Used as ground truth label source for manoeuvre classifiers and as EKF2 attitude feedback for companion-computer-based state estimators.</td>
             </tr>
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white">32</td>
-                <td class="p-3 border border-slate-700">LOCAL_POSITION_NED</td>
-                <td class="p-3 border border-slate-700 text-sky-400">FC → CC</td>
-                <td class="p-3 border border-slate-700">NED position (m) + velocity (m/s) in local frame. Primary input for trajectory planning nodes. Prefer this over GLOBAL_POSITION_INT for control — it avoids WGS-84 ↔ NED conversion overhead.</td>
+            <tr class="bg-slate-800">
+                <td class="p-3 text-white">32</td>
+                <td class="p-3 text-slate-300">LOCAL_POSITION_NED</td>
+                <td class="p-3 text-sky-400">FC → CC</td>
+                <td class="p-3 text-slate-300">NED position (m) + velocity (m/s) in local frame. Primary input for trajectory planning nodes. Prefer this over GLOBAL_POSITION_INT for control — it avoids WGS-84 ↔ NED conversion overhead.</td>
             </tr>
-            <tr>
-                <td class="p-3 border border-slate-700 text-white">33</td>
-                <td class="p-3 border border-slate-700">GLOBAL_POSITION_INT</td>
-                <td class="p-3 border border-slate-700 text-sky-400">FC → CC</td>
-                <td class="p-3 border border-slate-700">WGS-84 lat/lon (1e-7 deg units) + altitude (mm) + relative alt. Used for geofence enforcement, mission coordinate transforms, and Remote ID broadcast compliance checks.</td>
+            <tr class="bg-slate-900">
+                <td class="p-3 text-white">33</td>
+                <td class="p-3 text-slate-300">GLOBAL_POSITION_INT</td>
+                <td class="p-3 text-sky-400">FC → CC</td>
+                <td class="p-3 text-slate-300">WGS-84 lat/lon (1e-7 deg units) + altitude (mm) + relative alt. Used for geofence enforcement, mission coordinate transforms, and Remote ID broadcast compliance checks.</td>
             </tr>
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white">76</td>
-                <td class="p-3 border border-slate-700">COMMAND_LONG</td>
-                <td class="p-3 border border-slate-700 text-rose-400">CC → FC</td>
-                <td class="p-3 border border-slate-700">Send any MAV_CMD (arm, takeoff, set mode, loiter, RTL). Requires acknowledgement via COMMAND_ACK (ID 77). Implement timeout + exponential retry in AI node — FC may drop commands during high CPU load.</td>
+            <tr class="bg-slate-800">
+                <td class="p-3 text-white">76</td>
+                <td class="p-3 text-slate-300">COMMAND_LONG</td>
+                <td class="p-3 text-rose-400">CC → FC</td>
+                <td class="p-3 text-slate-300">Send any MAV_CMD (arm, takeoff, set mode, loiter, RTL). Requires acknowledgement via COMMAND_ACK (ID 77). Implement timeout + exponential retry in AI node — FC may drop commands during high CPU load.</td>
             </tr>
-            <tr>
-                <td class="p-3 border border-slate-700 text-white">84</td>
-                <td class="p-3 border border-slate-700">SET_POSITION_TARGET_LOCAL_NED</td>
-                <td class="p-3 border border-slate-700 text-rose-400">CC → FC</td>
-                <td class="p-3 border border-slate-700">The primary AI command message. 16-bit type_mask selects active fields (position, velocity, acceleration, yaw, yaw_rate). AI calculates target position/velocity and populates NED frame fields. Send at 20–50 Hz. FC ignores fields with type_mask bit set.</td>
+            <tr class="bg-slate-900">
+                <td class="p-3 text-white">84</td>
+                <td class="p-3 text-slate-300">SET_POSITION_TARGET_LOCAL_NED</td>
+                <td class="p-3 text-rose-400">CC → FC</td>
+                <td class="p-3 text-slate-300">The primary AI command message. 16-bit type_mask selects active fields (position, velocity, acceleration, yaw, yaw_rate). Send at 20–50 Hz. FC ignores fields with type_mask bit set.</td>
             </tr>
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white">87</td>
-                <td class="p-3 border border-slate-700">SET_ATTITUDE_TARGET</td>
-                <td class="p-3 border border-slate-700 text-rose-400">CC → FC</td>
-                <td class="p-3 border border-slate-700">Direct quaternion + thrust attitude command. Used when AI computes attitude directly — RL-based agile manoeuvre controllers, aerobatic policy networks, or emergency attitude recovery. Bypasses FC position controller.</td>
+            <tr class="bg-slate-800">
+                <td class="p-3 text-white">87</td>
+                <td class="p-3 text-slate-300">SET_ATTITUDE_TARGET</td>
+                <td class="p-3 text-rose-400">CC → FC</td>
+                <td class="p-3 text-slate-300">Direct quaternion + thrust attitude command. Used when AI computes attitude directly — RL-based agile manoeuvre controllers, aerobatic policy networks, or emergency attitude recovery. Bypasses FC position controller.</td>
             </tr>
-            <tr>
-                <td class="p-3 border border-slate-700 text-white">105</td>
-                <td class="p-3 border border-slate-700">HIGHRES_IMU</td>
-                <td class="p-3 border border-slate-700 text-sky-400">FC → CC</td>
-                <td class="p-3 border border-slate-700">Full IMU data: 3-axis accel, 3-axis gyro, 3-axis mag, temperature, baro. Publishable at up to 1 kHz over DDS; ~200 Hz typical over 921600-baud UART. Input to companion-side EKF or VIO pre-integration.</td>
+            <tr class="bg-slate-900">
+                <td class="p-3 text-white">105</td>
+                <td class="p-3 text-slate-300">HIGHRES_IMU</td>
+                <td class="p-3 text-sky-400">FC → CC</td>
+                <td class="p-3 text-slate-300">Full IMU data: 3-axis accel, 3-axis gyro, 3-axis mag, temperature, baro. Publishable at up to 1 kHz over DDS; ~200 Hz typical over 921600-baud UART. Input to companion-side EKF or VIO pre-integration.</td>
             </tr>
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white">147</td>
-                <td class="p-3 border border-slate-700">BATTERY_STATUS</td>
-                <td class="p-3 border border-slate-700 text-sky-400">FC → CC</td>
-                <td class="p-3 border border-slate-700">Per-cell voltage array (mV), total current (mA), consumed charge (mAh), battery temperature. AI mission planner monitors this to trigger failsafe RTL when estimated remaining flight time drops below a configurable threshold.</td>
+            <tr class="bg-slate-800">
+                <td class="p-3 text-white">147</td>
+                <td class="p-3 text-slate-300">BATTERY_STATUS</td>
+                <td class="p-3 text-sky-400">FC → CC</td>
+                <td class="p-3 text-slate-300">Per-cell voltage array (mV), total current (mA), consumed charge (mAh), battery temperature. AI mission planner monitors this to trigger failsafe RTL when estimated remaining flight time drops below a configurable threshold.</td>
             </tr>
         </tbody>
     </table>
+    </div>
 
     <h4>MAVLink Routing & the mavlink-router Daemon</h4>
     <p>MAVLink has no topology discovery. Routing is address-based: every message carries (SYS_ID, COMP_ID) for source and destination. Broadcast destination is SYS_ID=0, COMP_ID=0. The flight controller uses SYS_ID=1 by default. GCS uses SYS_ID=255. An AI companion node should identify as SYS_ID=1, COMP_ID=191 (MAV_COMP_ID_ONBOARD_COMPUTER). The <code>mavlink-router</code> daemon on the companion computer routes MAVLink packets between all endpoints simultaneously — no exclusive-access UART ownership.</p>
@@ -339,7 +355,12 @@ Port    = 14552
     </div>
 
     <h3>8.4 DroneCAN / OpenCyphal (UAVCAN v1)</h3>
-    <p>DroneCAN (formerly UAVCAN v0) is the standard peripheral bus for open-source drone platforms — a full application layer over CAN that provides typed messages, node health monitoring, and firmware update over the bus. OpenCyphal (UAVCAN v1, ratified 2022) extends this with CAN FD support, UDP transport, and a redesigned port/subject model. PX4 has supported DroneCAN since v1.9; ArduPilot since v3.x.</p>
+    <p>DroneCAN (formerly UAVCAN v0) is the standard peripheral bus for open-source drone platforms — a full application layer over CAN that provides typed messages, node health monitoring, and firmware update over the bus. OpenCyphal (UAVCAN v1, ratified 2022) extends this with CAN FD support, UDP transport, and a redesigned port/subject model. PX4 has supported DroneCAN since v1.9; ArduPilot since v3.x. References: <a href="https://dronecan.github.io/" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">DroneCAN Specification</a>, <a href="https://docs.px4.io/main/en/dronecan/" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">PX4 DroneCAN Guide</a>.</p>
+
+    <figure class="my-6">
+        <img src="images/m8_can_bus_topology.svg" alt="CAN Bus network topology — bus network with nodes daisy-chained on a single segment" class="rounded-lg w-full max-w-lg mx-auto">
+        <figcaption class="text-gray-400 text-sm text-center mt-2">CAN bus topology: all DroneCAN nodes share a single two-wire segment terminated at both ends with 120 Ω resistors. Source: <a href="https://commons.wikimedia.org/wiki/File:BusNetwork.svg" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">Wikimedia Commons</a> (public domain)</figcaption>
+    </figure>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 text-sm">
         <div class="bg-slate-900 p-5 rounded border border-slate-700">
@@ -347,10 +368,10 @@ Port    = 14552
             <ul class="space-y-1 font-mono text-xs text-slate-300">
                 <li>• Transport: CAN 2.0B (29-bit extended IDs, 8-byte frames)</li>
                 <li>• Node IDs: 1–127 (dynamic allocation or manual)</li>
-                <li>• Key types: uavcan.equipment.esc.*, uavcan.equipment.gnss.*</li>
+                <li>• Key message types: uavcan.equipment.esc.*, uavcan.equipment.gnss.*</li>
                 <li>• Max bus speed: 1 Mbps; max 127 nodes per segment</li>
                 <li>• Hardware: Zubax Myxa ESC, Zubax GNSS 2.0, mRo GPS, Avionics Anonymous</li>
-                <li>• PX4: UAVCAN_ENABLE = 2 (sensors + outputs)</li>
+                <li>• PX4 param: UAVCAN_ENABLE = 2 (sensors + outputs)</li>
             </ul>
         </div>
         <div class="bg-slate-900 p-5 rounded border border-emerald-800">
@@ -367,12 +388,13 @@ Port    = 14552
     </div>
 
     <h4>DroneCAN Bus Engineering Rules</h4>
-    <ul class="text-slate-300 text-sm space-y-2">
-        <li><strong>Termination:</strong> Both physical ends of the CAN segment require 120 Ω termination resistors. Pixhawk 6C has solder-jumper selectable termination. External nodes (ESCs, GPS) need external 120 Ω if they are the last node. Missing termination causes reliable 25% packet loss at 1 Mbps.</li>
-        <li><strong>Cable type:</strong> Use twisted-pair for CAN H/CAN L. Flat ribbon cable or untwisted wire next to power wiring causes common-mode noise. Recommended: ≥22 AWG twisted-pair, shielded on &gt;30 cm runs.</li>
+    <ul class="text-slate-300 text-sm space-y-2 mb-4">
+        <li><strong>Termination:</strong> Both physical ends of the CAN segment require 120 Ω termination resistors. Missing termination causes reliable 25% packet loss at 1 Mbps. Pixhawk 6C has solder-jumper selectable termination.</li>
+        <li><strong>Cable type:</strong> Use twisted-pair for CAN H/CAN L. Flat ribbon cable or untwisted wire next to power wiring causes common-mode noise. Recommended: ≥22 AWG twisted-pair, shielded on &gt;30 cm runs adjacent to motor wiring.</li>
         <li><strong>Bus length vs speed:</strong> 1 Mbps → max ~40 m; 500 kbps → max ~100 m; 125 kbps → max ~500 m. Propagation delay must be &lt;5% of bit time.</li>
         <li><strong>Dynamic node ID allocation:</strong> PX4 auto-allocates DroneCAN node IDs using the UAVCAN DNIA protocol. IDs are saved to <code>uavcan_node_ids.db</code> on SD card. Prefer manual assignment for production deployments — prevents ID churn after SD card replacement.</li>
         <li><strong>ESC telemetry feedback:</strong> DroneCAN smart ESCs return per-motor RPM, phase current, bus voltage, MCU temperature, and error flags at 100–500 Hz. This enables per-motor fault detection, propeller-loss detection, and motor health monitoring in the AI mission manager.</li>
+        <li><strong>yakut monitoring tool:</strong> Install <code>pip install yakut</code> to monitor live bus transfers, check node health, and confirm ID assignments during bench integration without requiring QGroundControl.</li>
     </ul>
 
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-8">
@@ -431,47 +453,49 @@ ros2 param get /fmu/out/uavcan_node_ids uavcan_node_ids</code></pre>
     <h4>ROS 2 QoS Profiles for Drone Topics</h4>
     <p>QoS (Quality of Service) policies are critical. Wrong QoS settings cause silent data loss or unbounded memory growth. PX4 <code>/fmu/out/</code> topics use specific profiles — a subscriber QoS mismatch silently receives zero messages with no error log. Always match publisher QoS exactly when subscribing to PX4 topics.</p>
 
-    <table class="w-full text-left border-collapse mt-4 mb-8 text-sm">
-        <thead>
-            <tr class="bg-slate-800 text-sky-400">
-                <th class="p-3 border border-slate-700">QoS Policy</th>
-                <th class="p-3 border border-slate-700">Setting</th>
-                <th class="p-3 border border-slate-700">When to Use on Drones</th>
+    <div class="overflow-x-auto my-6">
+    <table class="w-full text-sm text-left">
+        <thead class="bg-slate-700 text-slate-300">
+            <tr>
+                <th class="p-3">QoS Policy</th>
+                <th class="p-3">Setting</th>
+                <th class="p-3">When to Use on Drones</th>
             </tr>
         </thead>
-        <tbody class="text-slate-300 font-mono text-xs">
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white">Reliability</td>
-                <td class="p-3 border border-slate-700 text-sky-400">BEST_EFFORT</td>
-                <td class="p-3 border border-slate-700">IMU, sensor data, position estimates, video frames. Drop stale messages rather than queue them. Matches PX4 /fmu/out/* default. Missing one IMU sample at 250 Hz is safe; stale queued data 200ms old is dangerous.</td>
+        <tbody class="divide-y divide-slate-700 text-xs font-mono">
+            <tr class="bg-slate-800">
+                <td class="p-3 text-white">Reliability</td>
+                <td class="p-3 text-sky-400">BEST_EFFORT</td>
+                <td class="p-3 text-slate-300">IMU, sensor data, position estimates, video frames. Drop stale messages rather than queue them. Matches PX4 /fmu/out/* default. Missing one IMU sample at 250 Hz is safe; stale queued data 200 ms old is dangerous.</td>
             </tr>
-            <tr>
-                <td class="p-3 border border-slate-700 text-white">Reliability</td>
-                <td class="p-3 border border-slate-700 text-amber-400">RELIABLE</td>
-                <td class="p-3 border border-slate-700">Mission waypoints, arming commands, parameter updates. Every message must arrive. Retransmission cost is acceptable because these messages are infrequent (&lt;1 Hz). Use for /fmu/in/ setpoint topics.</td>
+            <tr class="bg-slate-900">
+                <td class="p-3 text-white">Reliability</td>
+                <td class="p-3 text-amber-400">RELIABLE</td>
+                <td class="p-3 text-slate-300">Mission waypoints, arming commands, parameter updates. Every message must arrive. Use for /fmu/in/ setpoint topics.</td>
             </tr>
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white">Durability</td>
-                <td class="p-3 border border-slate-700 text-sky-400">VOLATILE</td>
-                <td class="p-3 border border-slate-700">All real-time sensor topics. Never cache for late-joining subscribers — a new node subscribing to /fmu/out/vehicle_attitude should receive live data, not a stale reading from 500 ms ago.</td>
+            <tr class="bg-slate-800">
+                <td class="p-3 text-white">Durability</td>
+                <td class="p-3 text-sky-400">VOLATILE</td>
+                <td class="p-3 text-slate-300">All real-time sensor topics. Never cache for late-joining subscribers — a new node subscribing to /fmu/out/vehicle_attitude should receive live data, not a stale reading from 500 ms ago.</td>
             </tr>
-            <tr>
-                <td class="p-3 border border-slate-700 text-white">Durability</td>
-                <td class="p-3 border border-slate-700 text-amber-400">TRANSIENT_LOCAL</td>
-                <td class="p-3 border border-slate-700">Map data, mission plans, configuration topics. New subscribers receive the last published value immediately on connect — essential for map servers and costmap publishers in Nav2 integration.</td>
+            <tr class="bg-slate-900">
+                <td class="p-3 text-white">Durability</td>
+                <td class="p-3 text-amber-400">TRANSIENT_LOCAL</td>
+                <td class="p-3 text-slate-300">Map data, mission plans, configuration topics. New subscribers receive the last published value immediately on connect — essential for map servers and costmap publishers in Nav2 integration.</td>
             </tr>
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white">History</td>
-                <td class="p-3 border border-slate-700 text-emerald-400">KEEP_LAST(1)</td>
-                <td class="p-3 border border-slate-700">All sensor topics on embedded hardware. Queue depth 1 means only the latest message is held per subscriber — prevents unbounded memory growth. Never use KEEP_ALL on a drone sensor topic; it will exhaust RAM under brief CPU spike.</td>
+            <tr class="bg-slate-800">
+                <td class="p-3 text-white">History</td>
+                <td class="p-3 text-emerald-400">KEEP_LAST(1)</td>
+                <td class="p-3 text-slate-300">All sensor topics on embedded hardware. Queue depth 1 means only the latest message is held per subscriber — prevents unbounded memory growth. Never use KEEP_ALL on a drone sensor topic; it will exhaust RAM under brief CPU spike.</td>
             </tr>
-            <tr>
-                <td class="p-3 border border-slate-700 text-white">Deadline</td>
-                <td class="p-3 border border-slate-700 text-rose-400">Set per topic Hz</td>
-                <td class="p-3 border border-slate-700">For safety monitors: deadline = 1/Hz × 1.5. E.g., for a 50 Hz position estimate, set deadline = 30 ms. Triggers on_requested_deadline_missed callback — use as watchdog to trigger failsafe if state estimate goes stale mid-flight.</td>
+            <tr class="bg-slate-900">
+                <td class="p-3 text-white">Deadline</td>
+                <td class="p-3 text-rose-400">Set per topic Hz</td>
+                <td class="p-3 text-slate-300">For safety monitors: deadline = 1/Hz × 1.5. E.g., for a 50 Hz position estimate, set deadline = 30 ms. Triggers on_requested_deadline_missed callback — use as watchdog to trigger failsafe if state estimate goes stale mid-flight.</td>
             </tr>
         </tbody>
     </table>
+    </div>
 
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-8">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">ROS 2 C++: correct QoS for PX4 /fmu/out/ subscription</div>
@@ -558,41 +582,54 @@ ros2 topic list
     </div>
 
     <h3>8.7 Video Encoding for Drone Downlinks</h3>
-    <p>Drone video pipelines have fundamentally different constraints from broadcast streaming: encoding latency must stay under 100 ms for real-time GCS situational awareness, RF bandwidth limits downlinks to 2–20 Mbps for BVLOS operations, and the encoder must run on battery-constrained hardware at &lt;5 W. Software encoders (libx264, libx265) are disqualified on power alone — hardware encode is mandatory.</p>
+    <p>Drone video pipelines have fundamentally different constraints from broadcast streaming: encoding latency must stay under 100 ms for real-time GCS situational awareness, RF bandwidth limits downlinks to 2–20 Mbps for BVLOS operations, and the encoder must run on battery-constrained hardware at &lt;5 W. Software encoders (libx264, libx265) are disqualified on power alone — hardware encode is mandatory. The codec choice directly sets the quality-bandwidth-latency operating point for the entire ISR pipeline.</p>
 
-    <table class="w-full text-left border-collapse mt-4 mb-6 text-sm">
-        <thead>
-            <tr class="bg-slate-800 text-sky-400">
-                <th class="p-3 border border-slate-700">Codec</th>
-                <th class="p-3 border border-slate-700">Compression vs H.264</th>
-                <th class="p-3 border border-slate-700">HW Encode Latency</th>
-                <th class="p-3 border border-slate-700">2025 Platform Support</th>
+    <div class="overflow-x-auto my-6">
+    <table class="w-full text-sm text-left">
+        <thead class="bg-slate-700 text-slate-300">
+            <tr>
+                <th class="p-3">Codec</th>
+                <th class="p-3">Compression vs H.264</th>
+                <th class="p-3">HW Encode Latency</th>
+                <th class="p-3">Encode Power</th>
+                <th class="p-3">2025 Platform Support</th>
             </tr>
         </thead>
-        <tbody class="text-slate-300 font-mono text-xs">
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white font-bold">H.264 / AVC</td>
-                <td class="p-3 border border-slate-700">1× baseline</td>
-                <td class="p-3 border border-slate-700 text-emerald-400">16–33 ms (1 frame @ 30–60 fps)</td>
-                <td class="p-3 border border-slate-700">Universal: Jetson (nvenc h264), RK3588 (rkmpp h264), RPi 5 (V4L2 M2M). Supported by every GCS (QGroundControl, Mission Planner, DJI Pilot). Use for compatibility-first deployments and legacy integration.</td>
+        <tbody class="divide-y divide-slate-700 text-xs font-mono">
+            <tr class="bg-slate-800">
+                <td class="p-3 text-white font-bold">H.264 / AVC<br><span class="text-slate-500 font-normal">Baseline / High</span></td>
+                <td class="p-3 text-slate-300">1× baseline</td>
+                <td class="p-3 text-emerald-400">16–33 ms (1 frame @ 30–60 fps)</td>
+                <td class="p-3 text-emerald-400">~0.5 W (HW)</td>
+                <td class="p-3 text-slate-300">Universal: Jetson (nvenc h264), RK3588 (rkmpp h264), RPi 5 (V4L2 M2M). Supported by every GCS (QGroundControl, Mission Planner, DJI Pilot). Use for compatibility-first deployments and legacy integration. Max throughput on Jetson Orin: 4K@120fps NVENC.</td>
             </tr>
-            <tr>
-                <td class="p-3 border border-slate-700 text-white font-bold">H.265 / HEVC</td>
-                <td class="p-3 border border-slate-700 text-emerald-400">~40% better quality at same bitrate</td>
-                <td class="p-3 border border-slate-700 text-emerald-400">16–33 ms (hardware)</td>
-                <td class="p-3 border border-slate-700">Jetson Orin (nvenc hevc, up to 8K), RK3588 (rkmpp hevc), Qualcomm QCS8550. Required for high-quality 4K ISR within 10–20 Mbps budget. QGroundControl 4.3+ supports H.265 RTSP. Default codec choice for new BVLOS systems.</td>
+            <tr class="bg-slate-900">
+                <td class="p-3 text-white font-bold">H.265 / HEVC<br><span class="text-slate-500 font-normal">Main / Main10</span></td>
+                <td class="p-3 text-emerald-400">~40% better quality at same bitrate</td>
+                <td class="p-3 text-emerald-400">16–33 ms (hardware)</td>
+                <td class="p-3 text-emerald-400">~0.7 W (HW)</td>
+                <td class="p-3 text-slate-300">Jetson Orin (nvenc hevc, up to 8K), RK3588 (rkmpp hevc), Qualcomm QCS8550. Required for high-quality 4K ISR within 10–20 Mbps budget. QGroundControl 4.3+ supports H.265 RTSP. <strong class="text-white">Default codec choice for new BVLOS systems.</strong> 1080p@30fps fits in 2–4 Mbps at useful quality.</td>
             </tr>
-            <tr class="bg-slate-900/50">
-                <td class="p-3 border border-slate-700 text-white font-bold">AV1</td>
-                <td class="p-3 border border-slate-700 text-sky-400">~50% better than H.264</td>
-                <td class="p-3 border border-slate-700 text-rose-400">100–500 ms SW (real-time HW: 2025+)</td>
-                <td class="p-3 border border-slate-700">Intel ARC A-series (2023+), Qualcomm Snapdragon (2024+). Not yet viable for real-time drone links — decode latency too high. Best for post-mission ISR footage compression, SATCOM uplinks where bandwidth cost dominates.</td>
+            <tr class="bg-slate-800">
+                <td class="p-3 text-white font-bold">AV1<br><span class="text-slate-500 font-normal">SVT-AV1 / libaom</span></td>
+                <td class="p-3 text-sky-400">~50% better than H.264</td>
+                <td class="p-3 text-rose-400">100–500 ms SW; 30–50 ms HW (2025)</td>
+                <td class="p-3 text-amber-400">~1.2 W (HW encode)</td>
+                <td class="p-3 text-slate-300">Intel ARC A-series GPU (HW AV1 encode, 2023+), Qualcomm Snapdragon 8 Gen 3 (2024+), NVIDIA Ada Lovelace (not on Jetson). Not yet viable for real-time tactical drone links — decode latency + decoder deployment gaps. Best for post-mission ISR footage archival or SATCOM uplinks where bandwidth cost dominates.</td>
+            </tr>
+            <tr class="bg-slate-900">
+                <td class="p-3 text-white font-bold">H.264 Intra-only<br><span class="text-slate-500 font-normal">All-I frames</span></td>
+                <td class="p-3 text-rose-400">~5× larger than GOP H.264</td>
+                <td class="p-3 text-emerald-400">&lt;1 frame (16 ms @ 60fps)</td>
+                <td class="p-3 text-emerald-400">~0.5 W</td>
+                <td class="p-3 text-slate-300">Used for low-latency obstacle avoidance video where any P-frame error propagation is unacceptable. DJI O3/O4 Air Unit uses a proprietary low-latency mode approaching intra-only characteristics. Configure via <code>iframeinterval=1</code> in GStreamer nvv4l2h264enc. Bandwidth penalty is severe: 1080p@30fps requires 15–25 Mbps.</td>
             </tr>
         </tbody>
     </table>
+    </div>
 
     <h4>GStreamer Pipeline: H.265 Encode on Jetson Orin (NVENC)</h4>
-    <p>Jetson Orin includes hardware NVENC supporting H.264 and H.265 up to 4K@120fps. The zero-copy path uses NVMM memory (shared between the ISP and the encoder), avoiding a CPU-side buffer copy that would add ~5 ms and 30% CPU load:</p>
+    <p>Jetson Orin includes hardware NVENC supporting H.264 and H.265 up to 4K@120fps. The zero-copy path uses NVMM memory (shared between the ISP and the encoder), avoiding a CPU-side buffer copy that would add ~5 ms and 30% CPU load. For multi-client delivery, MediaMTX (formerly rtsp-simple-server) provides a zero-dependency RTSP/WebRTC server in a single binary.</p>
 
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">GStreamer: H.265 zero-copy encode → RTP UDP (Jetson Orin)</div>
@@ -644,7 +681,81 @@ v4l2-ctl --list-devices | grep -A2 rkvenc
         </div>
     </div>
 
-    <h3>8.8 End-to-End Latency Budget Analysis</h3>
+    <h3>8.8 NVIDIA DeepStream & Holoscan for Drone AI Pipelines</h3>
+    <p>Two NVIDIA SDKs address drone-class real-time video and sensor processing from different angles: <strong>DeepStream</strong> targets multi-camera video analytics with GStreamer integration, while <strong>Holoscan</strong> targets low-latency sensor-to-inference pipelines across arbitrary sensor modalities.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 text-sm">
+        <div class="bg-slate-900 p-5 rounded border border-slate-700">
+            <strong class="text-green-400 block mb-2">NVIDIA DeepStream SDK 7.x (2024)</strong>
+            <p class="text-xs text-slate-400 mb-2">GStreamer-based multi-camera video analytics toolkit. 40+ hardware-accelerated plugins. Available on Jetson Orin (ARM) and x86 dGPU platforms.</p>
+            <ul class="space-y-1 font-mono text-xs text-slate-300">
+                <li>• <strong class="text-white">Zero-copy:</strong> NvBufSurface passes NVMM frames between plugins without CPU copies</li>
+                <li>• <strong class="text-white">nvstreammux:</strong> Batches N camera streams into a single GPU tensor for inference</li>
+                <li>• <strong class="text-white">nvinfer:</strong> TensorRT INT8/FP16 inference plugin — plug in any ONNX model</li>
+                <li>• <strong class="text-white">nvtracker:</strong> IOU / NvDCF / DeepSORT multi-object tracking</li>
+                <li>• <strong class="text-white">DS 7.0 new:</strong> Python DeepStream Library (no GStreamer required), Service Maker for C++ app generation, BEVFusion multi-sensor fusion (LiDAR + camera), PipeTuner automated parameter optimisation</li>
+                <li>• <strong class="text-white">Drone application:</strong> 8× 1080p camera streams with object detection + tracking in real time on Orin AGX, &lt;50 ms end-to-end at 30fps</li>
+            </ul>
+            <a href="https://developer.nvidia.com/deepstream-sdk" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline text-xs mt-2 block">NVIDIA DeepStream SDK documentation →</a>
+        </div>
+        <div class="bg-slate-900 p-5 rounded border border-violet-800">
+            <strong class="text-violet-400 block mb-2">NVIDIA Holoscan SDK v4.x (2025)</strong>
+            <p class="text-xs text-slate-400 mb-2">Domain-agnostic, graph-based AI sensor processing framework. Current release: v4.3.0 (May 2025). Targets ultra-low-latency heterogeneous sensor pipelines beyond video alone.</p>
+            <ul class="space-y-1 font-mono text-xs text-slate-300">
+                <li>• <strong class="text-white">Graph DAG model:</strong> Operators connected in directed graphs; GPU-resident DAG support from v4.2 eliminates CPU round-trips</li>
+                <li>• <strong class="text-white">Holoscan Sensor Bridge:</strong> Streams sensor data over Ethernet directly into GPU memory via GPUDirect — bypasses CPU entirely for high-bandwidth ingest</li>
+                <li>• <strong class="text-white">Zero-copy ingest:</strong> OpenCV integration (v4.x) enables GPU-side image processing without memory transfers</li>
+                <li>• <strong class="text-white">Multi-modal:</strong> Any sensor type — cameras, LiDAR, radar, IMU, ultrasound — same pipeline framework</li>
+                <li>• <strong class="text-white">v4.3 new:</strong> CUDA 13 support, TensorRT 10.16, PyTorch 2.11, six new AI Skills for automated deployment</li>
+                <li>• <strong class="text-white">Drone application:</strong> Camera-IMU-LiDAR fusion pipelines; medical-to-aerospace technology transfer for ISR and EO/IR payload processing</li>
+            </ul>
+            <a href="https://developer.nvidia.com/holoscan-sdk" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline text-xs mt-2 block">NVIDIA Holoscan SDK documentation →</a>
+        </div>
+    </div>
+
+    <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-8">
+        <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">DeepStream Python Library: 8-camera object detection pipeline (DS 7.x)</div>
+        <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Python Code Example</summary>
+<pre><code class="language-python"># DeepStream 7.x Python Library (no GStreamer code required)
+# Requires: pip install pyds  and  apt install deepstream-7.0
+
+import pyds
+from deepstream import Pipeline, Source, Sink, Infer
+
+# Build 8-camera detection pipeline
+pipeline = Pipeline()
+sources  = [Source.rtsp(f"rtsp://cam{i}:8554/live") for i in range(8)]
+mux      = pipeline.add_streammux(batch_size=8, width=1920, height=1080)
+infer    = pipeline.add_infer(model_engine="/models/yolov8s_fp16.engine",
+                               num_classes=80, batch_size=8)
+tracker  = pipeline.add_tracker(tracker_type="NvDCF")
+sink     = Sink.rtsp(port=8554, stream_name="detections")
+
+pipeline.connect(sources, mux, infer, tracker, sink)
+pipeline.run()   # blocking; Ctrl-C to stop
+
+# Access detection metadata in a probe callback:
+def detection_callback(pad, info, user_data):
+    gst_buffer = info.get_buffer()
+    batch_meta = pyds.gst_buffer_get_nvds_batch_meta(hash(gst_buffer))
+    for frame_meta in pyds.NvDsBatchMeta.cast(batch_meta).frame_meta_list:
+        for obj_meta in pyds.NvDsFrameMeta.cast(frame_meta.data).obj_meta_list:
+            obj = pyds.NvDsObjectMeta.cast(obj_meta.data)
+            print(f"Class {obj.class_id}: ({obj.rect_params.left:.0f},{obj.rect_params.top:.0f})")</code></pre>
+</details>
+        </div>
+    </div>
+
+    <div class="my-8">
+        <h3 class="text-xl font-bold text-white mb-3">Video: Build Vision AI Pipelines with NVIDIA DeepStream</h3>
+        <div class="relative w-full" style="padding-bottom: 56.25%;">
+            <iframe class="absolute inset-0 w-full h-full rounded-lg" src="https://www.youtube.com/embed/yj11L8rFC30" title="Build Vision AI Pipelines Faster with NVIDIA DeepStream Inference Builder" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <h3>8.9 End-to-End Latency Budget Analysis</h3>
     <p>The most important latency metric for an AI-controlled drone is the <em>perception-to-actuation latency</em>: the time from a photon hitting the camera sensor to a corrective motor command being executed by the ESC. For stable autonomous flight at moderate speeds, this must stay below 150 ms. For aggressive manoeuvring or obstacle avoidance at high speed, below 50 ms is required. Understanding where latency comes from allows systematic optimisation.</p>
 
     <div class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden mb-6">
@@ -685,7 +796,7 @@ v4l2-ctl --list-devices | grep -A2 rkvenc
                 </tr>
                 <tr class="border-t border-slate-800">
                     <td class="p-3 text-white">Flight Controller</td>
-                    <td class="p-3 text-slate-400">400Hz loop → 1kHz high-rate</td>
+                    <td class="p-3 text-slate-400">400 Hz loop → 1 kHz high-rate</td>
                     <td class="p-3 text-center text-amber-400">2.5 ms</td>
                     <td class="p-3 text-center text-emerald-400">1 ms</td>
                 </tr>
@@ -729,7 +840,139 @@ v4l2-ctl --list-devices | grep -A2 rkvenc
         </div>
     </div>
 
-    <h3>8.9 Bandwidth Budget Calculator</h3>
+    <h3>8.10 Data Recording: ROS 2 Bags & MCAP Format</h3>
+    <p>Flight data recording is essential for debugging, training data collection, and post-mission analysis. ROS 2 bags have evolved significantly: since ROS 2 Iron (May 2023), <strong>MCAP</strong> is the default storage format for rosbag2, replacing the SQLite3 <code>.db3</code> format.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 text-sm">
+        <div class="bg-slate-900 p-5 rounded border border-slate-700">
+            <strong class="text-amber-400 block mb-2">MCAP Format — Key Properties</strong>
+            <ul class="space-y-1 font-mono text-xs text-slate-300">
+                <li>• Container format for timestamped multi-modal sensor data</li>
+                <li>• Schemas embedded in-file — readable without external dependencies</li>
+                <li>• Native libraries: C++, Python, Go, Rust, TypeScript</li>
+                <li>• Random-access index: seek to any timestamp in O(log n)</li>
+                <li>• Optional LZ4 / Zstd per-chunk compression</li>
+                <li>• Foxglove Studio natively visualises MCAP without ROS install</li>
+                <li>• Supports non-ROS schemas: Protobuf, FlatBuffers, JSON Schema</li>
+            </ul>
+        </div>
+        <div class="bg-slate-900 p-5 rounded border border-emerald-800">
+            <strong class="text-emerald-400 block mb-2">rosbag2 Recording Best Practices</strong>
+            <ul class="space-y-1 font-mono text-xs text-slate-300">
+                <li>• Always use NVMe M.2 (PCIe 3.0 ×4) for recording — eMMC saturates above 300 MB/s</li>
+                <li>• Pre-allocate storage: <code>--max-bag-size 10000</code> (MB) prevents mid-flight full-disk</li>
+                <li>• Split bags by time: <code>--max-bag-duration 300</code> (seconds) for 5-min segments</li>
+                <li>• Record raw compressed images (sensor_msgs/CompressedImage) not raw to save 10–20× space</li>
+                <li>• Use <code>--qos-profile-overrides-path</code> YAML to match PX4 BEST_EFFORT QoS on subscription</li>
+                <li>• mcap CLI tool (brew/apt): <code>mcap info bag.mcap</code> shows topic statistics instantly</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-8">
+        <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">rosbag2 MCAP recording — multi-sensor drone flight data</div>
+        <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Shell Code Example</summary>
+<pre><code class="language-bash"># Install MCAP storage plugin (ROS 2 Iron+ includes this by default):
+sudo apt install ros-humble-rosbag2-storage-mcap
+
+# Record selected topics to MCAP bag on NVMe:
+ros2 bag record \
+  --storage mcap \
+  --max-bag-size 10000 \
+  --max-bag-duration 300 \
+  --output /mnt/nvme/flights/$(date +%Y%m%d_%H%M%S) \
+  /fmu/out/vehicle_attitude \
+  /fmu/out/vehicle_local_position \
+  /fmu/out/sensor_combined \
+  /fmu/out/esc_status \
+  /camera/image_raw/compressed \
+  /camera/camera_info \
+  /livox/lidar
+
+# Inspect recording without ROS (mcap CLI):
+mcap info /mnt/nvme/flights/20260601_143022/bag_0.mcap
+# Topics: /fmu/out/vehicle_attitude  (250 Hz, 1.2 GB)
+#         /livox/lidar               (10 Hz, 3.8 GB)
+
+# Play back at 2x speed for offline analysis:
+ros2 bag play /mnt/nvme/flights/20260601_143022 --rate 2.0 \
+  --storage mcap \
+  --topics /fmu/out/vehicle_attitude /camera/image_raw/compressed</code></pre>
+</details>
+        </div>
+    </div>
+
+    <h3>8.11 Sensor Data Rates & LiDAR Bandwidth</h3>
+    <p>Understanding the raw data rates of each sensor is prerequisite to interface selection and storage planning. The table below gives production-accurate values for sensors commonly integrated on AI drone platforms as of 2025–2026.</p>
+
+    <div class="overflow-x-auto my-6">
+    <table class="w-full text-sm text-left">
+        <thead class="bg-slate-700 text-slate-300">
+            <tr>
+                <th class="p-3">Sensor</th>
+                <th class="p-3">Native Rate</th>
+                <th class="p-3">Raw Data Rate</th>
+                <th class="p-3">Interface</th>
+                <th class="p-3">Notes</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-700 text-xs font-mono">
+            <tr class="bg-slate-800">
+                <td class="p-3 text-white font-bold">Camera — 1080p RAW10</td>
+                <td class="p-3 text-slate-300">30 fps</td>
+                <td class="p-3 text-amber-400">~600 Mbps/camera</td>
+                <td class="p-3 text-slate-300">CSI-2 D-PHY 2-lane</td>
+                <td class="p-3 text-slate-300">1920×1080×10bit×30 = 622 Mbps. H.265 hardware encode reduces to 4–8 Mbps for RF downlink.</td>
+            </tr>
+            <tr class="bg-slate-900">
+                <td class="p-3 text-white font-bold">Camera — 4K RAW10</td>
+                <td class="p-3 text-slate-300">60 fps</td>
+                <td class="p-3 text-rose-400">~4.97 Gbps/camera</td>
+                <td class="p-3 text-slate-300">CSI-2 D-PHY 4-lane</td>
+                <td class="p-3 text-slate-300">3840×2160×10bit×60 = 4.97 Gbps. Requires 4-lane CSI-2 at full rate. NVMM zero-copy to NVENC essential.</td>
+            </tr>
+            <tr class="bg-slate-800">
+                <td class="p-3 text-white font-bold">ICM-42688-P IMU</td>
+                <td class="p-3 text-slate-300">8,000 Hz ODR</td>
+                <td class="p-3 text-emerald-400">~3.1 Mbps</td>
+                <td class="p-3 text-slate-300">SPI 24 MHz</td>
+                <td class="p-3 text-slate-300">6-axis × 16-bit × 8000 Hz = 768 kbps data; SPI framing ~3.1 Mbps. Gyro noise: 2.8 mdps/√Hz. Max ODR 8 kHz (native), 32 kHz (with anti-aliasing filter).</td>
+            </tr>
+            <tr class="bg-slate-900">
+                <td class="p-3 text-white font-bold">Livox Mid-360 LiDAR</td>
+                <td class="p-3 text-slate-300">200,000 pts/s</td>
+                <td class="p-3 text-amber-400">~80–120 Mbps</td>
+                <td class="p-3 text-slate-300">100BASE-TX Ethernet</td>
+                <td class="p-3 text-slate-300">Each point: XYZ float32 + intensity uint8 + timestamp = ~20 bytes. 200k pts/s × 20B = 32 Mbps raw; Livox UDP packet overhead pushes real usage to ~80–120 Mbps. Well within 100BASE-TX ceiling.</td>
+            </tr>
+            <tr class="bg-slate-800">
+                <td class="p-3 text-white font-bold">Ouster OS1-128 LiDAR</td>
+                <td class="p-3 text-slate-300">2.62 M pts/s</td>
+                <td class="p-3 text-rose-400">~600–800 Mbps</td>
+                <td class="p-3 text-slate-300">1000BASE-T Ethernet</td>
+                <td class="p-3 text-slate-300">128 channels × 20,480 pts/rev × 10 Hz = 2.62 M pts/s. Requires GigE; dedicated NIC recommended. Primary sensor on VTOL/fixed-wing mapping platforms.</td>
+            </tr>
+            <tr class="bg-slate-900">
+                <td class="p-3 text-white font-bold">u-blox F9P RTK GPS</td>
+                <td class="p-3 text-slate-300">20 Hz (RTK)</td>
+                <td class="p-3 text-emerald-400">&lt;1 Mbps</td>
+                <td class="p-3 text-slate-300">UART / DroneCAN</td>
+                <td class="p-3 text-slate-300">NMEA + UBX binary negligible bandwidth. RTK corrections (RTCM3) from base station: ~2 kbps. 1PPS output ±10 ns RMS for timing.</td>
+            </tr>
+            <tr class="bg-slate-800">
+                <td class="p-3 text-white font-bold">MAVLink Telemetry</td>
+                <td class="p-3 text-slate-300">10 Hz full set</td>
+                <td class="p-3 text-emerald-400">~50–200 kbps</td>
+                <td class="p-3 text-slate-300">UART / UDP</td>
+                <td class="p-3 text-slate-300">Full 10 Hz telemetry stream: attitude + position + IMU + battery + status = ~150 kbps. QGC "full" rate. C2 link budget: allocate 500 kbps for telemetry overhead on BVLOS LTE links.</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <h3>8.12 Bandwidth Budget Calculator</h3>
     <p>Use this calculator to determine the required internal data bandwidth for a given sensor configuration. Results indicate which physical interface is required between the sensor layer and the companion computer. <em>Note: raw bandwidth is the CSI-2/USB load; compressed bandwidth is what flows over an RF downlink.</em></p>
 
     <div class="interactive-panel">
@@ -867,8 +1110,8 @@ v4l2-ctl --list-devices | grep -A2 rkvenc
         </div>
     </div>
 
-    <h3>8.10 Precision Time Protocol & Clock Synchronisation</h3>
-    <p>Sensor fusion requires that every measurement carries an accurate timestamp. Fusing a camera frame timestamped at T_cam with an IMU reading at T_imu when the two clocks have drifted by 5 ms introduces artificial position noise. At 10 m/s drone speed, a 5 ms timing error causes 5 cm of spurious position excursion per IMU update — enough to destabilise a VIO estimator at close range to obstacles.</p>
+    <h3>8.13 Precision Time Protocol & Clock Synchronisation</h3>
+    <p>Sensor fusion requires that every measurement carries an accurate timestamp. Fusing a camera frame timestamped at T_cam with an IMU reading at T_imu when the two clocks have drifted by 5 ms introduces artificial position noise. At 10 m/s drone speed, a 5 ms timing error causes 5 cm of spurious position excursion per IMU update — enough to destabilise a VIO estimator at close range to obstacles. Time synchronisation is not optional on any platform running camera-IMU fusion or multi-LiDAR setups.</p>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 text-sm">
         <div class="bg-slate-900 p-4 rounded border border-slate-700">
@@ -878,6 +1121,7 @@ v4l2-ctl --list-devices | grep -A2 rkvenc
                 <li>• No hardware required</li>
                 <li>• Insufficient for VIO/SLAM at &gt;5 m/s</li>
                 <li>• Use chrony (not ntpd) — faster convergence</li>
+                <li>• Adequate for MAVLink telemetry logging only</li>
             </ul>
         </div>
         <div class="bg-slate-900 p-4 rounded border border-amber-700">
@@ -886,7 +1130,8 @@ v4l2-ctl --list-devices | grep -A2 rkvenc
                 <li>• Software: 100 ns – 1 µs accuracy</li>
                 <li>• Hardware timestamps: &lt;100 ns</li>
                 <li>• Requires PTP-capable Ethernet NIC</li>
-                <li>• Orin: hardware PTP on enet0 (ptp4l + phc2sys)</li>
+                <li>• Jetson Orin: HW PTP on enet0 (ptp4l + phc2sys)</li>
+                <li>• Recommended for camera-LiDAR fusion</li>
             </ul>
         </div>
         <div class="bg-slate-900 p-4 rounded border border-emerald-700">
@@ -896,8 +1141,14 @@ v4l2-ctl --list-devices | grep -A2 rkvenc
                 <li>• u-blox F9P 1PPS output: ±10 ns RMS</li>
                 <li>• Feed to SoC GPIO + chrony refclock PPS</li>
                 <li>• Gold standard for outdoor autonomous missions</li>
+                <li>• Required for multi-vehicle coordinated operations</li>
             </ul>
         </div>
+    </div>
+
+    <div class="bg-sky-900/20 border border-sky-700/40 rounded-lg p-4 mb-6 text-sm">
+        <strong class="text-sky-400">Hardware Trigger Synchronisation for Stereo / Camera-IMU</strong>
+        <p class="text-slate-300 mt-1">For stereo SLAM and camera-IMU tight coupling, software timestamping introduces ±half-frame uncertainty (~8 ms at 60 fps). Hardware trigger eliminates this: the IMU fires a GPIO trigger at a fixed rate (typically 200 Hz), the camera sensor captures on the rising edge, and the timestamp is taken at trigger issuance — reducing timing uncertainty to &lt;50 µs (IMU jitter). PX4 can output a camera trigger via CAM_TRIG_MODE parameter on any unused GPIO. OAK-D Pro cameras expose a hardware sync connector natively. For Orin CSI-2 cameras, use the Tegra ISP synchronisation API to align frame captures to the same microsecond across all sensors.</p>
     </div>
 
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-8">
@@ -926,10 +1177,7 @@ sudo phc2sys -s eth0 -c CLOCK_REALTIME -w -O 0 -m 2&gt;&amp;1 | grep offset &amp
         </div>
     </div>
 
-    <h4>Hardware Trigger Synchronisation for Stereo / Camera-IMU</h4>
-    <p>For stereo SLAM and camera-IMU tight coupling, software timestamping introduces ±half-frame uncertainty (~8 ms at 60 fps). Hardware trigger eliminates this: the IMU fires a GPIO trigger at a fixed rate (typically 200 Hz), the camera sensor captures on the rising edge, and the timestamp is taken at trigger issuance — reducing timing uncertainty to &lt;50 µs (IMU jitter). PX4 can output a camera trigger via CAM_TRIG_MODE parameter on any unused GPIO. OAK-D cameras expose a hardware sync connector natively.</p>
-
-    <h3>8.11 C2 Link Design Patterns</h3>
+    <h3>8.14 C2 Link Design Patterns</h3>
     <p>The Command and Control (C2) link carries MAVLink telemetry between the ground station and the aircraft. For BVLOS operations the link must be resilient: FAA Part 107 BVLOS waiver requirements and EASA regulations require Detect and Avoid capability and a documented C2 link specification. Even for VLOS autonomous missions, an undetected C2 link loss must trigger failsafe RTL automatically, not a hover-and-wait that drains the battery.</p>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 text-sm">
@@ -952,17 +1200,17 @@ sudo phc2sys -s eth0 -c CLOCK_REALTIME -w -O 0 -m 2&gt;&amp;1 | grep offset &amp
                 <li>• Round-trip latency: 50–200 ms (LTE), 20–50 ms (5G)</li>
                 <li>• Backup: RFD900x SiK radio — automatic fail-back in mavlink-router</li>
                 <li>• Remote ID: OpenDroneID via WiFi NaN + BT 5.0 simultaneously</li>
-                <li>• Regulation (USA): FAA Part 107 BVLOS waiver + DAA required for extended-range ops</li>
+                <li>• Regulation (USA): FAA Part 107 BVLOS waiver + DAA required</li>
             </ul>
         </div>
     </div>
 
-    <h4>OpenDroneID & Remote Identification (2024–2025 Status)</h4>
+    <h4>OpenDroneID & Remote Identification (2024–2026 Status)</h4>
     <p>As of September 2023, the FAA requires all drones over 250 g flying in US airspace to broadcast Remote ID. OpenDroneID is the open implementation, supported natively by PX4 (v1.13+) and ArduPilot (4.3+). The drone broadcasts GPS position, altitude, velocity, and operator ID simultaneously via WiFi Neighbor Awareness Networking (NaN) and Bluetooth 5.0 Long Range at 1 Hz. These are two independent RF paths to ensure interoperability with the full range of receivers.</p>
 
     <ul class="text-slate-300 text-sm space-y-2">
         <li><strong>PX4 setup:</strong> Set <code>RID_ENABLE=1</code>, configure <code>UAS_ID</code> (FAA registration number format CUA-XXXXX). PX4 v1.14+ supports broadcast via attached OpenDroneID module (ESP32-S3 running PX4 RID firmware) over UART or natively via companion computer WiFi.</li>
-        <li><strong>Hardware (2025):</strong> BlueMark DB200 (15 g, dual WiFi+BT, USB-C), Cube ID Module (integrates with Cube autopilot), ESP32-S3 DIY with open firmware (github.com/opendroneid/opendroneid-core-c).</li>
+        <li><strong>Hardware (2025):</strong> BlueMark DB200 (15 g, dual WiFi+BT, USB-C), Cube ID Module (integrates with Cube autopilot), ESP32-S3 DIY with open firmware (<a href="https://github.com/opendroneid/opendroneid-core-c" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">github.com/opendroneid/opendroneid-core-c</a>).</li>
         <li><strong>ArduPilot:</strong> <code>DID_ENABLE=1</code>, MAVLink OpenDroneID messages (MSG 12900–12905) as of 4.3+. Compatible with all RID receivers certified under ASTM F3586-22.</li>
         <li><strong>EASA equivalent:</strong> EU 2019/945 Category C1/C2 requires Direct Remote ID broadcast compliant with EUROCAE ED-280. OpenDroneID implements both FAA and EASA message sets simultaneously.</li>
     </ul>
@@ -984,6 +1232,27 @@ sudo phc2sys -s eth0 -c CLOCK_REALTIME -w -O 0 -m 2&gt;&amp;1 | grep offset &amp
 # Use DroneScanner app (iOS/Android) to confirm reception
 # Check both WiFi NaN beacon and BLE 5 Long Range advertisement</code></pre>
 </details>
+        </div>
+    </div>
+
+    <h3>8.15 External References</h3>
+    <ul class="text-slate-300 text-sm space-y-2 mb-8">
+        <li><a href="https://dronecan.github.io/Specification/" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">DroneCAN Protocol Specification</a> — complete CAN transport layer, message type registry, DNIA allocation protocol</li>
+        <li><a href="https://docs.px4.io/main/en/dronecan/" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">PX4 DroneCAN Guide</a> — parameter reference, wiring diagrams, node ID management</li>
+        <li><a href="https://docs.px4.io/main/en/ros2/user_guide" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">PX4 ROS 2 / Micro XRCE-DDS User Guide</a> — dds_topics.yaml configuration, QoS mismatch debugging</li>
+        <li><a href="https://mcap.dev/" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">MCAP Format Specification</a> — container format docs, CLI tool, language libraries</li>
+        <li><a href="https://developer.nvidia.com/deepstream-sdk" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">NVIDIA DeepStream 7.x SDK</a> — GStreamer plugin reference, Python DeepStream Library API</li>
+        <li><a href="https://developer.nvidia.com/holoscan-sdk" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">NVIDIA Holoscan SDK v4.x</a> — operator graph API, Sensor Bridge, GPUDirect ingest</li>
+        <li><a href="https://invensense.tdk.com/products/motion-tracking/6-axis/icm-42688-p" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">TDK ICM-42688-P Datasheet</a> — 8 kHz ODR, noise specifications, SPI/I3C interface details</li>
+        <li><a href="https://www.livoxtech.com/mid-360/specs" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">Livox Mid-360 Specifications</a> — 200,000 pts/s, 100BASE-TX Ethernet interface</li>
+        <li><a href="https://linuxptp.sourceforge.net/" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">linuxptp — ptp4l / phc2sys</a> — IEEE 1588-2019 PTP implementation for Linux, Jetson configuration notes</li>
+        <li><a href="https://mavlink.io/en/guide/mavlink_version.html" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">MAVLink v2 Specification</a> — packet format, signing, message ID registry, routing rules</li>
+    </ul>
+
+    <div class="my-8">
+        <h3 class="text-xl font-bold text-white mb-3">Video: Embedded Programming for Quadcopters — Architecture Deep Dive</h3>
+        <div class="relative w-full" style="padding-bottom: 56.25%;">
+            <iframe class="absolute inset-0 w-full h-full rounded-lg" src="https://www.youtube.com/embed/CHSYgLfhwUo" title="Embedded Programming for Quadcopters — sensor interfaces, control loops, data flow" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
         </div>
     </div>
 </div>

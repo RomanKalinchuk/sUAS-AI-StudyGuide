@@ -1,8 +1,47 @@
 export default `
 <div class="fade-in">
     <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 10</span>
-    <h2>AI Model Training &amp; Dataset Pipeline for Drone Applications</h2>
-    <p>Training a detector on COCO and dropping it onto a drone will get mAP scores 15-20 points below what the same architecture achieves when fine-tuned on aerial data. This module covers why aerial data is different, which datasets to use, and the full pipeline from training to edge deployment.</p>
+    <h2>ML Pipeline for Drone Edge-AI: Data &rarr; Train &rarr; Optimize &rarr; Deploy</h2>
+    <p>A complete production ML pipeline for autonomous drone perception covers six tightly linked stages: collect and curate domain-specific data, annotate it, train with transfer learning, compress and quantize the model, build a hardware-optimized inference engine, and close the loop with on-device monitoring. Each stage has drone-specific pitfalls. This module covers the full pipeline end-to-end with 2025-era tooling: JetPack 6.x, TensorRT 10.x, NVIDIA TAO Toolkit 6.x, DeepStream 7.x, and YOLO11.</p>
+
+    <!-- Pipeline Overview Flowchart -->
+    <div class="my-8">
+        <h3 class="text-xl font-bold text-white mb-4">10.0 The Complete ML Pipeline</h3>
+        <div class="overflow-x-auto">
+            <div class="flex items-stretch gap-0 min-w-max">
+                <div class="bg-sky-900/60 border border-sky-500/50 rounded-l-lg p-4 text-center flex flex-col justify-center w-36">
+                    <div class="text-sky-400 font-bold text-sm">1. COLLECT</div>
+                    <div class="text-slate-300 text-xs mt-1">Real + Synthetic Data</div>
+                </div>
+                <div class="flex items-center text-slate-500 text-lg">&rarr;</div>
+                <div class="bg-violet-900/60 border border-violet-500/50 p-4 text-center flex flex-col justify-center w-36">
+                    <div class="text-violet-400 font-bold text-sm">2. LABEL</div>
+                    <div class="text-slate-300 text-xs mt-1">Roboflow / CVAT / Label Studio</div>
+                </div>
+                <div class="flex items-center text-slate-500 text-lg">&rarr;</div>
+                <div class="bg-emerald-900/60 border border-emerald-500/50 p-4 text-center flex flex-col justify-center w-36">
+                    <div class="text-emerald-400 font-bold text-sm">3. TRAIN</div>
+                    <div class="text-slate-300 text-xs mt-1">PyTorch 2.x + YOLO11 / TAO</div>
+                </div>
+                <div class="flex items-center text-slate-500 text-lg">&rarr;</div>
+                <div class="bg-amber-900/60 border border-amber-500/50 p-4 text-center flex flex-col justify-center w-36">
+                    <div class="text-amber-400 font-bold text-sm">4. OPTIMIZE</div>
+                    <div class="text-slate-300 text-xs mt-1">Prune &rarr; Distill &rarr; Quantize</div>
+                </div>
+                <div class="flex items-center text-slate-500 text-lg">&rarr;</div>
+                <div class="bg-red-900/60 border border-red-500/50 p-4 text-center flex flex-col justify-center w-36">
+                    <div class="text-red-400 font-bold text-sm">5. DEPLOY</div>
+                    <div class="text-slate-300 text-xs mt-1">TensorRT 10 .engine on Jetson</div>
+                </div>
+                <div class="flex items-center text-slate-500 text-lg">&rarr;</div>
+                <div class="bg-teal-900/60 border border-teal-500/50 rounded-r-lg p-4 text-center flex flex-col justify-center w-36">
+                    <div class="text-teal-400 font-bold text-sm">6. MONITOR</div>
+                    <div class="text-slate-300 text-xs mt-1">MLflow / W&amp;B + Active Learning</div>
+                </div>
+            </div>
+        </div>
+        <p class="text-slate-400 text-xs mt-2 italic">Each stage feeds the next. Monitoring closes the loop: production failures trigger new labeled data and retraining.</p>
+    </div>
 
     <h3>10.1 Why Aerial Datasets Are Different</h3>
     <p>Standard vision datasets like COCO and ImageNet are overwhelmingly ground-level, eye-level photography. Drone imagery breaks almost every assumption baked into those datasets.</p>
@@ -10,19 +49,19 @@ export default `
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div class="interactive-panel bg-[#0d1320] border-slate-700">
             <h4 class="mt-0 border-none text-amber-400 text-sm">Nadir vs. Oblique Views</h4>
-            <p class="text-slate-300 text-sm">A nadir (straight-down) view at 50m altitude sees a car as a ~30x15 pixel rectangle — no windshield, no grille, pure roof. This is fundamentally different from the side-on car appearances in COCO. At 15-30 degrees off-nadir (oblique), you see partial sides plus foreshortening. Pre-trained backbone features for "car" are tuned to frontal/side appearances and must be re-learned.</p>
+            <p class="text-slate-300 text-sm">A nadir (straight-down) view at 50m altitude sees a car as a ~30&times;15 pixel rectangle &mdash; no windshield, no grille, pure roof. This is fundamentally different from the side-on car appearances in COCO. At 15-30 degrees off-nadir (oblique), you see partial sides plus foreshortening. Pre-trained backbone features for "car" are tuned to frontal/side appearances and must be re-learned.</p>
         </div>
         <div class="interactive-panel bg-[#0d1320] border-slate-700">
             <h4 class="mt-0 border-none text-amber-400 text-sm">Small Object Detection Challenge</h4>
-            <p class="text-slate-300 text-sm">At 70m altitude with a typical 12MP drone camera, a pedestrian occupies roughly 15x40 pixels — well below the COCO "small" threshold of 32x32 pixels. COCO small-object AP is already the weakest metric for most models. VisDrone reports that over 60% of its annotated instances are &lt;32px in the longest dimension, creating severe foreground/background class imbalance in anchor assignment.</p>
+            <p class="text-slate-300 text-sm">At 70m altitude with a typical 12MP drone camera, a pedestrian occupies roughly 15&times;40 pixels &mdash; well below the COCO "small" threshold of 32&times;32 pixels. Over 60% of VisDrone annotated instances are &lt;32px in the longest dimension, creating severe foreground/background class imbalance in anchor assignment. imgsz=1280 recovers ~9 mAP50 points versus imgsz=640.</p>
         </div>
         <div class="interactive-panel bg-[#0d1320] border-slate-700">
             <h4 class="mt-0 border-none text-amber-400 text-sm">Scale Variation &amp; Altitude Coupling</h4>
-            <p class="text-slate-300 text-sm">A single flight mission covering 20m-80m altitude introduces a 4x scale range for every object class. Multi-scale feature pyramids (FPN/PAN) help, but they assume the scale range is fixed during training. Training with a fixed imgsz=640 and then inferring at 1280 or using multi-scale augmentation during training are both necessary to handle this.</p>
+            <p class="text-slate-300 text-sm">A single flight mission covering 20m-80m altitude introduces a 4x scale range for every object class. Multi-scale feature pyramids (FPN/PAN) help, but they assume the scale range is fixed during training. Training with multi_scale=True randomizes imgsz at each batch by &plusmn;50%, directly simulating altitude change without requiring multi-altitude flight data.</p>
         </div>
         <div class="interactive-panel bg-[#0d1320] border-slate-700">
-            <h4 class="mt-0 border-none text-amber-400 text-sm">Motion Blur &amp; Dataset Bias</h4>
-            <p class="text-slate-300 text-sm">At 15 m/s flight speed with 1/250s shutter, a 50m-altitude camera accumulates ~3px of motion blur. At 1/60s, this becomes ~12px on a small object — rendering it nearly undetectable. COCO/ImageNet have negligible motion blur training signal. Class imbalance in aerial surveillance is also extreme: pedestrian instances outnumber bus instances by 20:1 in VisDrone, requiring weighted loss sampling.</p>
+            <h4 class="mt-0 border-none text-amber-400 text-sm">Motion Blur &amp; Class Imbalance</h4>
+            <p class="text-slate-300 text-sm">At 15 m/s flight speed with 1/60s shutter, a 50m-altitude camera accumulates ~12px of motion blur on small objects &mdash; rendering them nearly undetectable. COCO/ImageNet have negligible motion blur training signal. Class imbalance is extreme: pedestrian instances outnumber bus instances by 20:1 in VisDrone, requiring weighted loss sampling or focal loss tuning.</p>
         </div>
     </div>
 
@@ -30,79 +69,128 @@ export default `
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-4">
         <h4 class="mt-0 border-none text-sky-400">VisDrone2019</h4>
-        <p class="text-slate-300 text-sm">The benchmark dataset for drone-based detection. Collected by the AISKYEYE team at Tianjin University from 14 cities across China, using DJI Phantom 3 Standard and Phantom 4 drones at altitudes of 10-70m.</p>
+        <p class="text-slate-300 text-sm">The benchmark dataset for drone-based detection. Collected at Tianjin University from 14 Chinese cities using DJI Phantom 3/4 drones at 10-70m altitude.</p>
         <ul class="text-slate-300 text-sm list-disc pl-5 space-y-1 mt-2">
             <li><strong>Images:</strong> 10,209 static images + 288 video clips (261,908 frames)</li>
-            <li><strong>Annotations:</strong> 2.6M+ bounding boxes across 10 classes: pedestrian, people, bicycle, car, van, truck, tricycle, awning-tricycle, bus, motor</li>
-            <li><strong>Train/Val/Test split:</strong> 6,471 / 548 / 1,610 images for detection</li>
-            <li><strong>Download:</strong> Official site requires registration — or use Hugging Face: <code>Voxel51/VisDrone2019-DET</code> (~2.3 GB). Also available on Roboflow Universe as <code>VisDrone2019-DET</code>.</li>
-            <li><strong>Key challenge:</strong> Dense crowd scenes, tiny objects, severe occlusion. Using imgsz=1280 instead of 640 recovers ~9 mAP50 points.</li>
+            <li><strong>Annotations:</strong> 2.6M+ bounding boxes, 10 classes: pedestrian, people, bicycle, car, van, truck, tricycle, awning-tricycle, bus, motor</li>
+            <li><strong>Download:</strong> Hugging Face <code>Voxel51/VisDrone2019-DET</code> (~2.3 GB) or Roboflow Universe <code>VisDrone2019-DET</code></li>
+            <li><strong>Key challenge:</strong> Dense crowd scenes, tiny objects, severe occlusion. imgsz=1280 is mandatory for competitive results.</li>
         </ul>
     </div>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-4">
-        <h4 class="mt-0 border-none text-sky-400">DOTA — Dataset for Object deTection in Aerial Images</h4>
-        <p class="text-slate-300 text-sm">The standard benchmark for <strong>oriented bounding box (OBB)</strong> detection in satellite/aerial imagery. Annotations use 8-coordinate OBB format: (x1,y1, x2,y2, x3,y3, x4,y4) with vertices in clockwise order.</p>
+        <h4 class="mt-0 border-none text-sky-400">DOTA v2.0 &mdash; Oriented Bounding Box Benchmark</h4>
+        <p class="text-slate-300 text-sm">Standard benchmark for <strong>oriented bounding box (OBB)</strong> detection in satellite/aerial imagery. Annotations use 8-coordinate OBB format: (x1,y1, x2,y2, x3,y3, x4,y4) clockwise.</p>
         <ul class="text-slate-300 text-sm list-disc pl-5 space-y-1 mt-2">
-            <li><strong>DOTA-v1.0:</strong> 2,806 images (800px-20,000px), 188,282 instances, 15 categories including plane, ship, storage tank, baseball diamond, bridge, harbor, vehicle, helicopter, roundabout, soccer ball field, swimming pool</li>
-            <li><strong>DOTA-v1.5:</strong> Adds "container crane" category, increases small instance count significantly</li>
-            <li><strong>DOTA-v2.0:</strong> 11,268 images, 1,793,658 instances, 18 categories (adds airport, helipad). Test-challenge split: 6,053 images with 1.09M instances.</li>
-            <li><strong>Access:</strong> <a href="https://captain-whu.github.io/DOTA/dataset.html" class="text-sky-400 hover:underline">captain-whu.github.io/DOTA</a> — registration required. Also available via Ultralytics dataset download.</li>
+            <li><strong>DOTA-v2.0:</strong> 11,268 images, 1,793,658 instances, 18 categories (adds airport, helipad). Best for ship/aircraft/vehicle detection from satellite altitude.</li>
+            <li><strong>DOTA-v1.0:</strong> 2,806 images, 188,282 instances, 15 categories &mdash; the widely-cited baseline.</li>
+            <li><strong>Access:</strong> <a href="https://captain-whu.github.io/DOTA/dataset.html" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">captain-whu.github.io/DOTA</a> &mdash; registration required. Ultralytics also supports direct dataset download.</li>
         </ul>
     </div>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-4">
-        <h4 class="mt-0 border-none text-sky-400">AU-AIR — Multi-modal UAV Dataset</h4>
-        <p class="text-slate-300 text-sm">First multi-modal UAV dataset combining RGB video with synchronized flight telemetry. Captured in Aarhus, Denmark at max 30m altitude for traffic surveillance.</p>
-        <ul class="text-slate-300 text-sm list-disc pl-5 space-y-1 mt-2">
-            <li><strong>Content:</strong> 8 video clips, ~2 hours, 32,823 extracted frames with bounding box annotations</li>
-            <li><strong>Modalities:</strong> RGB video + GPS + altitude (barometer) + IMU (accelerometer, gyroscope) + velocity — all time-synchronized per frame</li>
-            <li><strong>Classes:</strong> 8 traffic-related categories (human, car, truck, van, bicycle, motorbike, bus, trailer)</li>
-            <li><strong>Use case:</strong> Training and evaluating multi-modal fusion models that combine visual features with flight state.</li>
-        </ul>
+        <h4 class="mt-0 border-none text-sky-400">AU-AIR &mdash; Multi-modal UAV Dataset</h4>
+        <p class="text-slate-300 text-sm">First multi-modal UAV dataset combining RGB video with synchronized flight telemetry. 8 video clips, ~2 hours, 32,823 annotated frames, 8 traffic classes. RGB + GPS + altitude + IMU + velocity per frame. Use case: training and evaluating multi-modal fusion models that combine visual features with flight state.</p>
     </div>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-4">
         <h4 class="mt-0 border-none text-sky-400">2024-2025 Newer Aerial Datasets</h4>
         <ul class="text-slate-300 text-sm list-disc pl-5 space-y-2 mt-2">
-            <li><strong>M3OT (2025):</strong> Multi-Drone Multi-Modality dataset for Multi-Object Tracking. 21,580 frames, 10,790 paired RGB-IR images, 220,000 bounding boxes across suburban/urban/night scenarios. Useful for IR-visible fusion tracking.</li>
-            <li><strong>CODrone (2025):</strong> Comprehensive Oriented Object Detection benchmark for UAV. Multi-city, multi-lighting collection with OBB annotations. GitHub: <code>AHideoKuzeA/CODrone</code>.</li>
-            <li><strong>RFUAV (2025):</strong> Radio-frequency-based UAV identification — 1.3 TB raw RF data from 37 UAV types using USRP SDR. For RF-domain drone detection, not visual.</li>
+            <li><strong>M3OT (2025):</strong> Multi-Drone Multi-Modality dataset for Multi-Object Tracking. 21,580 frames, 10,790 paired RGB-IR images, 220,000 bounding boxes. Useful for IR-visible fusion tracking.</li>
+            <li><strong>CODrone (2025):</strong> Comprehensive Oriented Object Detection benchmark for UAV. Multi-city, multi-lighting, OBB annotations. GitHub: <code>AHideoKuzeA/CODrone</code>.</li>
+            <li><strong>RFUAV (2025):</strong> Radio-frequency UAV identification &mdash; 1.3 TB raw RF data from 37 UAV types using USRP SDR. For RF-domain drone detection, not visual.</li>
             <li><strong>Mid-Air (synthetic):</strong> 54 synthetic trajectories, 420k+ frames with RGB, depth, surface normals, stereo disparity, object semantics. Useful for pre-training before domain adaptation.</li>
         </ul>
     </div>
 
-    <h3>10.3 Data Collection Strategy</h3>
-    <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-6">
-        <h4 class="mt-0 border-none text-white">Coverage Matrix for a Production Dataset</h4>
-        <table class="w-full text-xs text-slate-300 mt-2">
-            <thead><tr class="text-sky-400 border-b border-slate-700">
-                <th class="text-left py-1 pr-4">Variable</th>
-                <th class="text-left py-1">Values to Cover</th>
-            </tr></thead>
-            <tbody class="space-y-1">
-                <tr class="border-b border-slate-800"><td class="py-1 pr-4 font-mono">Altitude</td><td class="py-1">20m, 30m, 40m, 50m, 60m, 70m (10m increments). Each altitude changes apparent object scale by ~1.17x per 10m step.</td></tr>
-                <tr class="border-b border-slate-800"><td class="py-1 pr-4 font-mono">Lighting</td><td class="py-1">Golden hour (6-8 AM/PM), overcast diffuse, high-noon harsh shadows, twilight, artificial night lighting</td></tr>
-                <tr class="border-b border-slate-800"><td class="py-1 pr-4 font-mono">Season</td><td class="py-1">Summer (full foliage, green ground), winter (snow, leafless trees), autumn (color shifts)</td></tr>
-                <tr class="border-b border-slate-800"><td class="py-1 pr-4 font-mono">Geography</td><td class="py-1">Urban dense, suburban, rural open, coastline/water reflection, industrial. Appearance of concrete vs. grass vs. sand backgrounds changes false positive rates significantly.</td></tr>
-                <tr class="border-b border-slate-800"><td class="py-1 pr-4 font-mono">Camera angle</td><td class="py-1">Nadir (0° tilt), 15°, 30° oblique. Mix ratios depend on mission profile.</td></tr>
-                <tr><td class="py-1 pr-4 font-mono">Object density</td><td class="py-1">Sparse (rural), medium (suburban intersection), dense (city center, crowd scenes)</td></tr>
+    <h3>10.3 Synthetic Data Generation</h3>
+    <p>Obtaining labeled aerial data at scale for rare scenarios (night, fire, CBRN events, contested airspace) is operationally impractical. Synthetic data from physics-based simulators fills the gap, but introduces a <strong>domain gap</strong> &mdash; the delta between simulated and real-world sensor statistics.</p>
+
+    <div class="overflow-x-auto my-6">
+        <table class="w-full text-sm text-left">
+            <thead class="bg-slate-700 text-slate-300">
+                <tr>
+                    <th class="p-3">Dimension</th>
+                    <th class="p-3">Real Data</th>
+                    <th class="p-3">Synthetic Data (Isaac Sim)</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-700">
+                <tr class="bg-slate-800">
+                    <td class="p-3 text-slate-300 font-semibold">Acquisition cost</td>
+                    <td class="p-3 text-slate-400">High &mdash; flight permits, crew, weather</td>
+                    <td class="p-3 text-emerald-400">Near-zero marginal cost after setup</td>
+                </tr>
+                <tr class="bg-slate-800/50">
+                    <td class="p-3 text-slate-300 font-semibold">Annotation cost</td>
+                    <td class="p-3 text-slate-400">$0.05&ndash;$0.15 per bounding box (crowd)</td>
+                    <td class="p-3 text-emerald-400">Automatic &mdash; ground truth from renderer</td>
+                </tr>
+                <tr class="bg-slate-800">
+                    <td class="p-3 text-slate-300 font-semibold">Rare-event coverage</td>
+                    <td class="p-3 text-red-400">Very difficult &mdash; unsafe or illegal to capture</td>
+                    <td class="p-3 text-emerald-400">Trivial &mdash; script the scenario</td>
+                </tr>
+                <tr class="bg-slate-800/50">
+                    <td class="p-3 text-slate-300 font-semibold">Domain gap</td>
+                    <td class="p-3 text-emerald-400">Zero (is the real domain)</td>
+                    <td class="p-3 text-red-400">5&ndash;30% mAP gap; reduces with domain randomization</td>
+                </tr>
+                <tr class="bg-slate-800">
+                    <td class="p-3 text-slate-300 font-semibold">Sensor noise modeling</td>
+                    <td class="p-3 text-emerald-400">Ground truth sensor noise</td>
+                    <td class="p-3 text-amber-400">Approximate &mdash; camera ISP pipeline not fully simulated</td>
+                </tr>
+                <tr class="bg-slate-800/50">
+                    <td class="p-3 text-slate-300 font-semibold">Best use</td>
+                    <td class="p-3 text-emerald-400">Fine-tuning, final evaluation</td>
+                    <td class="p-3 text-emerald-400">Pre-training backbone, rare scenario augmentation</td>
+                </tr>
             </tbody>
         </table>
     </div>
 
-    <p class="text-slate-300 text-sm"><strong>Annotation Tools:</strong></p>
-    <ul class="text-slate-300 text-sm list-disc pl-5 space-y-1 mb-6">
-        <li><strong>Label Studio</strong> — open-source, self-hostable, supports YOLO/COCO/Pascal VOC export. Good for team workflows with custom pre-annotations via model-in-the-loop.</li>
-        <li><strong>CVAT (Computer Vision Annotation Tool)</strong> — developed by Intel, open-source, supports semi-automatic annotation via SAM integration. Best for video annotation with track interpolation.</li>
-        <li><strong>Roboflow</strong> — SaaS, includes augmentation pipeline + dataset versioning + auto-train. Fastest path from raw images to YOLO-ready dataset. Free tier: 10,000 source images.</li>
-    </ul>
+    <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-6">
+        <h4 class="mt-0 border-none text-sky-400 text-sm">NVIDIA Isaac Sim + Replicator: Domain Randomization API</h4>
+        <p class="text-slate-300 text-sm mb-3">Isaac Sim 4.x (2025) ships with the Replicator extension for synthetic data generation (SDG). Replicator randomizes scene attributes (lighting, materials, camera pose, object placement) and exports annotated frames automatically. The recommended workflow for drone perception:</p>
+        <ol class="text-slate-300 text-sm list-decimal pl-5 space-y-1">
+            <li>Build an urban/suburban USD scene in Isaac Sim (import from OpenStreetMap or NVIDIA City Sample)</li>
+            <li>Place asset library: vehicles, people, infrastructure from NVIDIA Omniverse Exchange</li>
+            <li>Attach a Replicator camera rig at drone-representative altitudes (20m, 50m, 70m)</li>
+            <li>Use domain randomization: randomize lighting azimuth/elevation, surface textures, vehicle colors, background foliage</li>
+            <li>Export frames as KITTI, COCO, or YOLO format &mdash; ground-truth bounding boxes generated automatically</li>
+            <li>Mix synthetic pre-training data with ~20% real-world fine-tuning data; measure domain gap on held-out real test set</li>
+        </ol>
+        <p class="text-slate-300 text-sm mt-3"><strong>Domain gap rule of thumb:</strong> For object classes at 5-10m drone altitude, synthetic-only models show 5-10% mAP gap. At 50m+, the gap widens to 20-30% if ISP noise is not modeled. Adding 10-15% real images to the training mix typically closes the gap to &lt;5%.</p>
+    </div>
 
-    <h3>10.4 YOLO Model Family Selection (2025)</h3>
-    <p>YOLO11 was released by Ultralytics in October 2024. It introduces the C3k2 block (cross-stage partial with two kernels) and C2PSA (Cross-Stage Partial with Spatial Attention) modules, replacing the C2f block from YOLOv8. <span class="text-amber-400 font-bold">Note:</span> YOLO12 (February 2025) is now the Ultralytics-supported successor, introducing an area-attention mechanism accepted at NeurIPS 2025 that yields ~1.2% mAP improvement over YOLO11n at comparable speed. YOLO11 remains the recommended choice for edge deployment — Hailo, RKNN, and TensorRT pipelines have mature YOLO11 support while YOLO12 toolchain support matures.</p>
+    <h3>10.4 Annotation Tools (2025)</h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 text-sm">
+        <div class="hw-card p-4 rounded-xl">
+            <h4 class="text-sky-400 mt-0 text-sm font-bold">Roboflow (2025)</h4>
+            <p class="text-slate-300 text-xs mt-1">SaaS + open-source inference. AI-assisted labeling with Label Assist, Smart Polygon, Box Prompting, and Auto Label powered by foundation models. Dataset versioning + augmentation pipeline built-in. RF-DETR training directly in platform. Free tier: 10,000 source images.</p>
+            <p class="text-slate-300 text-xs mt-2">New in 2025: Synthetic data pipeline using NVIDIA Cosmos + Isaac Sim for defect and rare-class generation.</p>
+            <a href="https://roboflow.com" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline text-xs">roboflow.com</a>
+        </div>
+        <div class="hw-card p-4 rounded-xl">
+            <h4 class="text-sky-400 mt-0 text-sm font-bold">Label Studio</h4>
+            <p class="text-slate-300 text-xs mt-1">Open-source, self-hostable. Supports YOLO, COCO, Pascal VOC export. Model-in-the-loop pre-annotation via ML backends. Best for teams needing data sovereignty (air-gapped, on-prem).</p>
+            <p class="text-slate-300 text-xs mt-2">Integrates with MLflow for tracking annotation-to-training lineage.</p>
+            <a href="https://labelstud.io" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline text-xs">labelstud.io</a>
+        </div>
+        <div class="hw-card p-4 rounded-xl">
+            <h4 class="text-sky-400 mt-0 text-sm font-bold">CVAT</h4>
+            <p class="text-slate-300 text-xs mt-1">Intel-developed, open-source. Semi-automatic annotation via Segment Anything Model (SAM) integration. Best for <strong>video annotation</strong> with track interpolation across frames &mdash; essential for VisDrone video clips and AU-AIR dataset.</p>
+            <a href="https://cvat.ai" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline text-xs">cvat.ai</a>
+        </div>
+    </div>
+
+    <h3>10.5 Model Selection (2025)</h3>
+    <p>YOLO11 (October 2024) introduced C3k2 blocks and C2PSA spatial attention modules, replacing C2f from YOLOv8. YOLO12 (February 2025) added area-attention for ~1.2% mAP gain but toolchain support is still maturing. YOLO11 remains the recommended edge deployment choice &mdash; mature TensorRT, Hailo, and RKNN pipelines are all YOLO11-validated.</p>
 
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
-        <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">YOLO11 Detection Model Variants — COCO val2017</div>
+        <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">YOLO11 Detection Variants &mdash; COCO val2017</div>
         <div class="p-4 overflow-x-auto">
             <table class="w-full text-xs text-slate-300 font-mono">
                 <thead><tr class="text-sky-400 border-b border-slate-700">
@@ -124,24 +212,6 @@ export default `
     </div>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-6">
-        <h4 class="mt-0 border-none text-amber-400 text-sm">YOLO11 on VisDrone — Practical Benchmarks</h4>
-        <p class="text-slate-300 text-sm">Unlike COCO, VisDrone mAP50 numbers are significantly lower for all models due to small object prevalence. Community-reported baselines at imgsz=1280, 100 epochs:</p>
-        <ul class="text-slate-300 text-sm list-disc pl-5 space-y-1 mt-2">
-            <li><strong>YOLO11n @ 1280:</strong> ~33-36 mAP50. At imgsz=640 this drops ~9 points to ~24-27 mAP50.</li>
-            <li><strong>YOLO11s @ 1280:</strong> ~40-44 mAP50. The recommended entry point for most drone missions.</li>
-            <li><strong>YOLO11m @ 1280:</strong> ~46-50 mAP50. Diminishing returns vs YOLO11s on VisDrone's small objects.</li>
-            <li>Architecture variants (SRTSOD-YOLO, MFA-YOLO, PPM-YOLO) report 3-8 point mAP50 gains over YOLO11 baselines on VisDrone by adding multi-scale feature fusion heads specifically tuned to small object scales (&lt;16px).</li>
-        </ul>
-    </div>
-
-    <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-6">
-        <h4 class="mt-0 border-none text-amber-400 text-sm">RT-DETR: When to Use Transformers Over CNNs</h4>
-        <p class="text-slate-300 text-sm">RT-DETR (Real-Time DEtection TRansformer, CVPR 2024, Baidu) uses a ResNet/HGNetV2 backbone with a hybrid encoder that replaces NMS with a set-prediction decoder. RT-DETR-R50 achieves 53.1% AP on COCO at 108 FPS on an A100.</p>
-        <p class="text-slate-300 text-sm mt-2"><strong>Use RT-DETR when:</strong> scenes have dense overlapping objects where NMS suppression causes missed detections; you need global context (cross-image attention for occluded targets); you have GPU compute budget and accuracy is the priority.</p>
-        <p class="text-slate-300 text-sm mt-2"><strong>Use YOLO11 when:</strong> deploying to Hailo-8, RK3588, or Jetson Orin NX where transformer attention maps cannot be efficiently scheduled; needing &lt;10ms latency per frame; fine-tuning speed matters (transformers require significantly more CUDA memory and epochs to converge).</p>
-    </div>
-
-    <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-6">
         <h4 class="mt-0 border-none text-amber-400 text-sm">Model Selection by TOPS Budget</h4>
         <table class="w-full text-xs text-slate-300 mt-2">
             <thead><tr class="text-sky-400 border-b border-slate-700">
@@ -151,25 +221,26 @@ export default `
                 <th class="text-left py-1">Notes</th>
             </tr></thead>
             <tbody>
-                <tr class="border-b border-slate-800"><td class="py-1 pr-4">Hailo-8</td><td class="py-1 pr-4">26 TOPS</td><td class="py-1 pr-4">YOLO11n or YOLO11s</td><td class="py-1">HEF format required. YOLO11s at 640 runs comfortably at 30fps+ on Hailo-8 with ~2.5W draw.</td></tr>
-                <tr class="border-b border-slate-800"><td class="py-1 pr-4">Hailo-8L</td><td class="py-1 pr-4">13 TOPS</td><td class="py-1 pr-4">YOLO11n</td><td class="py-1">Used in Raspberry Pi AI HAT+. Nano fits within 13 TOPS at 30fps@640.</td></tr>
-                <tr class="border-b border-slate-800"><td class="py-1 pr-4">Jetson Orin NX 8GB</td><td class="py-1 pr-4">70 TOPS</td><td class="py-1 pr-4">YOLO11m or YOLO11l</td><td class="py-1">TensorRT INT8 engine. YOLO11m@1280 for aerial small object missions.</td></tr>
-                <tr class="border-b border-slate-800"><td class="py-1 pr-4">Jetson AGX Orin</td><td class="py-1 pr-4">275 TOPS</td><td class="py-1 pr-4">YOLO11l / YOLO11x</td><td class="py-1">Also suitable for RT-DETR-R50 with headroom for concurrent SLAM.</td></tr>
+                <tr class="border-b border-slate-800"><td class="py-1 pr-4">Hailo-8</td><td class="py-1 pr-4">26 TOPS</td><td class="py-1 pr-4">YOLO11n/s</td><td class="py-1">HEF format. YOLO11s at 640 &gt;30fps at ~2.5W.</td></tr>
+                <tr class="border-b border-slate-800"><td class="py-1 pr-4">Hailo-8L</td><td class="py-1 pr-4">13 TOPS</td><td class="py-1 pr-4">YOLO11n</td><td class="py-1">RPi AI HAT+. Nano fits within 13 TOPS at 30fps@640.</td></tr>
+                <tr class="border-b border-slate-800"><td class="py-1 pr-4">Jetson Orin NX 8GB</td><td class="py-1 pr-4">70&ndash;100 TOPS*</td><td class="py-1 pr-4">YOLO11m/l</td><td class="py-1">TRT INT8. *Super Mode (JetPack 6.2) adds ~70% TOPS.</td></tr>
+                <tr class="border-b border-slate-800"><td class="py-1 pr-4">Jetson AGX Orin</td><td class="py-1 pr-4">275 TOPS</td><td class="py-1 pr-4">YOLO11l/x</td><td class="py-1">Also suitable for RT-DETR-R50 + concurrent SLAM.</td></tr>
                 <tr><td class="py-1 pr-4">RK3588 (RK NPU)</td><td class="py-1 pr-4">6 TOPS</td><td class="py-1 pr-4">YOLO11n</td><td class="py-1">RKNN format. 6 TOPS limits to nano at real-time speed.</td></tr>
             </tbody>
         </table>
+        <p class="text-slate-400 text-xs mt-2">*JetPack 6.2 (2025) Super Mode increases Orin NX AI TOPS by up to 70% and Orin Nano memory bandwidth by 50%. Requires enabling in nvpmodel.</p>
     </div>
 
-    <h3>10.5 Training Pipeline</h3>
+    <h3>10.6 Training Pipeline</h3>
 
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
-        <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Bash: Ultralytics YOLO11 Training Commands</div>
+        <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Bash: YOLO11 Training Commands (Ultralytics 8.3+)</div>
         <div class="p-4 overflow-x-auto">
 <details class="code-expand">
-    <summary>Shell Code Example</summary>
-<pre><code class="language-bash"># Fine-tune YOLO11s on VisDrone — recommended baseline
-# imgsz=1280 is critical for small objects. batch=-1 auto-scales to VRAM.
-# multi_scale=True trains at [0.5, 1.5]x imgsz range, simulating altitude variation.
+    <summary>Show Training Script</summary>
+<pre><code class="language-bash"># Fine-tune YOLO11s on VisDrone -- recommended baseline
+# imgsz=1280 critical for small objects; batch=-1 auto-scales to VRAM
+# multi_scale=True trains at [0.5, 1.5]x imgsz, simulating altitude variation
 yolo detect train \\
     data=VisDrone.yaml \\
     model=yolo11s.pt \\
@@ -193,8 +264,8 @@ yolo detect train \\
     project=runs/aerial \\
     name=visdrone_yolo11s
 
-# Transfer learning with frozen backbone (first 5 epochs):
-# freeze=10 freezes the first 10 layers (backbone); unfreeze for fine-tuning.
+# Transfer learning: frozen backbone (first 5 epochs)
+# freeze=10 freezes backbone layers 0-9; unfreeze for full fine-tune
 yolo detect train \\
     data=VisDrone.yaml \\
     model=yolo11m.pt \\
@@ -215,188 +286,564 @@ yolo detect val \\
     </div>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-6">
-        <h4 class="mt-0 border-none text-white text-sm">Augmentation Rationale for Aerial Data</h4>
+        <h4 class="mt-0 border-none text-white text-sm">Transfer Learning Strategy &amp; Augmentation Rationale</h4>
         <ul class="text-slate-300 text-sm list-disc pl-5 space-y-1 mt-2">
-            <li><strong>Mosaic (mosaic=1.0):</strong> Tiles 4 images into one. Highly effective for aerial because it increases object-per-image density and exposes the model to varied backgrounds simultaneously. Do not disable for aerial training.</li>
-            <li><strong>MixUp (mixup=0.15):</strong> Alpha-blends two images. Use at low weight (0.1-0.2). Too high makes small object gradients noisy.</li>
-            <li><strong>Random scale via multi_scale:</strong> Trains at randomized imgsz * [0.5, 1.5] each batch — directly simulates altitude change (higher altitude = smaller objects).</li>
-            <li><strong>Horizontal flip (fliplr=0.5):</strong> Safe for aerial. Roads, vehicles, buildings are horizontally symmetric when viewed from above.</li>
-            <li><strong>Vertical flip (flipud=0.0):</strong> Disabled. There is no physical scenario where a drone image is upside-down, and it wastes augmentation budget on impossible views.</li>
-            <li><strong>Perspective (perspective=0.0003):</strong> Simulates oblique view angle variation. Keep small to avoid geometric distortion making small boxes undetectable.</li>
-            <li><strong>HSV shifts:</strong> hsv_h=0.015 (hue for seasonal/time-of-day variation), hsv_s=0.7 (saturation for overcast vs sunny), hsv_v=0.4 (brightness for shadow/lighting). These are the most important augmentations after mosaic for aerial domain shift.</li>
+            <li><strong>Phase 1 &mdash; Frozen backbone (epochs 1-5):</strong> freeze=10, lr0=0.001. Adapts detection head to aerial class distributions without destroying COCO-pretrained backbone features.</li>
+            <li><strong>Phase 2 &mdash; Full fine-tune (epochs 6-100):</strong> Remove freeze, lr0=0.01 with cosine LR decay (cos_lr=True). Slow cosine descent suits small object tuning where the model needs sustained moderate LR.</li>
+            <li><strong>Mosaic (mosaic=1.0):</strong> Tiles 4 images. Increases object density per image; critical for aerial. Never disable for aerial training.</li>
+            <li><strong>multi_scale=True:</strong> Randomly scales imgsz &times; [0.5, 1.5] each batch. Directly simulates altitude variation with zero additional data.</li>
+            <li><strong>flipud=0.0:</strong> Disabled. No physical drone scenario produces an upside-down image. Wastes augmentation budget.</li>
+            <li><strong>HSV shifts:</strong> hsv_h=0.015 (seasonal/TOD variation), hsv_s=0.7 (overcast vs. sunny), hsv_v=0.4 (shadow/lighting). Most impactful augmentations after mosaic for aerial domain shift.</li>
+            <li><strong>VRAM note:</strong> YOLO11s @ imgsz=1280 requires ~14 GB with batch=8. batch=-1 auto-selects safe batch size. On 24 GB RTX 4090, expect batch=4-6 for YOLO11m.</li>
         </ul>
     </div>
 
-    <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-6">
-        <h4 class="mt-0 border-none text-white text-sm">Transfer Learning Strategy</h4>
-        <p class="text-slate-300 text-sm"><strong>Phase 1 — Frozen backbone (epochs 1-5):</strong> Set <code>freeze=10</code> (freezes backbone layers 0-9). Use lr0=0.001. Lets the new detection head adapt to aerial class distributions without destroying pretrained backbone features. Warmup_epochs=3 gradually ramps LR from lr0/10 to lr0.</p>
-        <p class="text-slate-300 text-sm mt-2"><strong>Phase 2 — Full fine-tune (epochs 6-100):</strong> Remove freeze, use lr0=0.01 with cosine LR decay (cos_lr=True) to lrf=0.01. The cosine schedule decays slowly then rapidly, which works better than step decay for small object tuning where the model needs long stable periods at moderate LR.</p>
-        <p class="text-slate-300 text-sm mt-2"><strong>Batch size / VRAM:</strong> At imgsz=1280, YOLO11s requires ~14 GB VRAM with batch=8. Use batch=-1 to have Ultralytics auto-select the maximum safe batch. On a 24GB GPU (RTX 3090/4090), batch=4-6 at imgsz=1280 with YOLO11m.</p>
+    <div class="my-8">
+        <h3 class="text-xl font-bold text-white mb-3">NVIDIA YOLO11 Ecosystem Overview</h3>
+        <div class="relative w-full" style="padding-bottom: 56.25%;">
+            <iframe class="absolute inset-0 w-full h-full rounded-lg" src="https://www.youtube.com/embed/nQBOkGR_lg0" title="YOLO11 TensorRT Object Detection on Jetson Orin &mdash; 100FPS with Ultralytics" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+        <p class="text-gray-400 text-sm text-center mt-2">YOLO11 TensorRT INT8 engine achieving 100 FPS on Jetson Orin with Ultralytics 8.3+. Demonstrates the complete export-to-deploy workflow on JetPack 6.</p>
     </div>
 
-    <h3>10.6 Export Pipeline to Edge</h3>
+    <h3>10.7 Model Optimization: Pruning, Distillation, and Quantization</h3>
+    <p>Before building a TensorRT engine, apply model compression to reduce parameter count and memory footprint. The standard 2025 order of operations is: <strong>prune &rarr; distill &rarr; quantize</strong>. Each stage is independent and multiplicative in effect.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="interactive-panel bg-[#0d1320] border-slate-700">
+            <h4 class="mt-0 border-none text-violet-400 text-sm">Structured Pruning</h4>
+            <p class="text-slate-300 text-sm">Removes entire channels or layers with low L1-norm weight magnitude. TAO Toolkit 6.x prune command supports magnitude-based structured pruning. Typical result: 30-50% parameter reduction with &lt;2% mAP drop if retrained post-prune for 10-20 epochs. Required before QAT for best results.</p>
+        </div>
+        <div class="interactive-panel bg-[#0d1320] border-slate-700">
+            <h4 class="mt-0 border-none text-violet-400 text-sm">Knowledge Distillation</h4>
+            <p class="text-slate-300 text-sm">Trains a small student model to match the soft output distribution of a larger teacher. TAO 6.x supports distillation natively. A YOLO11n student trained against a YOLO11l teacher gains ~2-4 mAP50 points with no parameter increase. Effective when the target platform TOPS budget is fixed and the task is classification-heavy.</p>
+        </div>
+        <div class="interactive-panel bg-[#0d1320] border-slate-700">
+            <h4 class="mt-0 border-none text-violet-400 text-sm">Quantization-Aware Training (QAT)</h4>
+            <p class="text-slate-300 text-sm">Inserts fake-quantization nodes during training so the model learns to compensate for INT8 rounding. Recovers most of the accuracy lost in post-training quantization (PTQ). 10-20 extra fine-tuning epochs with QAT leaves &lt;1% mAP drop vs. FP32, compared to 1-5% for PTQ. NVIDIA Model Optimizer 0.25+ supports QAT for YOLO architectures.</p>
+        </div>
+    </div>
+
+    <h3>10.8 Quantization Deep Dive</h3>
+
+    <div class="overflow-x-auto my-6">
+        <table class="w-full text-sm text-left">
+            <thead class="bg-slate-700 text-slate-300">
+                <tr>
+                    <th class="p-3">Format</th>
+                    <th class="p-3">Bits</th>
+                    <th class="p-3">Memory vs FP32</th>
+                    <th class="p-3">Typical mAP50 Drop</th>
+                    <th class="p-3">Speedup (Orin)</th>
+                    <th class="p-3">Supported by TRT 10</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-700">
+                <tr class="bg-slate-800">
+                    <td class="p-3 text-slate-300 font-mono font-bold">FP32</td>
+                    <td class="p-3 text-slate-400">32</td>
+                    <td class="p-3 text-slate-400">1x (baseline)</td>
+                    <td class="p-3 text-emerald-400">0% (reference)</td>
+                    <td class="p-3 text-slate-400">1x</td>
+                    <td class="p-3 text-emerald-400">Yes</td>
+                </tr>
+                <tr class="bg-slate-800/50">
+                    <td class="p-3 text-slate-300 font-mono font-bold">BF16</td>
+                    <td class="p-3 text-slate-400">16</td>
+                    <td class="p-3 text-slate-400">0.5x</td>
+                    <td class="p-3 text-emerald-400">&lt;0.1%</td>
+                    <td class="p-3 text-amber-400">1.3&ndash;1.8x</td>
+                    <td class="p-3 text-emerald-400">Yes (Ampere+)</td>
+                </tr>
+                <tr class="bg-slate-800">
+                    <td class="p-3 text-slate-300 font-mono font-bold">FP16</td>
+                    <td class="p-3 text-slate-400">16</td>
+                    <td class="p-3 text-slate-400">0.5x</td>
+                    <td class="p-3 text-emerald-400">&lt;0.5%</td>
+                    <td class="p-3 text-emerald-400">1.5&ndash;2x</td>
+                    <td class="p-3 text-emerald-400">Yes</td>
+                </tr>
+                <tr class="bg-slate-800/50">
+                    <td class="p-3 text-slate-300 font-mono font-bold">FP8</td>
+                    <td class="p-3 text-slate-400">8</td>
+                    <td class="p-3 text-slate-400">0.25x</td>
+                    <td class="p-3 text-emerald-400">&lt;1%</td>
+                    <td class="p-3 text-emerald-400">2&ndash;4x</td>
+                    <td class="p-3 text-emerald-400">Yes (TRT 10.2+, Hopper/Ada)</td>
+                </tr>
+                <tr class="bg-slate-800">
+                    <td class="p-3 text-slate-300 font-mono font-bold">INT8 PTQ</td>
+                    <td class="p-3 text-slate-400">8</td>
+                    <td class="p-3 text-slate-400">0.25x</td>
+                    <td class="p-3 text-amber-400">1&ndash;5%</td>
+                    <td class="p-3 text-emerald-400">2&ndash;4x</td>
+                    <td class="p-3 text-emerald-400">Yes</td>
+                </tr>
+                <tr class="bg-slate-800/50">
+                    <td class="p-3 text-slate-300 font-mono font-bold">INT8 QAT</td>
+                    <td class="p-3 text-slate-400">8</td>
+                    <td class="p-3 text-slate-400">0.25x</td>
+                    <td class="p-3 text-emerald-400">&lt;1%</td>
+                    <td class="p-3 text-emerald-400">2&ndash;4x</td>
+                    <td class="p-3 text-emerald-400">Yes</td>
+                </tr>
+                <tr class="bg-slate-800">
+                    <td class="p-3 text-slate-300 font-mono font-bold">INT4 WoQ</td>
+                    <td class="p-3 text-slate-400">4 (weights only)</td>
+                    <td class="p-3 text-slate-400">0.125x weights</td>
+                    <td class="p-3 text-amber-400">2&ndash;5%</td>
+                    <td class="p-3 text-emerald-400">3&ndash;6x memory</td>
+                    <td class="p-3 text-amber-400">TRT 10.0+ (Hopper only)</td>
+                </tr>
+                <tr class="bg-slate-800/50">
+                    <td class="p-3 text-slate-300 font-mono font-bold">NVFP4</td>
+                    <td class="p-3 text-slate-400">4 (fp float)</td>
+                    <td class="p-3 text-slate-400">0.125x</td>
+                    <td class="p-3 text-emerald-400">&lt;1% on LLMs</td>
+                    <td class="p-3 text-emerald-400">4&ndash;8x vs FP16</td>
+                    <td class="p-3 text-amber-400">TRT 10.x + Blackwell GPU</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="bg-amber-900/20 border border-amber-500/50 p-4 rounded mb-6 text-amber-200 text-sm">
+        <strong>Practical thresholds for drone perception:</strong> FP16 is lossless in practice and should always be the first step &mdash; enable with half=True in the Ultralytics export command. INT8 PTQ with 500+ calibration images from the real deployment domain typically lands at 1-3% mAP drop. If PTQ causes &gt;5% mAP50 drop, switch to INT8 QAT using NVIDIA Model Optimizer &mdash; 10-20 fine-tuning epochs recovers most accuracy. INT4 and NVFP4 are 2025-era options primarily targeting LLMs on Hopper/Blackwell; for YOLO-class CNNs on Jetson Orin (Ampere architecture), INT8 remains the standard.
+    </div>
+
+    <h3>10.9 TensorRT 10.x Optimization Workflow</h3>
+    <p><a href="https://developer.nvidia.com/tensorrt" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">TensorRT 10.x</a> (shipping with JetPack 6.1+ as TRT 10.3) applies layer fusion, kernel auto-tuning, memory layout optimization, and precision reduction to produce a hardware-specific <code>.engine</code> file. Key TRT 10 additions over TRT 8.x: INT4 weight-only quantization, FP8 convolution support, weight-stripped engines (99% engine size reduction via <code>kSTRIP_PLAN</code>), and a new IPluginV3 framework for custom ops.</p>
 
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
-        <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Python/Bash: Complete Edge Export Workflows</div>
+        <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Python: Complete TensorRT 10 Workflow &mdash; PyTorch &rarr; ONNX &rarr; TRT Engine</div>
         <div class="p-4 overflow-x-auto">
 <details class="code-expand">
-    <summary>Python Code Example</summary>
+    <summary>Show TensorRT Export Code</summary>
+<pre><code class="language-python">from ultralytics import YOLO
+import tensorrt as trt
+import numpy as np
+
+# ── Step 1: Export trained YOLO11 to ONNX (host machine) ──────────────
+model = YOLO("runs/aerial/visdrone_yolo11s/weights/best.pt")
+
+model.export(
+    format="onnx",
+    imgsz=1280,
+    opset=17,           # TensorRT 10 supports up to opset 20; opset 17 for max compat
+    simplify=True,      # onnx-simplifier removes redundant nodes
+    batch=1,
+)
+# Output: best.onnx
+
+# ── Step 2a: FP16 engine (fastest, minimal accuracy loss) ─────────────
+# Run ON THE TARGET JETSON (engine is hardware-specific)
+model.export(
+    format="engine",
+    imgsz=1280,
+    half=True,          # FP16 precision
+    batch=1,
+    device=0,
+)
+# Output: best.engine  (~2x faster than FP32, <0.5% mAP drop)
+
+# ── Step 2b: INT8 engine with PTQ calibration ─────────────────────────
+model.export(
+    format="engine",
+    imgsz=1280,
+    int8=True,          # INT8 PTQ
+    data="VisDrone.yaml",   # Calibration dataset -- uses val split, ~500 images
+    batch=1,
+    device=0,
+)
+# Output: best.engine  (~3-4x faster than FP32, 1-5% mAP drop)
+
+# ── Step 3: Run inference with TRT engine ─────────────────────────────
+trt_model = YOLO("best.engine")
+results = trt_model("drone_frame.jpg", imgsz=1280)
+results[0].show()
+
+# ── Step 4: trtexec benchmark (from JetPack terminal) ─────────────────
+# trtexec --onnx=best.onnx --saveEngine=best.engine \\
+#         --fp16 --workspace=4096 --iterations=100 \\
+#         --avgRuns=100 --percentile=99
+# Reports: mean latency, 99th-percentile latency, throughput (queries/s)</code></pre>
+</details>
+        </div>
+    </div>
+
+    <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
+        <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Python: NVIDIA TAO Toolkit 6.x &mdash; Prune &rarr; Retrain &rarr; Export</div>
+        <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Show TAO Toolkit Script</summary>
+<pre><code class="language-python"># TAO Toolkit 6.x CLI (tao command installed via pip install nvidia-tao)
+# TAO manages the full train-prune-retrain-export cycle with a single config
+
+# 1. Train baseline DetectNet_v2 or YOLO model via TAO
+# tao model detectnet_v2 train -e spec.yaml -r ./results
+
+# 2. Prune: remove low-magnitude channels (30-50% param reduction)
+# tao model detectnet_v2 prune \\
+#     -m ./results/weights/resnet18_detector.tlt \\
+#     -o ./results/pruned.tlt \\
+#     -pth 0.1    # pruning threshold -- higher = more aggressive
+
+# 3. Retrain pruned model (restores accuracy)
+# tao model detectnet_v2 train -e spec_retrain.yaml -r ./results_pruned
+
+# 4. Export to ONNX with QDQ quantization nodes (ready for TRT INT8)
+# tao model detectnet_v2 export \\
+#     -m ./results_pruned/weights/resnet18_detector.tlt \\
+#     -o ./model_int8.onnx \\
+#     --gen_ds_config \\     # generates DeepStream config
+#     --data_type INT8 \\
+#     --cal_image_dir ./calib_images/
+
+# Python API alternative (TAO 6.x microservices via REST):
+import requests, json
+
+# TAO Fine-Tuning Microservice (FTMS) -- cloud or on-prem NGC container
+FTMS_URL = "http://localhost:8000/api/v1"
+
+payload = {
+    "model": "yolo11s",
+    "dataset": "s3://my-bucket/visdrone/",
+    "num_epochs": 100,
+    "img_size": 1280,
+    "precision": "int8",
+}
+resp = requests.post(f"{FTMS_URL}/train", json=payload)
+job_id = resp.json()["job_id"]
+print(f"TAO training job: {job_id}")</code></pre>
+</details>
+        </div>
+    </div>
+
+    <h3>10.10 JetPack 6.x Software Stack</h3>
+    <p><a href="https://developer.nvidia.com/embedded/jetpack-sdk-62" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">JetPack 6.2</a> (2025) is the current production release for all Jetson Orin modules. It ships Ubuntu 22.04 LTS, Kernel 5.15, and the following AI stack:</p>
+
+    <div class="overflow-x-auto my-4">
+        <table class="w-full text-sm text-left">
+            <thead class="bg-slate-700 text-slate-300">
+                <tr>
+                    <th class="p-3">JetPack</th>
+                    <th class="p-3">Release</th>
+                    <th class="p-3">CUDA</th>
+                    <th class="p-3">TensorRT</th>
+                    <th class="p-3">cuDNN</th>
+                    <th class="p-3">Notes</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-700">
+                <tr class="bg-slate-800">
+                    <td class="p-3 text-slate-300">6.0</td>
+                    <td class="p-3 text-slate-400">May 2024</td>
+                    <td class="p-3 text-slate-400">12.2</td>
+                    <td class="p-3 text-amber-400">8.6</td>
+                    <td class="p-3 text-slate-400">8.9</td>
+                    <td class="p-3 text-slate-400">First production JP6; Ubuntu 22.04</td>
+                </tr>
+                <tr class="bg-slate-800/50">
+                    <td class="p-3 text-slate-300">6.1</td>
+                    <td class="p-3 text-slate-400">Sep 2024</td>
+                    <td class="p-3 text-slate-400">12.6</td>
+                    <td class="p-3 text-emerald-400">10.3</td>
+                    <td class="p-3 text-slate-400">9.3</td>
+                    <td class="p-3 text-slate-400">TRT 10 debut on Jetson; firmware TPM</td>
+                </tr>
+                <tr class="bg-slate-800">
+                    <td class="p-3 text-slate-300 font-bold">6.2</td>
+                    <td class="p-3 text-emerald-400 font-bold">2025 (current)</td>
+                    <td class="p-3 text-slate-400">12.6</td>
+                    <td class="p-3 text-emerald-400">10.3</td>
+                    <td class="p-3 text-slate-400">9.3</td>
+                    <td class="p-3 text-emerald-400">Super Mode: +70% TOPS on Orin NX/Nano</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p class="text-slate-300 text-sm mb-4"><strong>Super Mode</strong> (JetPack 6.2): Enables above-specification power modes for Orin NX and Orin Nano modules. Orin NX series gains up to 70% AI TOPS; Orin Nano gains 50% memory bandwidth and up to 2x generative AI inference performance. Enable with <code>sudo nvpmodel -m 0</code> and confirm with <code>sudo jetson_clocks</code>.</p>
+
+    <figure class="my-6">
+        <img src="images/m10_jetson_software_stack.svg" alt="NVIDIA Jetson Software Stack Diagram showing layers from hardware to application" class="rounded-lg w-full bg-white p-2">
+        <figcaption class="text-gray-400 text-sm text-center mt-2">NVIDIA Jetson software stack: from SoC hardware through Jetson Linux, AI libraries (CUDA, TensorRT, cuDNN), Jetson Platform Services, and application frameworks. Source: <a href="https://developer.nvidia.com/embedded/develop/software" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">NVIDIA Developer</a></figcaption>
+    </figure>
+
+    <h3>10.11 NVIDIA DeepStream 7.x &mdash; Production Video Analytics Pipeline</h3>
+    <p><a href="https://developer.nvidia.com/deepstream-getting-started" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">DeepStream SDK 7.x</a> is NVIDIA's GStreamer-based streaming analytics toolkit. It wraps TensorRT inference inside a GStreamer plugin pipeline, handling multi-camera input, hardware-accelerated decode (NVDEC), inference on DLA and GPU, multi-object tracking (NvDCF, DeepSORT), and output to RTSP or Kafka. For drone payloads streaming to a GCS or edge server, DeepStream is the production-grade alternative to writing raw OpenCV loops.</p>
+
+    <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-6">
+        <h4 class="mt-0 border-none text-sky-400 text-sm">DeepStream 7.x Key Features &amp; Capabilities</h4>
+        <ul class="text-slate-300 text-sm list-disc pl-5 space-y-1 mt-2">
+            <li><strong>Multi-stream scaling:</strong> Orin AGX handles up to 8 streams per DLA (16 total); Orin NX 16GB: 4 per DLA (8 total); Orin NX 8GB: 4 streams; Orin Nano: 4 streams.</li>
+            <li><strong>DLA offload:</strong> Runs detection on DLA (Deep Learning Accelerator) to free the iGPU for computer vision postprocessing. PeopleNet 2.6 + DLA offload demonstrated on Orin AGX.</li>
+            <li><strong>LiDAR inference (DS 7.0):</strong> New end-to-end sample for PointPillarNet 3D bounding box inference on point-cloud data &mdash; relevant for drone-mounted LiDAR payloads.</li>
+            <li><strong>NvDCF tracker:</strong> Multi-object tracker with optional PVA (Programmable Vision Accelerator) backend on Orin &mdash; reduces GPU load for tracking-heavy missions.</li>
+            <li><strong>YOLO11 integration:</strong> Ultralytics publishes a full guide for deploying YOLO11 via DeepStream + TensorRT on Jetson Orin with DeepStream Python bindings.</li>
+        </ul>
+    </div>
+
+    <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
+        <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Bash: DeepStream 7.x Pipeline for YOLO11 on Jetson (JetPack 6)</div>
+        <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Show DeepStream Pipeline Script</summary>
+<pre><code class="language-bash"># Install DeepStream 7.x on JetPack 6
+# (Pre-installed in NVIDIA L4T ML Docker container; or install via apt)
+sudo apt install deepstream-7.0
+
+# DeepStream Python bindings (pyds)
+pip install pyds
+
+# Reference app: deepstream-test3 (multi-stream detector + tracker)
+# config_infer_primary_yoloV11.txt points to your .engine file and labels
+
+# Key sections of config_infer_primary_yoloV11.txt:
+# [property]
+# gpu-id=0
+# net-scale-factor=0.0039215697906911373
+# model-engine-file=best.engine
+# labelfile-path=visdrone_labels.txt
+# batch-size=1
+# network-mode=2          # 0=FP32, 1=INT8, 2=FP16
+# num-detected-classes=10
+# interval=0              # Infer every frame (set 1 to skip alternate frames)
+
+# Run reference app
+python3 deepstream_test3.py \\
+    -i file:///drone_footage.mp4 \\
+    --cfg-file config_infer_primary_yoloV11.txt
+
+# For live RTSP stream from drone:
+# -i rtsp://192.168.1.10:8554/live</code></pre>
+</details>
+        </div>
+    </div>
+
+    <h3>10.12 Full Edge Export Workflow: Jetson, Hailo, RKNN</h3>
+
+    <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
+        <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Python: Multi-Target Export Pipeline</div>
+        <div class="p-4 overflow-x-auto">
+<details class="code-expand">
+    <summary>Show Full Export Script</summary>
 <pre><code class="language-python">from ultralytics import YOLO
 
 model = YOLO("runs/aerial/visdrone_yolo11s/weights/best.pt")
 
-# ── Path 1: NVIDIA Jetson ──────────────────────────────────────────
-# PyTorch .pt → ONNX → TensorRT .engine (INT8)
+# ── Path 1: NVIDIA Jetson (JetPack 6, TensorRT 10.3) ──────────────────
+# Must run ON the target Jetson GPU -- engine is device-specific
 model.export(
-    format="engine",          # Direct TensorRT engine export
+    format="engine",
     imgsz=1280,
-    half=False,               # FP16; set int8=True + data= for INT8 calibration
-    int8=True,
-    data="VisDrone.yaml",     # Calibration dataset for INT8 PTQ
+    half=True,              # FP16 -- recommended starting point
     batch=1,
-    device=0                  # Must be run on the target Jetson GPU
+    device=0,
 )
-# Output: best.engine — deploy with model("best.engine")
+# For INT8: set int8=True, data="VisDrone.yaml" (uses val split for calib)
 
-# ── Path 2: Hailo-8 ───────────────────────────────────────────────
-# Step A: Export ONNX (opset 11 or 12; Hailo DFC requires specific opset)
+# ── Path 2: Hailo-8 (hailo_sdk_client v3.28+) ─────────────────────────
+# Step A: Export ONNX (run on x86 host)
 model.export(format="onnx", imgsz=640, opset=11, simplify=True)
-# Output: best.onnx
 
-# Step B: Run Hailo Dataflow Compiler (hailo_sdk_client v3.27+)
-# This must run on x86 host machine, not the Hailo device itself.
-# hailo_sdk_client parses the ONNX, applies model optimization,
-# generates .har (Hailo Archive), then compiles to .hef
-
+# Step B: Hailo Dataflow Compiler (hailo_sdk_client)
+# Run on x86 host machine (NOT on Hailo device)
 # hailo parse onnx best.onnx --net-name yolo11s
 # hailo optimize yolo11s.har --calib-path /path/to/calib_images/
 # hailo compile yolo11s_optimized.har --hw-arch hailo8
-# Output: yolo11s.hef — deploy via HailoRT Python API
+# Output: yolo11s.hef  -- deploy via HailoRT Python API
 
-# ── Path 3: Rockchip RK3588 ───────────────────────────────────────
-# PyTorch .pt → ONNX → RKNN Toolkit 2 → .rknn
-model.export(format="rknn", imgsz=640)
-# Ultralytics natively supports RKNN export as of 2024
-# Alternatively via rknn-toolkit2:
-#   rknn = RKNNLite()
-#   rknn.load_onnx(model='best.onnx')
-#   rknn.build(do_quantization=True, dataset='./dataset.txt')
-#   rknn.export_rknn('best.rknn')
-</code></pre>
+# ── Path 3: Rockchip RK3588 (rknn-toolkit2) ───────────────────────────
+model.export(format="rknn", imgsz=640)   # native Ultralytics RKNN export
+
+# Or via rknn-toolkit2 directly:
+# from rknn.api import RKNN
+# rknn = RKNN()
+# rknn.load_onnx(model="best.onnx")
+# rknn.build(do_quantization=True, dataset="./calib_list.txt")
+# rknn.export_rknn("best.rknn")
+
+# ── Path 4: ONNX Runtime (cross-platform, CPU/ARM) ────────────────────
+model.export(format="onnx", imgsz=1280, opset=17)
+# Deploy with onnxruntime-gpu or onnxruntime on ARM:
+# import onnxruntime as ort
+# sess = ort.InferenceSession("best.onnx",
+#     providers=["CUDAExecutionProvider", "CPUExecutionProvider"])
+# outputs = sess.run(None, {"images": input_tensor})</code></pre>
 </details>
         </div>
     </div>
 
-    <h3>10.7 Vision-Language Models (VLMs) at the Edge</h3>
-    <p>YOLO-class CNNs draw bounding boxes around pre-defined object classes — they answer "Is there a car here?" Traditional navigation is then: "fly to bounding box." VLMs break this constraint by enabling <strong>semantic scene understanding</strong>: "navigate to the red truck near the damaged building." The drone can reason about novel objects and spatial relationships without retraining.</p>
+    <h3>10.13 Experiment Tracking: MLflow &amp; Weights &amp; Biases</h3>
 
-    <div class="bg-amber-900/20 border border-amber-500/50 p-4 rounded mb-6 text-amber-200 text-sm">
-        <strong>Architectural difference:</strong> A CNN extracts spatial feature maps and passes them through detection heads. A VLM encodes both an image and a natural-language query into a shared embedding space and outputs grounded predictions. The language component acts as a zero-shot class specification — any concept the language model understands becomes a detectable category.
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 text-sm">
-        <div class="hw-card p-5 rounded-xl">
-            <h4 class="text-white mt-0 text-base">Edge-Deployable VLM Architectures (2025–2026)</h4>
-            <ul class="space-y-3 text-slate-300 text-xs font-mono">
-                <li>
-                    <strong class="text-sky-400 block">LLaVA-1.6 / LLaVA-Phi-3 Mini (3.8B)</strong>
-                    CLIP ViT vision encoder + small language model (Phi-3 Mini 3.8B). Fits in 8GB LPDDR5 on Jetson Orin Nano at FP16. ~2–4 inference/sec at 336px input. Use for semantic scene description when real-time rate is not required (e.g., mission planning queries, pre-flight area assessment).
-                </li>
-                <li>
-                    <strong class="text-sky-400 block">NVIDIA GR00T N1 (foundation model)</strong>
-                    NVIDIA's robotics foundation model. Uses a dual-system architecture: a diffusion transformer for low-level motor control + a VLM for high-level goal interpretation. Requires Jetson Thor or AGX Orin for real-time inference. Primary use: mapping natural language mission goals to multi-step motor primitives.
-                </li>
-                <li>
-                    <strong class="text-sky-400 block">Grounding DINO + SAM2 (open vocabulary detection)</strong>
-                    Grounding DINO takes a text prompt ("red truck") and outputs bounding boxes for any object matching the description — zero-shot. SAM2 then produces instance masks. Combined pipeline: ~8–15 fps on Orin NX 16GB with TensorRT optimization. The practical solution for semantic target detection on current hardware.
-                </li>
-            </ul>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="interactive-panel bg-[#0d1320] border-slate-700">
+            <h4 class="mt-0 border-none text-sky-400 text-sm">MLflow 3.0 (June 2025)</h4>
+            <p class="text-slate-300 text-sm">Major pivot in MLflow 3.0: unified AI engineering platform for agents, LLMs, and CV models. Adds OpenTelemetry-compatible tracing, 50+ built-in evaluation metrics, prompt versioning, and AI Gateway. For drone CV pipelines: use <code>mlflow.pytorch.autolog()</code> during YOLO training to automatically log hyperparameters, mAP curves, loss metrics, and model artifacts. Runs a local UI at <code>mlflow ui</code> for self-hosted, air-gapped DoD environments.</p>
+            <a href="https://mlflow.org" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline text-xs">mlflow.org</a>
         </div>
-        <div class="hw-card p-5 rounded-xl">
-            <h4 class="text-white mt-0 text-base">Practical Integration Pattern</h4>
-            <p class="text-slate-300 text-xs mb-3">VLMs are too slow for 30 fps closed-loop control. The production architecture is a two-tier pipeline:</p>
-            <div class="bg-slate-900 p-3 rounded border border-slate-700 text-xs font-mono text-slate-300 space-y-2">
-                <p><strong class="text-sky-400">Tier 1 — Fast loop (30 fps):</strong> YOLO11 tracks the target bounding box and feeds pixel coordinates to the MAVLink control loop. Runs continuously.</p>
-                <p><strong class="text-sky-400">Tier 2 — Slow loop (1–2 fps):</strong> Grounding DINO or LLaVA processes the full scene against the mission goal ("find the red truck"). When it detects a match, it seeds the YOLO tracker with a new target ROI. The fast loop then takes over tracking.</p>
-                <p><strong class="text-emerald-400">Result:</strong> Semantic understanding from the VLM + real-time control from the CNN detector. Neither runs alone.</p>
-            </div>
+        <div class="interactive-panel bg-[#0d1320] border-slate-700">
+            <h4 class="mt-0 border-none text-sky-400 text-sm">Weights &amp; Biases (W&amp;B)</h4>
+            <p class="text-slate-300 text-sm">Developer-first experiment tracking with best-in-class visualization. Acquired by CoreWeave in March 2025. Ultralytics YOLO11 integrates W&amp;B natively: add <code>wandb</code> to callbacks and W&amp;B auto-logs training runs, confusion matrices, PR curves, and sample predictions with bounding box overlays. TAO 6.x also integrates W&amp;B for managed training jobs.</p>
+            <p class="text-slate-300 text-sm mt-2">For classified/controlled projects: use W&amp;B Server (self-hosted) or MLflow to keep telemetry on-prem.</p>
+            <a href="https://wandb.ai" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline text-xs">wandb.ai</a>
         </div>
     </div>
 
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
-        <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">
-            Python: Grounding DINO open-vocabulary detection on Jetson Orin
-        </div>
+        <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Python: W&amp;B + Ultralytics YOLO11 Integration</div>
         <div class="p-4 overflow-x-auto">
 <details class="code-expand">
-    <summary>Python Code Example</summary>
-<pre><code class="language-python">from groundingdino.util.inference import load_model, load_image, predict, annotate
-import torch
+    <summary>Show W&amp;B Tracking Script</summary>
+<pre><code class="language-python">import wandb
+from ultralytics import YOLO
 
-model = load_model(
-    "groundingdino/config/GroundingDINO_SwinT_OGC.py",
-    "weights/groundingdino_swint_ogc.pth"
+# Initialize W&B run -- auto-logs config, system metrics, model artifacts
+wandb.init(
+    project="aerial-drone-detection",
+    name="yolo11s-visdrone-1280",
+    config={
+        "model": "yolo11s",
+        "dataset": "VisDrone2019",
+        "imgsz": 1280,
+        "epochs": 100,
+        "quantization": "INT8",
+        "target_hardware": "Jetson Orin NX 8GB",
+    }
 )
 
-# Query from mission planner — natural language target specification
-TEXT_PROMPT = "red truck . damaged building . person on rooftop"
-BOX_THRESHOLD = 0.35
-TEXT_THRESHOLD = 0.25
+model = YOLO("yolo11s.pt")
 
-image_source, image = load_image("frame.jpg")
-
-boxes, logits, phrases = predict(
-    model=model,
-    image=image,
-    caption=TEXT_PROMPT,
-    box_threshold=BOX_THRESHOLD,
-    text_threshold=TEXT_THRESHOLD,
-    device="cuda"  # TensorRT-optimized on Orin NX at ~8 fps
+# W&B integration is automatic in Ultralytics when wandb is installed
+results = model.train(
+    data="VisDrone.yaml",
+    imgsz=1280,
+    epochs=100,
+    batch=-1,
+    project="wandb_aerial",  # W&B syncs this run automatically
 )
 
-# boxes are cx,cy,w,h normalized — convert to pixel coords for MAVLink targeting
-# phrases: list of matched text tokens per box (e.g., ["red truck", "person"])
-print(f"Detected: {phrases} at boxes {boxes}")</code></pre>
+# Log final TRT benchmark results
+wandb.log({
+    "trt_fp16_latency_ms": 8.2,
+    "trt_int8_latency_ms": 5.1,
+    "map50_fp32": 44.2,
+    "map50_int8": 42.8,
+    "map50_drop_pct": 3.2,
+})
+wandb.finish()</code></pre>
 </details>
         </div>
     </div>
 
-    <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 text-sm mb-8">
-        <strong class="text-sky-400 block mb-2">VLM Hardware Requirements — Current State (2026)</strong>
-        <table class="w-full text-xs font-mono text-slate-300">
-            <thead><tr class="text-slate-400 border-b border-slate-700">
-                <th class="text-left pb-2 pr-4">Model</th>
-                <th class="text-left pb-2 pr-4">Min. Hardware</th>
-                <th class="text-left pb-2 pr-4">Inference Rate</th>
-                <th class="text-left pb-2">Use Case</th>
-            </tr></thead>
-            <tbody>
-                <tr class="border-b border-slate-800"><td class="py-1 pr-4">Grounding DINO (SwinT)</td><td class="py-1 pr-4">Orin NX 8GB</td><td class="py-1 pr-4 text-emerald-400">8–15 fps</td><td class="py-1">Open-vocab target detection (production-ready)</td></tr>
-                <tr class="border-b border-slate-800"><td class="py-1 pr-4">LLaVA-Phi-3 Mini (3.8B)</td><td class="py-1 pr-4">Orin Nano (15W)</td><td class="py-1 pr-4 text-amber-400">2–4 fps</td><td class="py-1">Scene description, mission planning queries</td></tr>
-                <tr class="border-b border-slate-800"><td class="py-1 pr-4">LLaVA-1.6 (7B)</td><td class="py-1 pr-4">AGX Orin 32GB</td><td class="py-1 pr-4 text-amber-400">1–2 fps</td><td class="py-1">Complex reasoning, multi-object semantic analysis</td></tr>
-                <tr><td class="py-1 pr-4">GR00T N1</td><td class="py-1 pr-4">Jetson Thor</td><td class="py-1 pr-4 text-amber-400">~10 Hz control</td><td class="py-1">End-to-end language→motor policy (2026+ hardware)</td></tr>
-            </tbody>
-        </table>
+    <h3>10.14 Production Monitoring &amp; Active Learning</h3>
+
+    <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-6">
+        <h4 class="mt-0 border-none text-amber-400 text-sm">Closing the Loop: Active Learning Pipeline</h4>
+        <p class="text-slate-300 text-sm mb-3">Deployed models degrade over time due to domain shift (new geography, season change, lighting regime). A production aerial AI system needs an active learning loop:</p>
+        <ol class="text-slate-300 text-sm list-decimal pl-5 space-y-2">
+            <li><strong>Log inference uncertainty:</strong> TensorRT output scores below a confidence threshold (e.g., conf &lt; 0.4) flag frames as uncertain. Log these to object storage (S3 or on-prem NAS).</li>
+            <li><strong>Human-in-the-loop review:</strong> Flagged frames are surfaced in Roboflow or Label Studio for rapid annotation. Annotators label only the uncertain subset, not the full stream.</li>
+            <li><strong>Automated retraining trigger:</strong> When new labeled data exceeds a threshold (e.g., 500 new images, or mAP drops &gt;2% on holdout), trigger a retraining job. MLflow tracks the lineage from data version to model version.</li>
+            <li><strong>Regression test before deployment:</strong> New engine must pass mAP &ge; baseline &minus; 1% on frozen test set. DeepStream integration tests confirm latency &lt; mission SLA before pushing to fleet.</li>
+        </ol>
     </div>
 
-    <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-4">
-        <h4 class="mt-0 border-none text-amber-400 text-sm">Quantization Validation — Acceptable mAP Drop Thresholds</h4>
-        <p class="text-slate-300 text-sm">Always measure mAP before and after quantization on the test split at native resolution. Community and research-validated thresholds:</p>
+    <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-6">
+        <h4 class="mt-0 border-none text-amber-400 text-sm">Quantization Validation Thresholds</h4>
         <table class="w-full text-xs text-slate-300 mt-2">
             <thead><tr class="text-sky-400 border-b border-slate-700">
                 <th class="text-left py-1 pr-4">Quantization</th>
                 <th class="text-left py-1 pr-4">Typical mAP50 drop</th>
-                <th class="text-left py-1 pr-4">Speedup</th>
-                <th class="text-left py-1">Mitigation</th>
+                <th class="text-left py-1 pr-4">Speedup (Orin)</th>
+                <th class="text-left py-1">Action if &gt;Threshold</th>
             </tr></thead>
             <tbody>
-                <tr class="border-b border-slate-800"><td class="py-1 pr-4">FP32 → FP16</td><td class="py-1 pr-4">&lt;0.5%</td><td class="py-1 pr-4">1.5-2x</td><td class="py-1">None needed; lossless in practice</td></tr>
-                <tr class="border-b border-slate-800"><td class="py-1 pr-4">FP32 → INT8 PTQ</td><td class="py-1 pr-4">1-5% mAP50-95</td><td class="py-1 pr-4">2-4x</td><td class="py-1">Use 500+ calibration images from training set. Accept up to 3% drop.</td></tr>
-                <tr class="border-b border-slate-800"><td class="py-1 pr-4">FP32 → INT8 QAT</td><td class="py-1 pr-4">&lt;1%</td><td class="py-1 pr-4">2-4x</td><td class="py-1">Quantization-aware training recovers most accuracy; 10-20 extra epochs</td></tr>
-                <tr><td class="py-1 pr-4">Hailo HEF INT8</td><td class="py-1 pr-4">2-7% mAP50</td><td class="py-1 pr-4">10-20x vs CPU</td><td class="py-1">Hailo optimizer auto-selects sensitive layers. If &gt;5% drop, increase calib set.</td></tr>
+                <tr class="border-b border-slate-800"><td class="py-1 pr-4">FP32 &rarr; FP16</td><td class="py-1 pr-4">&lt;0.5%</td><td class="py-1 pr-4">1.5&ndash;2x</td><td class="py-1">No action; lossless in practice</td></tr>
+                <tr class="border-b border-slate-800"><td class="py-1 pr-4">FP32 &rarr; INT8 PTQ</td><td class="py-1 pr-4">1&ndash;5%</td><td class="py-1 pr-4">2&ndash;4x</td><td class="py-1">If &gt;5% drop: switch to INT8 QAT (10-20 epochs)</td></tr>
+                <tr class="border-b border-slate-800"><td class="py-1 pr-4">FP32 &rarr; INT8 QAT</td><td class="py-1 pr-4">&lt;1%</td><td class="py-1 pr-4">2&ndash;4x</td><td class="py-1">Use QAT as default when accuracy is critical</td></tr>
+                <tr><td class="py-1 pr-4">Hailo HEF INT8</td><td class="py-1 pr-4">2&ndash;7%</td><td class="py-1 pr-4">10&ndash;20x vs CPU</td><td class="py-1">If &gt;5% drop: increase calib set, check sensitive layers</td></tr>
             </tbody>
         </table>
-        <p class="text-slate-300 text-sm mt-3"><strong>Hard rule:</strong> If INT8 PTQ drops mAP50 by more than 5% relative (e.g., from 40 to below 38 mAP50), switch to INT8 QAT or FP16 only. Transformer-based models (RT-DETR) are more sensitive to INT8 quantization than CNN-based YOLO due to attention softmax precision requirements.</p>
+        <p class="text-slate-300 text-sm mt-3"><strong>Hard rule:</strong> Transformer-based models (RT-DETR) are more sensitive to INT8 quantization than CNN-based YOLO due to attention softmax precision requirements. Always validate on your <em>actual deployment domain</em> test set, not on COCO.</p>
     </div>
+
+    <figure class="my-6">
+        <img src="images/m10_deepinsight_pipeline.jpg" alt="NVIDIA Jetson edge AI deep learning inference pipeline overview" class="rounded-lg w-full">
+        <figcaption class="text-gray-400 text-sm text-center mt-2">NVIDIA Jetson-based deep learning inference pipeline: camera &rarr; CUDA preprocessing &rarr; TensorRT engine &rarr; postprocessing &rarr; application output. Source: <a href="https://github.com/dusty-nv/jetson-inference" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">NVIDIA jetson-inference (GitHub)</a></figcaption>
+    </figure>
+
+    <div class="my-8">
+        <h3 class="text-xl font-bold text-white mb-3">YOLO11 + DeepStream + TensorRT: Full Stack Deployment</h3>
+        <div class="relative w-full" style="padding-bottom: 56.25%;">
+            <iframe class="absolute inset-0 w-full h-full rounded-lg" src="https://www.youtube.com/embed/AzMXXQXYO4E" title="Crazy Fast YOLO11 Inference with DeepStream and TensorRT on NVIDIA Jetson Orin" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+        <p class="text-gray-400 text-sm text-center mt-2">YOLO11 inference with NVIDIA DeepStream 7.x and TensorRT on Jetson Orin &mdash; multi-stream pipeline with hardware-accelerated decode and the NvDCF multi-object tracker.</p>
+    </div>
+
+    <h3>10.15 VLMs &amp; Foundation Models at the Edge (2025)</h3>
+    <p>YOLO-class CNNs classify pre-defined objects. Vision-Language Models (VLMs) enable <strong>semantic scene understanding</strong>: "navigate to the red truck near the damaged building" &mdash; zero-shot, without retraining. The architectural difference: CNNs extract spatial feature maps and pass them through detection heads; VLMs encode both image and language query into a shared embedding space and output grounded predictions.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 text-sm">
+        <div class="hw-card p-5 rounded-xl">
+            <h4 class="text-white mt-0 text-base">Edge-Deployable VLMs (2025&ndash;2026)</h4>
+            <ul class="space-y-3 text-slate-300 text-xs font-mono">
+                <li>
+                    <strong class="text-sky-400 block">Grounding DINO + SAM2</strong>
+                    Open-vocabulary detection: text prompt &rarr; bounding boxes for any described object, zero-shot. SAM2 adds instance masks. ~8&ndash;15 fps on Orin NX 16GB with TensorRT. Production-ready for semantic target detection.
+                </li>
+                <li>
+                    <strong class="text-sky-400 block">LLaVA-Phi-3 Mini (3.8B)</strong>
+                    CLIP ViT + Phi-3 Mini language model. Fits in 8GB LPDDR5 on Jetson Orin Nano at FP16. ~2&ndash;4 inference/sec. Use for mission planning queries and pre-flight area assessment.
+                </li>
+                <li>
+                    <strong class="text-sky-400 block">NVIDIA GR00T N1</strong>
+                    Dual-system: diffusion transformer for motor control + VLM for goal interpretation. Requires Jetson Thor or AGX Orin. Maps natural language mission goals to multi-step motor primitives.
+                </li>
+            </ul>
+        </div>
+        <div class="hw-card p-5 rounded-xl">
+            <h4 class="text-white mt-0 text-base">Two-Tier Production Pattern</h4>
+            <p class="text-slate-300 text-xs mb-3">VLMs are too slow for 30 fps closed-loop control. The standard architecture:</p>
+            <div class="bg-slate-900 p-3 rounded border border-slate-700 text-xs font-mono text-slate-300 space-y-2">
+                <p><strong class="text-sky-400">Tier 1 &mdash; Fast loop (30 fps):</strong> YOLO11 TRT engine tracks target bounding box and feeds pixel coordinates to the MAVLink control loop. Runs continuously on GPU.</p>
+                <p><strong class="text-sky-400">Tier 2 &mdash; Slow loop (1&ndash;2 fps):</strong> Grounding DINO or LLaVA processes full scene against mission goal. On match, seeds YOLO tracker with new target ROI.</p>
+                <p><strong class="text-emerald-400">Result:</strong> Semantic understanding from VLM + real-time control from CNN. Neither works alone for closed-loop drone guidance.</p>
+            </div>
+        </div>
+    </div>
+
+    <h3>10.16 Key References &amp; Tools</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-sm">
+        <div class="interactive-panel bg-[#0d1320] border-slate-700">
+            <h4 class="mt-0 border-none text-sky-400 text-sm">Documentation</h4>
+            <ul class="text-slate-300 text-sm list-disc pl-5 space-y-1">
+                <li><a href="https://docs.nvidia.com/deeplearning/tensorrt/latest/index.html" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">TensorRT 10.x Documentation</a> &mdash; quantization, builder API, plugins</li>
+                <li><a href="https://docs.nvidia.com/tao/tao-toolkit/latest/index.html" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">NVIDIA TAO Toolkit 6.x Docs</a> &mdash; train, prune, distill, export</li>
+                <li><a href="https://developer.nvidia.com/deepstream-getting-started" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">DeepStream SDK 7.x</a> &mdash; multi-stream GStreamer pipeline</li>
+                <li><a href="https://developer.nvidia.com/embedded/jetpack-sdk-62" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">JetPack 6.2 SDK</a> &mdash; Jetson Orin production software stack</li>
+                <li><a href="https://docs.ultralytics.com/guides/deepstream-nvidia-jetson" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">Ultralytics YOLO + DeepStream Guide</a></li>
+            </ul>
+        </div>
+        <div class="interactive-panel bg-[#0d1320] border-slate-700">
+            <h4 class="mt-0 border-none text-sky-400 text-sm">Tools &amp; Datasets</h4>
+            <ul class="text-slate-300 text-sm list-disc pl-5 space-y-1">
+                <li><a href="https://roboflow.com" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">Roboflow</a> &mdash; annotation, augmentation, dataset versioning</li>
+                <li><a href="https://labelstud.io" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">Label Studio</a> &mdash; open-source, self-hostable annotation</li>
+                <li><a href="https://mlflow.org" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">MLflow 3.0</a> &mdash; experiment tracking, model registry</li>
+                <li><a href="https://wandb.ai" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">Weights &amp; Biases</a> &mdash; developer-first run tracking</li>
+                <li><a href="https://github.com/NVIDIA/Model-Optimizer" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">NVIDIA Model Optimizer</a> &mdash; QAT, pruning, INT4/FP8</li>
+                <li><a href="https://developer.nvidia.com/isaac/sim" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">NVIDIA Isaac Sim 4.x</a> &mdash; synthetic data generation with Replicator</li>
+                <li><a href="https://captain-whu.github.io/DOTA/dataset.html" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">DOTA v2.0</a> &mdash; oriented bounding box aerial benchmark</li>
+            </ul>
+        </div>
+    </div>
+
+    <figure class="my-6">
+        <img src="images/m10_ml_workflow.png" alt="Ultralytics YOLO ecosystem showing training, export, and deployment integrations" class="rounded-lg w-full">
+        <figcaption class="text-gray-400 text-sm text-center mt-2">Ultralytics YOLO ecosystem: the platform supports training, validation, export to 20+ formats (ONNX, TensorRT, CoreML, TFLite, RKNN), and deployment integrations with cloud and edge targets. Source: <a href="https://ultralytics.com" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">Ultralytics</a></figcaption>
+    </figure>
+
 </div>
 `;

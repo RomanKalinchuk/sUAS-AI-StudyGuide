@@ -1,8 +1,458 @@
 export default `
 <div class="fade-in">
     <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 11</span>
-    <h2>Perception &amp; Visual SLAM</h2>
-    <p>To act autonomously in GPS-denied environments, a drone must simultaneously build a map of its surroundings and locate itself within that map — the Simultaneous Localization and Mapping (SLAM) problem. This module covers the complete mathematical stack: from the physics of how a camera sees the world, through classical feature-based methods and IMU preintegration theory, to the production SLAM systems deployed on modern autonomous platforms. Sensor coverage is maximum-breadth: monocular, stereo, RGB-D, and LiDAR-inertial.</p>
+    <h2>Perception, Computer Vision &amp; Visual SLAM</h2>
+    <p>Autonomous drone perception operates at two levels: <strong>object-level understanding</strong> — detecting, classifying, and tracking targets in real time — and <strong>geometric self-localization</strong> — recovering the drone's own pose by mapping the environment. This module covers both: from YOLO11/RT-DETR real-time detection and SAM 2 video segmentation, through multi-object tracking, thermal IR processing, and monocular depth estimation, to the full mathematical stack of Visual SLAM — camera geometry, optical flow, Visual-Inertial Odometry, loop closure, and deep learning frontiers. Hardware coverage spans edge deployment on Jetson Orin NX, FLIR thermal cameras, and NVIDIA Isaac ROS cuVSLAM.</p>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 my-6 text-center text-xs">
+        <div class="bg-slate-800 border border-slate-700 rounded-lg p-3"><span class="text-sky-400 font-bold block text-lg">YOLO11</span><span class="text-slate-400">Real-time detection</span></div>
+        <div class="bg-slate-800 border border-slate-700 rounded-lg p-3"><span class="text-emerald-400 font-bold block text-lg">SAM 2</span><span class="text-slate-400">Video segmentation</span></div>
+        <div class="bg-slate-800 border border-slate-700 rounded-lg p-3"><span class="text-amber-400 font-bold block text-lg">ByteTrack</span><span class="text-slate-400">Multi-obj tracking</span></div>
+        <div class="bg-slate-800 border border-slate-700 rounded-lg p-3"><span class="text-purple-400 font-bold block text-lg">cuVSLAM</span><span class="text-slate-400">NVIDIA SLAM</span></div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         PART A: COMPUTER VISION FOR DRONE PERCEPTION
+         ═══════════════════════════════════════════════════════════ -->
+
+    <h3>11.A Real-Time Object Detection for UAVs</h3>
+    <p>Drone-borne object detection must run at ≥15 fps on a power-constrained edge processor, handle severe downward viewing angles, detect small objects at altitude (pedestrians at 50 m occupy as few as 8×8 pixels), and tolerate motion blur. The YOLO family — culminating in <strong>YOLO11</strong> (Ultralytics, September 2024) — and the transformer-based <strong>RT-DETR</strong> (Baidu, 2023) are the dominant production architectures.</p>
+
+    <h4>YOLO11: Architecture and Key Innovations</h4>
+    <p>YOLO11 retains the three-part backbone–neck–head structure of YOLOv8 but introduces two new blocks: <strong>C3k2</strong> (Cross-Stage Partial with two smaller convolution kernels — fewer parameters than C2f) and <strong>C2PSA</strong> (Convolutional Block with Parallel Spatial Attention — focuses computation on salient regions). SPPF (Spatial Pyramid Pooling Fast) at the backbone tail aggregates multi-scale context. The result: YOLO11m achieves higher COCO mAP than YOLOv8m with 22% fewer parameters. Tasks supported out-of-the-box: detection, instance segmentation, pose estimation, oriented bounding box (OBB) detection, and image classification — all from a single unified codebase.</p>
+
+    <div class="overflow-x-auto my-6">
+        <table class="w-full text-sm text-left">
+            <thead class="bg-slate-700 text-slate-300">
+                <tr>
+                    <th class="p-3">Model</th>
+                    <th class="p-3">Params (M)</th>
+                    <th class="p-3">FLOPs (B)</th>
+                    <th class="p-3">mAP<sup>val</sup> 50-95</th>
+                    <th class="p-3">CPU ONNX (ms)</th>
+                    <th class="p-3">T4 TensorRT (ms)</th>
+                    <th class="p-3">Notes</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-700">
+                <tr class="bg-slate-800"><td class="p-3 font-mono text-sky-300">YOLO11n</td><td class="p-3 text-slate-300">2.6</td><td class="p-3 text-slate-300">6.5</td><td class="p-3 text-green-400">39.5</td><td class="p-3 text-slate-300">56</td><td class="p-3 text-slate-300">1.5</td><td class="p-3 text-slate-400">Nano — Jetson Orin Nano, MCU class</td></tr>
+                <tr class="bg-slate-900"><td class="p-3 font-mono text-sky-300">YOLO11s</td><td class="p-3 text-slate-300">9.4</td><td class="p-3 text-slate-300">21.5</td><td class="p-3 text-green-400">47.0</td><td class="p-3 text-slate-300">90</td><td class="p-3 text-slate-300">2.5</td><td class="p-3 text-slate-400">Small — real-time on Orin NX</td></tr>
+                <tr class="bg-slate-800"><td class="p-3 font-mono text-amber-300">YOLO11m</td><td class="p-3 text-slate-300">20.1</td><td class="p-3 text-slate-300">68.0</td><td class="p-3 text-amber-400">51.5</td><td class="p-3 text-slate-300">183</td><td class="p-3 text-slate-300">4.7</td><td class="p-3 text-slate-400">Medium — best efficiency/accuracy balance</td></tr>
+                <tr class="bg-slate-900"><td class="p-3 font-mono text-amber-300">YOLO11l</td><td class="p-3 text-slate-300">25.3</td><td class="p-3 text-slate-300">86.9</td><td class="p-3 text-amber-400">53.4</td><td class="p-3 text-slate-300">239</td><td class="p-3 text-slate-300">6.2</td><td class="p-3 text-slate-400">Large — Jetson AGX Orin</td></tr>
+                <tr class="bg-slate-800"><td class="p-3 font-mono text-rose-300">YOLO11x</td><td class="p-3 text-slate-300">56.9</td><td class="p-3 text-slate-300">194.9</td><td class="p-3 text-rose-400">54.7</td><td class="p-3 text-slate-300">463</td><td class="p-3 text-slate-300">11.3</td><td class="p-3 text-slate-400">XLarge — server/GCS inference only</td></tr>
+            </tbody>
+        </table>
+        <p class="text-slate-500 text-xs mt-1">COCO val2017 benchmark. CPU = ONNX on Intel Core Ultra 7 (ms/image). Source: <a href="https://docs.ultralytics.com/models/yolo11" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">Ultralytics Docs</a></p>
+    </div>
+
+    <h4>YOLO Family + RT-DETR Model Comparison</h4>
+    <p>Each YOLO generation since v8 has addressed a specific weakness. YOLO11 is the current recommended starting point for drone deployments. RT-DETR uses a Transformer architecture — no NMS post-processing, globally consistent detections — at the cost of higher GPU memory and compute.</p>
+
+    <div class="overflow-x-auto my-6">
+        <table class="w-full text-sm text-left">
+            <thead class="bg-slate-700 text-slate-300">
+                <tr>
+                    <th class="p-3">Model</th>
+                    <th class="p-3">Year</th>
+                    <th class="p-3">Architecture</th>
+                    <th class="p-3">Key Innovation</th>
+                    <th class="p-3">mAP (COCO, medium)</th>
+                    <th class="p-3">NMS-free</th>
+                    <th class="p-3">Drone Fit</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-700">
+                <tr class="bg-slate-800"><td class="p-3 font-mono text-slate-300">YOLOv8m</td><td class="p-3 text-slate-300">2023</td><td class="p-3 text-slate-300">CNN (C2f, SPPF)</td><td class="p-3 text-slate-300">Anchor-free, decoupled head</td><td class="p-3 text-slate-300">50.2</td><td class="p-3 text-red-400">No</td><td class="p-3 text-slate-400">Mature baseline; large ecosystem</td></tr>
+                <tr class="bg-slate-900"><td class="p-3 font-mono text-slate-300">YOLOv9c</td><td class="p-3 text-slate-300">2024</td><td class="p-3 text-slate-300">CNN (GELAN)</td><td class="p-3 text-slate-300">PGI — prevents info loss in deep nets</td><td class="p-3 text-slate-300">53.0</td><td class="p-3 text-red-400">No</td><td class="p-3 text-slate-400">Better accuracy, more complex training</td></tr>
+                <tr class="bg-slate-800"><td class="p-3 font-mono text-slate-300">YOLOv10m</td><td class="p-3 text-slate-300">2024</td><td class="p-3 text-slate-300">CNN (dual assign)</td><td class="p-3 text-slate-300">NMS-free training (consistent dual assign)</td><td class="p-3 text-slate-300">51.3</td><td class="p-3 text-green-400">Yes</td><td class="p-3 text-slate-400">Lower latency; less mature ecosystem</td></tr>
+                <tr class="bg-slate-900"><td class="p-3 font-mono text-amber-300 font-bold">YOLO11m</td><td class="p-3 text-slate-300">2024</td><td class="p-3 text-slate-300">CNN (C3k2, C2PSA)</td><td class="p-3 text-slate-300">Spatial attention; 22% fewer params vs v8m</td><td class="p-3 text-amber-400 font-bold">51.5</td><td class="p-3 text-red-400">No</td><td class="p-3 text-slate-400 font-bold">Recommended default for UAV edge deployment</td></tr>
+                <tr class="bg-slate-800"><td class="p-3 font-mono text-purple-300">RT-DETR-L</td><td class="p-3 text-slate-300">2023</td><td class="p-3 text-slate-300">Transformer (hybrid encoder)</td><td class="p-3 text-slate-300">First real-time DETR; AIFI + CCFM encoder</td><td class="p-3 text-purple-400">53.0</td><td class="p-3 text-green-400">Yes</td><td class="p-3 text-slate-400">Better for occlusion; needs GPU (≥4 GB VRAM)</td></tr>
+            </tbody>
+        </table>
+        <p class="text-slate-500 text-xs mt-1">All measured at 640×640 input on COCO val2017. RT-DETR mAP: 114 FPS / 53.0 AP on T4 GPU. Sources: <a href="https://arxiv.org/abs/2304.08069" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">RT-DETR paper</a>, <a href="https://docs.ultralytics.com/models/yolo11" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">Ultralytics YOLO11 docs</a></p>
+    </div>
+
+    <figure class="my-6">
+        <img src="images/m11_object_detection.jpg" alt="YOLO real-time object detection bounding boxes on a scene" class="rounded-lg w-full">
+        <figcaption class="text-gray-400 text-sm text-center mt-2">YOLO real-time object detection with bounding boxes and class labels. On drone hardware, YOLO11n/s variants run at 30+ fps on Jetson Orin NX using TensorRT. Source: <a href="https://commons.wikimedia.org/wiki/File:Detected-with-YOLO--Schreibtisch-mit-Objekten.jpg" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">Wikimedia Commons</a> (CC0)</figcaption>
+    </figure>
+
+    <h4>Aerial Detection: VisDrone and Small-Object Challenges</h4>
+    <p>The <strong>VisDrone2019</strong> dataset (Tianjin University) is the standard benchmark for UAV-perspective detection: 261,908 frames and 10,209 static images from consumer drones over 14 Chinese cities, 10 classes (pedestrian, car, van, truck, bus, bicycle, motor, tricycle, awning-tricycle, people). Key challenges on aerial imagery:</p>
+    <ul class="text-slate-300 text-sm space-y-1 mb-4">
+        <li><strong>Small object size</strong> — pedestrians at 50 m altitude: ~8×12 pixels at 1080p. Standard 640×640 YOLO input loses resolution. Mitigation: <strong>SAHI</strong> (Slicing-Aided Hyper Inference) — slice input into overlapping 640×640 tiles, run detection on each tile, merge with NMS. Typically adds 15-30% mAP on VisDrone at ~3× inference cost.</li>
+        <li><strong>Density and occlusion</strong> — crowd scenes with 300+ objects per frame. Use OBB (Oriented Bounding Box) mode for overhead vehicles.</li>
+        <li><strong>View angle</strong> — top-down vs. oblique. Pre-train on VisDrone or DOTA (aerial remote sensing) before fine-tuning on mission-specific targets.</li>
+        <li><strong>Motion blur</strong> — global shutter camera required for fast drone maneuvers (&gt;10 m/s).</li>
+    </ul>
+
+    <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
+        <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Python: YOLO11 Inference with TensorRT + SAHI for Aerial Small-Object Detection</div>
+        <div class="p-4 overflow-x-auto">
+<pre><code class="language-python">from ultralytics import YOLO
+from sahi import AutoDetectionModel
+from sahi.predict import get_sliced_prediction
+
+# ── Standard YOLO11 TensorRT inference (Jetson Orin NX) ──────────────────
+model = YOLO("yolo11m.pt")
+# Export to TensorRT engine once (INT8 calibration for ~2× speedup)
+model.export(format="engine", imgsz=640, half=True, device=0)
+
+# Load engine and run on video stream
+trt_model = YOLO("yolo11m.engine")
+results = trt_model("drone_feed.mp4", stream=True, conf=0.25, iou=0.45)
+for r in results:
+    boxes = r.boxes.xyxy      # (N,4) float tensor, pixel coords
+    scores = r.boxes.conf     # (N,) confidence
+    classes = r.boxes.cls     # (N,) class index
+
+# ── SAHI sliced inference for small object detection at altitude ──────────
+sahi_model = AutoDetectionModel.from_pretrained(
+    model_type="ultralytics",
+    model_path="yolo11m.pt",
+    confidence_threshold=0.25,
+    device="cuda:0",
+)
+result = get_sliced_prediction(
+    "aerial_frame.jpg",
+    sahi_model,
+    slice_height=640, slice_width=640,
+    overlap_height_ratio=0.2, overlap_width_ratio=0.2,
+)
+# result.object_prediction_list — merged detections across all tiles
+print(f"Detected {len(result.object_prediction_list)} objects with SAHI")</code></pre>
+        </div>
+    </div>
+
+    <div class="my-8">
+        <h3 class="text-xl font-bold text-white mb-3">YOLO11 on VisDrone — Aerial Object Detection Tutorial</h3>
+        <div class="relative w-full" style="padding-bottom: 56.25%;">
+            <iframe class="absolute inset-0 w-full h-full rounded-lg" src="https://www.youtube.com/embed/9ymyH4H1fG4" title="How to Train YOLO11 on VisDrone Dataset | Aerial Detection Tutorial" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <h3>11.B SAM 2: Segment Anything Model 2 (Meta, 2024)</h3>
+    <p>SAM 2 (Meta AI, August 2024) extends the original Segment Anything Model to <strong>video</strong>. Given a prompt (point, box, or mask) on any frame, SAM 2 propagates that segmentation mask forward and backward through the entire video clip in real time. Architecture: <strong>Hiera</strong> image encoder (hierarchical ViT), a streaming memory bank (caches past mask predictions as context tokens), and a lightweight memory attention module. Training data: 50.9K videos annotated with 35.5M masks via a human-in-the-loop engine.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div class="interactive-panel bg-[#0d1320] border-slate-700">
+            <h4 class="mt-0 border-none text-sky-400 text-sm">SAM 2 Key Capabilities</h4>
+            <ul class="text-slate-300 text-xs space-y-1">
+                <li><strong>Zero-shot video segmentation</strong> — no fine-tuning needed for new object classes</li>
+                <li><strong>Promptable</strong> — click a point, draw a box, or paste a mask on frame 0</li>
+                <li><strong>Memory bank</strong> — up to 7 past frames stored as compressed tokens; handles re-appearance after occlusion</li>
+                <li><strong>Real-time capable</strong> — SAM 2 Tiny runs at ~44 fps on A100; SAM 2 Large ~6 fps</li>
+                <li><strong>License</strong> — Apache 2.0; model weights freely available</li>
+            </ul>
+        </div>
+        <div class="interactive-panel bg-[#0d1320] border-slate-700">
+            <h4 class="mt-0 border-none text-amber-400 text-sm">Drone Applications</h4>
+            <ul class="text-slate-300 text-xs space-y-1">
+                <li><strong>Target isolation</strong> — operator clicks a vehicle in frame 1; SAM 2 tracks the precise pixel mask for the rest of the clip without retraining</li>
+                <li><strong>Training data generation</strong> — annotate one frame, SAM 2 auto-propagates masks to all frames, massively reducing labeling cost</li>
+                <li><strong>Change detection</strong> — diff segmentation masks between passes to detect new objects in a scene</li>
+                <li><strong>Dynamic masking for SLAM</strong> — mask out moving objects (vehicles, people) before feeding frames to ORB-SLAM3 to prevent dynamic-point contamination</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
+        <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Python: SAM 2 Video Object Segmentation (Meta sam2 library)</div>
+        <div class="p-4 overflow-x-auto">
+<pre><code class="language-python">import torch
+import numpy as np
+from sam2.build_sam import build_sam2_video_predictor
+
+# Load SAM 2 (requires: pip install sam2)
+device = "cuda" if torch.cuda.is_available() else "cpu"
+predictor = build_sam2_video_predictor(
+    "sam2_hiera_large.yaml",
+    "/path/to/sam2_hiera_large.pt",
+    device=device,
+)
+
+# Initialize on a directory of JPEG frames (e.g., extracted from drone video)
+with torch.inference_mode():
+    state = predictor.init_state(video_path="/tmp/drone_frames/")
+
+    # Prompt: click a point on the target vehicle in frame 0
+    # ann_frame_idx=0, ann_obj_id=1 (arbitrary ID for this object)
+    frame_idx, obj_ids, mask_logits = predictor.add_new_points_or_box(
+        inference_state=state,
+        frame_idx=0,
+        obj_id=1,
+        points=np.array([[640, 380]], dtype=np.float32),  # (u, v) pixel click
+        labels=np.array([1], np.int32),                   # 1 = foreground
+    )
+
+    # Propagate forward through all frames
+    for frame_idx, obj_ids, mask_logits in predictor.propagate_in_video(state):
+        masks = (mask_logits > 0.0).cpu().numpy()  # (N_obj, H, W) binary masks
+        # masks[0] = binary mask for our target vehicle at frame frame_idx</code></pre>
+        </div>
+    </div>
+
+    <p>SAM 2 repository: <a href="https://github.com/facebookresearch/sam2" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">github.com/facebookresearch/sam2</a> &nbsp;|&nbsp; Paper: <a href="https://arxiv.org/abs/2408.00714" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">arXiv 2408.00714</a></p>
+
+    <h3>11.C Multi-Object Tracking (MOT) for Drone Surveillance</h3>
+    <p>Detection gives you boxes per frame. Tracking assigns persistent IDs across frames — essential for behavior analysis, headcount, and target handoff between drone and ground sensor. The dominant paradigm is <strong>tracking-by-detection</strong>: run a detector, then associate detections across frames using motion models and appearance features.</p>
+
+    <h4>Tracking Algorithm Comparison</h4>
+
+    <div class="overflow-x-auto my-6">
+        <table class="w-full text-sm text-left">
+            <thead class="bg-slate-700 text-slate-300">
+                <tr>
+                    <th class="p-3">Algorithm</th>
+                    <th class="p-3">Year</th>
+                    <th class="p-3">Motion Model</th>
+                    <th class="p-3">Low-Score Dets</th>
+                    <th class="p-3">Camera Motion Comp.</th>
+                    <th class="p-3">ReID</th>
+                    <th class="p-3">HOTA (MOT17)</th>
+                    <th class="p-3">Notes</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-700">
+                <tr class="bg-slate-800"><td class="p-3 font-mono text-slate-300">SORT</td><td class="p-3 text-slate-300">2016</td><td class="p-3 text-slate-300">Kalman + IoU</td><td class="p-3 text-red-400">No</td><td class="p-3 text-red-400">No</td><td class="p-3 text-red-400">No</td><td class="p-3 text-slate-300">—</td><td class="p-3 text-slate-400">Baseline; very fast but high ID-switch rate</td></tr>
+                <tr class="bg-slate-900"><td class="p-3 font-mono text-sky-300">ByteTrack</td><td class="p-3 text-slate-300">2022</td><td class="p-3 text-slate-300">Kalman + IoU</td><td class="p-3 text-green-400">Yes (2-stage)</td><td class="p-3 text-red-400">No</td><td class="p-3 text-red-400">No</td><td class="p-3 text-green-400">63.1</td><td class="p-3 text-slate-400">Associates low-confidence dets in 2nd pass; recovers occluded targets</td></tr>
+                <tr class="bg-slate-800"><td class="p-3 font-mono text-emerald-300">OC-SORT</td><td class="p-3 text-slate-300">2023</td><td class="p-3 text-slate-300">Kalman (obs-centric)</td><td class="p-3 text-green-400">Yes</td><td class="p-3 text-amber-400">Partial</td><td class="p-3 text-red-400">No</td><td class="p-3 text-emerald-400">63.9</td><td class="p-3 text-slate-400">Re-updates Kalman state from observations; better for nonlinear motion</td></tr>
+                <tr class="bg-slate-900"><td class="p-3 font-mono text-amber-300">BoT-SORT</td><td class="p-3 text-slate-300">2022</td><td class="p-3 text-slate-300">Kalman + IoU</td><td class="p-3 text-green-400">Yes</td><td class="p-3 text-green-400">Yes (homography)</td><td class="p-3 text-green-400">Optional</td><td class="p-3 text-amber-400">65.0</td><td class="p-3 text-slate-400">Camera motion compensation via homography; recommended for moving-camera drones</td></tr>
+                <tr class="bg-slate-800"><td class="p-3 font-mono text-purple-300">StrongSORT</td><td class="p-3 text-slate-300">2023</td><td class="p-3 text-slate-300">ECC + Kalman</td><td class="p-3 text-green-400">Yes</td><td class="p-3 text-green-400">Yes (ECC)</td><td class="p-3 text-green-400">OSNet ReID</td><td class="p-3 text-purple-400">64.4</td><td class="p-3 text-slate-400">Best ReID integration; slower but fewer ID switches on long occlusions</td></tr>
+            </tbody>
+        </table>
+        <p class="text-slate-500 text-xs mt-1">HOTA = Higher Order Tracking Accuracy on MOT17 test set. For drone (moving camera) scenarios, BoT-SORT's homography-based camera motion compensation is critical. Sources: <a href="https://arxiv.org/abs/2110.06864" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">ByteTrack</a>, <a href="https://arxiv.org/abs/2206.14651" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">BoT-SORT</a>, <a href="https://arxiv.org/abs/2203.14360" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">OC-SORT</a></p>
+    </div>
+
+    <div class="insight-box">
+        <div class="insight-label">DRONE TRACKING: MOVING CAMERA PROBLEM</div>
+        <p class="text-slate-200 text-sm mt-1">Standard trackers assume a static camera — IoU between consecutive frames fails when the drone pans or translates because every bounding box shifts even for stationary targets. BoT-SORT compensates by estimating a frame-to-frame homography (via ECC or feature matching) and warping all predicted Kalman states before association. On a drone panning at 30°/s, this reduces ID-switch rate by ~40% vs. vanilla ByteTrack.</p>
+    </div>
+
+    <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
+        <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Python: YOLO11 + BoT-SORT Multi-Object Tracking (Ultralytics native)</div>
+        <div class="p-4 overflow-x-auto">
+<pre><code class="language-python">from ultralytics import YOLO
+import cv2
+
+model = YOLO("yolo11m.pt")
+cap = cv2.VideoCapture("drone_feed.mp4")
+
+# Ultralytics has ByteTrack and BoT-SORT built-in
+# tracker="botsort.yaml" includes camera motion compensation
+track_history = {}  # track_id → list of (cx, cy) centroids
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    # Run tracking — returns Results with .boxes.id for persistent track IDs
+    results = model.track(frame, persist=True, tracker="botsort.yaml",
+                          conf=0.25, iou=0.45, verbose=False)
+
+    if results[0].boxes.id is not None:
+        boxes = results[0].boxes.xyxy.cpu().numpy()   # (N,4)
+        track_ids = results[0].boxes.id.int().cpu().tolist()  # (N,)
+        classes = results[0].boxes.cls.int().cpu().tolist()   # (N,)
+
+        for box, tid, cls in zip(boxes, track_ids, classes):
+            cx, cy = int((box[0]+box[2])/2), int((box[1]+box[3])/2)
+            track_history.setdefault(tid, []).append((cx, cy))
+            # Draw track tail (last 30 positions)
+            tail = track_history[tid][-30:]
+            for i in range(1, len(tail)):
+                cv2.line(frame, tail[i-1], tail[i], (0, 255, 255), 2)
+
+cap.release()</code></pre>
+        </div>
+    </div>
+
+    <h3>11.D Thermal / IR Vision Processing</h3>
+    <p>Thermal cameras (LWIR: 8–14 µm) detect emitted heat rather than reflected visible light, providing all-weather, day/night detection capability. FLIR Boson 640 and Lepton 3.5 are the standard small-UAV thermal modules. Processing thermal imagery requires different techniques than visible-band images.</p>
+
+    <figure class="my-6">
+        <img src="images/m11_thermal_detection.png" alt="Thermal infrared image showing heat signatures" class="rounded-lg w-full max-w-2xl mx-auto">
+        <figcaption class="text-gray-400 text-sm text-center mt-2">Thermal IR image showing heat signatures (bright = warm). Thermal cameras enable detection regardless of lighting conditions — critical for night ISR and search-and-rescue. Source: <a href="https://commons.wikimedia.org/wiki/File:Thermal_image_of_a_Tawny_Owl.png" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">Wikimedia Commons</a> (CC BY-SA)</figcaption>
+    </figure>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div class="interactive-panel bg-[#0d1320] border-slate-700">
+            <h4 class="mt-0 border-none text-amber-400 text-sm">Thermal Pre-Processing Pipeline</h4>
+            <ol class="text-slate-300 text-xs space-y-2 list-decimal pl-4">
+                <li><strong>Non-Uniformity Correction (NUC)</strong> — factory-calibrated per-pixel gain/offset correction. Most cameras apply this internally; some require a manual flat-field shutter drop.</li>
+                <li><strong>Bad Pixel Replacement</strong> — dead or stuck pixels (common in uncooled microbolometers) replaced by neighborhood median.</li>
+                <li><strong>Histogram Equalization / CLAHE</strong> — thermal scenes often have very low contrast (all objects near 300K). CLAHE with clipLimit=2.0 dramatically improves feature visibility without crushing hot spots.</li>
+                <li><strong>Pseudo-color mapping</strong> — map 14-bit thermal values to 8-bit colormap (INFERNO, JET, RAINBOW) for visualization and training data.</li>
+                <li><strong>Temporal averaging</strong> — for slow scenes, average 4-8 frames to reduce microbolometer noise (NETD ~50 mK uncooled).</li>
+            </ol>
+        </div>
+        <div class="interactive-panel bg-[#0d1320] border-slate-700">
+            <h4 class="mt-0 border-none text-sky-400 text-sm">Thermal Detection Strategy</h4>
+            <ul class="text-slate-300 text-xs space-y-2">
+                <li><strong>Fine-tune YOLO11 on thermal data</strong> — thermal appearance differs radically from RGB (inverted edges, no color, glow around warm targets). Always fine-tune; do not use RGB-trained weights zero-shot.</li>
+                <li><strong>FLIR ADAS dataset</strong> — 14,452 annotated thermal images (pedestrian, car, bicycle). Good starting point for UAV thermal detection fine-tuning.</li>
+                <li><strong>Multi-spectral fusion</strong> — fuse RGB + LWIR in feature space (mid-level fusion after backbone) for all-condition detection. Active research: CFT (Cross-modal Feature Transformer), PIAFusion.</li>
+                <li><strong>Human detection signature</strong> — human body (~310 K) appears bright against ~285 K background at night; contrast reverses mid-day in direct sun. Account for this in confidence thresholds.</li>
+                <li><strong>FLIR Boson 640 interface</strong> — USB-C (UVC) or MIPI CSI-2. On Jetson Orin: CSI-2 at 60 Hz via Argus API; CUDA CLAHE pre-processing takes ~0.3 ms.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
+        <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Python: Thermal Image Pre-Processing with OpenCV (CLAHE + Pseudo-color)</div>
+        <div class="p-4 overflow-x-auto">
+<pre><code class="language-python">import cv2
+import numpy as np
+
+def preprocess_thermal(raw_frame_14bit: np.ndarray) -> np.ndarray:
+    """
+    raw_frame_14bit: (H, W) uint16 array from FLIR Boson (14-bit values 0-16383)
+    Returns: (H, W, 3) uint8 BGR image suitable for YOLO11 inference
+    """
+    # 1. Normalize to 8-bit (preserves relative temperature ordering)
+    norm = cv2.normalize(raw_frame_14bit, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
+
+    # 2. CLAHE for contrast enhancement (tile size 8x8, clip limit 2.0)
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    enhanced = clahe.apply(norm)
+
+    # 3. Apply pseudo-color (INFERNO colormap: black=cold, bright yellow=hot)
+    colorized = cv2.applyColorMap(enhanced, cv2.COLORMAP_INFERNO)
+
+    return colorized  # (H, W, 3) BGR uint8 — feed directly to YOLO11
+
+# Multi-spectral fusion: stack RGB + thermal as 4-channel input
+# (Requires YOLO model fine-tuned on 4-channel input)
+def fuse_rgb_thermal(rgb: np.ndarray, thermal_8bit: np.ndarray) -> np.ndarray:
+    """Concatenate RGB and 1-channel thermal as 4-channel image."""
+    return np.concatenate([rgb, thermal_8bit[..., np.newaxis]], axis=2)</code></pre>
+        </div>
+    </div>
+
+    <h3>11.E Monocular Depth Estimation: Depth Anything v2 (2024)</h3>
+    <p><strong>Depth Anything v2</strong> (Yang et al., NeurIPS 2024) is the current state-of-the-art for single-image monocular depth. It uses a <strong>DINOv2 ViT-Large</strong> encoder (pretrained on 142M images) fine-tuned via a teacher-student self-training strategy: a large teacher generates pseudo-depth labels on 62M unlabeled real images; student models of varying sizes are trained on the combined synthetic + pseudo-labeled data. Key result: dramatically sharper detail on fine structures (wires, fences, thin poles) compared to previous methods.</p>
+
+    <div class="overflow-x-auto my-6">
+        <table class="w-full text-sm text-left">
+            <thead class="bg-slate-700 text-slate-300">
+                <tr>
+                    <th class="p-3">Variant</th>
+                    <th class="p-3">Encoder</th>
+                    <th class="p-3">Params (M)</th>
+                    <th class="p-3">Output</th>
+                    <th class="p-3">Drone Use Case</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-700">
+                <tr class="bg-slate-800"><td class="p-3 font-mono text-slate-300">DA-v2-Small</td><td class="p-3 text-slate-300">ViT-Small</td><td class="p-3 text-slate-300">25</td><td class="p-3 text-slate-300">Relative depth</td><td class="p-3 text-slate-400">Real-time obstacle awareness on Orin NX; ~15 fps at 518×518</td></tr>
+                <tr class="bg-slate-900"><td class="p-3 font-mono text-slate-300">DA-v2-Base</td><td class="p-3 text-slate-300">ViT-Base</td><td class="p-3 text-slate-300">97</td><td class="p-3 text-slate-300">Relative depth</td><td class="p-3 text-slate-400">Better scene detail; ~8 fps on Orin NX</td></tr>
+                <tr class="bg-slate-800"><td class="p-3 font-mono text-amber-300">DA-v2-Large</td><td class="p-3 text-slate-300">ViT-Large</td><td class="p-3 text-slate-300">335</td><td class="p-3 text-slate-300">Relative depth</td><td class="p-3 text-slate-400">Highest quality; GCS post-processing of recorded video</td></tr>
+                <tr class="bg-slate-900"><td class="p-3 font-mono text-green-300">DA-v2-Small-Metric</td><td class="p-3 text-slate-300">ViT-Small</td><td class="p-3 text-slate-300">25</td><td class="p-3 text-slate-300">Metric depth (m)</td><td class="p-3 text-slate-400">Absolute depth — obstacle ranging &lt;15 m without stereo camera</td></tr>
+            </tbody>
+        </table>
+        <p class="text-slate-500 text-xs mt-1">Metric variants fine-tuned on KITTI (outdoor) or NYU-Depth v2 (indoor). Source: <a href="https://github.com/DepthAnything/Depth-Anything-V2" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">github.com/DepthAnything/Depth-Anything-V2</a>, <a href="https://arxiv.org/abs/2406.09414" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">arXiv 2406.09414</a></p>
+    </div>
+
+    <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
+        <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">Python: Depth Anything v2 Metric Depth Inference</div>
+        <div class="p-4 overflow-x-auto">
+<pre><code class="language-python">import cv2, torch, numpy as np
+from depth_anything_v2.dpt import DepthAnythingV2
+
+# Metric depth model fine-tuned on outdoor (KITTI) data
+model_cfg = {"encoder": "vits", "features": 64, "out_channels": [48,96,192,384]}
+model = DepthAnythingV2(**model_cfg)
+model.load_state_dict(torch.load("depth_anything_v2_metric_outdoor_vits.pth",
+                                  map_location="cpu"))
+model = model.to("cuda").eval()
+
+frame = cv2.imread("drone_frame.jpg")
+# Returns metric depth map in meters (H, W) float32
+depth_m = model.infer_image(frame)   # values: ~0.1 m to ~80 m for outdoor
+print(f"Nearest obstacle: {depth_m.min():.2f} m")
+
+# Obstable avoidance: flag any region closer than 5 m
+danger_mask = depth_m &lt; 5.0
+if danger_mask.any():
+    danger_fraction = danger_mask.mean()
+    print(f"WARNING: {danger_fraction*100:.1f}% of frame within 5 m")</code></pre>
+        </div>
+    </div>
+
+    <h3>11.F Open-Vocabulary Detection: GroundingDINO</h3>
+    <p><strong>GroundingDINO</strong> (Liu et al., ECCV 2024) merges DINO (transformer object detector) with a BERT text encoder to enable <strong>zero-shot, text-prompted object detection</strong>. Instead of a fixed class list, you pass any natural language description: "military vehicle near fence" or "person carrying backpack." The model outputs bounding boxes with confidence scores for the described targets.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div class="interactive-panel bg-[#0d1320] border-slate-700">
+            <h4 class="mt-0 border-none text-sky-400 text-sm">Architecture</h4>
+            <ul class="text-slate-300 text-xs space-y-1">
+                <li><strong>Image backbone</strong>: Swin Transformer (feature maps at 4 scales)</li>
+                <li><strong>Text encoder</strong>: BERT-base (tokenizes the text prompt)</li>
+                <li><strong>Feature Enhancer</strong>: stacked self-attention + cross-attention between image and text features</li>
+                <li><strong>Language-Guided Query Selection</strong>: text tokens select which image queries to focus on</li>
+                <li><strong>Cross-Modality Decoder</strong>: refines boxes with image↔text attention at each decoder layer</li>
+            </ul>
+        </div>
+        <div class="interactive-panel bg-[#0d1320] border-slate-700">
+            <h4 class="mt-0 border-none text-amber-400 text-sm">DoD/ISR Relevance</h4>
+            <ul class="text-slate-300 text-xs space-y-1">
+                <li><strong>No retraining for new target classes</strong> — describe the target in English; useful for emergent threat categories not in training data</li>
+                <li><strong>Combine with SAM 2</strong> — use GroundingDINO box as SAM 2 prompt → pixel-precise mask on first mention of a new target type</li>
+                <li><strong>Oriented aerial detection</strong> — Oriented GroundingDINO variant handles rotated objects in top-down imagery</li>
+                <li><strong>Limitation</strong>: ~300ms inference on T4 GPU — not suitable for real-time &gt;30 fps; use for trigger/cue applications</li>
+                <li>Paper: <a href="https://arxiv.org/abs/2303.05499" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">arXiv 2303.05499</a> | <a href="https://github.com/IDEA-Research/GroundingDINO" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">GitHub</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <h3>11.G NVIDIA Isaac ROS cuVSLAM (2025)</h3>
+    <p>NVIDIA's <strong>cuVSLAM</strong> (CUDA-accelerated Visual SLAM) is the production SLAM library shipped with <strong>Isaac ROS</strong> — NVIDIA's GPU-accelerated ROS 2 package collection. cuVSLAM is a stereo-visual-inertial odometry system optimized to run entirely on NVIDIA GPU/DLA, leaving the CPU free for mission logic. It is the recommended SLAM solution for Jetson-based drone platforms as of 2025.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="interactive-panel bg-[#0d1320] border-slate-700">
+            <h4 class="mt-0 border-none text-sky-400 text-sm">Key Specs (Isaac ROS 3.x)</h4>
+            <ul class="text-slate-300 text-xs space-y-1">
+                <li><strong>Sensors</strong>: stereo camera pair + optional IMU; supports 1–4 camera rigs</li>
+                <li><strong>Frequency</strong>: 60 Hz visual odometry on Orin NX 16GB</li>
+                <li><strong>Loop closure</strong>: tested on trajectories &gt;1 km</li>
+                <li><strong>ROS 2</strong>: Jazzy / Humble compatible; publishes <code>nav_msgs/Odometry</code></li>
+                <li><strong>License</strong>: NVIDIA proprietary (free binary distribution)</li>
+            </ul>
+        </div>
+        <div class="interactive-panel bg-[#0d1320] border-slate-700">
+            <h4 class="mt-0 border-none text-amber-400 text-sm">vs. ORB-SLAM3</h4>
+            <ul class="text-slate-300 text-xs space-y-1">
+                <li>cuVSLAM: GPU-accelerated, real-time on Orin at 60 Hz; closed-source but binary available</li>
+                <li>ORB-SLAM3: fully open-source (GPLv3), better published benchmarks, CPU-only in standard build</li>
+                <li>cuVSLAM better suited for production integration; ORB-SLAM3 better for research and custom modifications</li>
+                <li>Both publish to ROS 2 <code>tf</code> tree and support ArduPilot VIO via VISION_POSITION_ESTIMATE</li>
+            </ul>
+        </div>
+        <div class="interactive-panel bg-[#0d1320] border-slate-700">
+            <h4 class="mt-0 border-none text-emerald-400 text-sm">Integration Steps</h4>
+            <ol class="text-slate-300 text-xs space-y-1 list-decimal pl-4">
+                <li>Install Isaac ROS on Jetson via <code>apt</code> or NVIDIA container</li>
+                <li>Configure stereo camera (ZED 2, OAK-D Pro, or FLIR Blackfly stereo pair)</li>
+                <li>Set camera intrinsics/extrinsics in YAML config</li>
+                <li>Launch <code>isaac_ros_visual_slam</code> node — outputs <code>/visual_slam/tracking/odometry</code></li>
+                <li>Bridge to ArduPilot via MAVROS <code>vision_pose</code> plugin or direct pymavlink</li>
+            </ol>
+        </div>
+    </div>
+
+    <p>Isaac ROS Visual SLAM docs: <a href="https://nvidia-isaac-ros.github.io/repositories_and_packages/isaac_ros_visual_slam/index.html" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">nvidia-isaac-ros.github.io</a> &nbsp;|&nbsp; cuVSLAM paper: <a href="https://arxiv.org/abs/2506.04359" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">arXiv 2506.04359</a></p>
+
+    <div class="my-8">
+        <h3 class="text-xl font-bold text-white mb-3">SAHI + YOLO11 for Small Object Detection in Drone Footage</h3>
+        <div class="relative w-full" style="padding-bottom: 56.25%;">
+            <iframe class="absolute inset-0 w-full h-full rounded-lg" src="https://www.youtube.com/embed/ILqMBah5ZvI" title="How to Use SAHI with Ultralytics YOLO11 for Object Detection in Drone Footage" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         PART B: GEOMETRIC VISION AND VISUAL SLAM
+         ═══════════════════════════════════════════════════════════ -->
 
     <h3>11.1 Camera Geometry and Calibration</h3>
     <p>A camera is a mathematical function that maps 3D world points <strong>P</strong> = (X, Y, Z) to 2D image pixels <strong>p</strong> = (u, v). Reversing this projection — recovering 3D structure and motion from 2D images — is the foundational problem of geometric computer vision.</p>
@@ -595,7 +1045,7 @@ Solver: Gauss-Newton or Levenberg-Marquardt with Schur complement<br>
     <p>Several mature open-source SLAM systems are available. The right choice depends on sensors, compute, accuracy requirements, and whether a persistent map is needed.</p>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-4">
-        <h4 class="mt-0 border-none text-white">Production Visual SLAM System Comparison (2024)</h4>
+        <h4 class="mt-0 border-none text-white">Production Visual SLAM System Comparison (2025)</h4>
         <div class="overflow-x-auto">
             <table class="w-full text-xs text-slate-300 mt-2">
                 <thead><tr class="text-sky-400 border-b border-slate-700">
@@ -608,12 +1058,13 @@ Solver: Gauss-Newton or Levenberg-Marquardt with Schur complement<br>
                     <th class="text-left py-1">Best For</th>
                 </tr></thead>
                 <tbody>
-                    <tr class="border-b border-slate-800"><td class="py-1 pr-3 font-mono text-amber-400">ORB-SLAM3</td><td class="py-1 pr-3">Opt window</td><td class="py-1 pr-3">Mono/Stereo/RGBD+IMU</td><td class="py-1 pr-3 text-green-400">DBoW2</td><td class="py-1 pr-3">Sparse 3D</td><td class="py-1 pr-3">GPLv3</td><td class="py-1">Best accuracy + multi-session. Gold standard for benchmarks.</td></tr>
-                    <tr class="border-b border-slate-800"><td class="py-1 pr-3 font-mono text-sky-400">OpenVINS</td><td class="py-1 pr-3">MSCKF filter</td><td class="py-1 pr-3">Mono/Stereo+IMU</td><td class="py-1 pr-3 text-red-400">No</td><td class="py-1 pr-3">None</td><td class="py-1 pr-3">GPLv3</td><td class="py-1">Best CPU efficiency, ROS2-native. Ideal for constrained drones.</td></tr>
+                    <tr class="border-b border-slate-800"><td class="py-1 pr-3 font-mono text-amber-400">ORB-SLAM3</td><td class="py-1 pr-3">Opt window</td><td class="py-1 pr-3">Mono/Stereo/RGBD+IMU</td><td class="py-1 pr-3 text-green-400">DBoW2</td><td class="py-1 pr-3">Sparse 3D</td><td class="py-1 pr-3">GPLv3</td><td class="py-1">Best published accuracy + multi-session. Research gold standard.</td></tr>
+                    <tr class="border-b border-slate-800"><td class="py-1 pr-3 font-mono text-sky-400">OpenVINS</td><td class="py-1 pr-3">MSCKF filter</td><td class="py-1 pr-3">Mono/Stereo+IMU</td><td class="py-1 pr-3 text-red-400">No</td><td class="py-1 pr-3">None</td><td class="py-1 pr-3">GPLv3</td><td class="py-1">Best CPU efficiency, ROS2-native. Ideal for power-constrained drones.</td></tr>
                     <tr class="border-b border-slate-800"><td class="py-1 pr-3 font-mono text-emerald-400">VINS-Fusion</td><td class="py-1 pr-3">Opt window</td><td class="py-1 pr-3">Multi-cam+IMU+GPS/UWB</td><td class="py-1 pr-3 text-green-400">DBoW2</td><td class="py-1 pr-3">Sparse 3D</td><td class="py-1 pr-3">GPLv3</td><td class="py-1">Multi-camera + absolute sensor fusion. GPS/UWB integration built-in.</td></tr>
                     <tr class="border-b border-slate-800"><td class="py-1 pr-3 font-mono text-rose-400">Kimera</td><td class="py-1 pr-3">MSCKF+graph</td><td class="py-1 pr-3">Stereo+IMU</td><td class="py-1 pr-3 text-green-400">LCD descriptor</td><td class="py-1 pr-3">3D mesh+semantic</td><td class="py-1 pr-3">BSD</td><td class="py-1">Semantic 3D mesh — labels objects in map. MIT spinout, active dev.</td></tr>
                     <tr class="border-b border-slate-800"><td class="py-1 pr-3 font-mono text-purple-400">RTAB-Map</td><td class="py-1 pr-3">Graph SLAM</td><td class="py-1 pr-3">RGBD/Stereo/LiDAR</td><td class="py-1 pr-3 text-green-400">BoW (SURF/ORB)</td><td class="py-1 pr-3">OctoMap/mesh</td><td class="py-1 pr-3">BSD</td><td class="py-1">Dense 3D maps + memory management for large areas. Multi-sensor.</td></tr>
-                    <tr><td class="py-1 pr-3 font-mono text-cyan-400">LIO-SAM</td><td class="py-1 pr-3">Factor graph</td><td class="py-1 pr-3">LiDAR+IMU+GPS</td><td class="py-1 pr-3 text-green-400">ICP keyframes</td><td class="py-1 pr-3">Point cloud</td><td class="py-1 pr-3">BSD</td><td class="py-1">Outdoor LiDAR-inertial SLAM. Best for large-area drone mapping.</td></tr>
+                    <tr class="border-b border-slate-800"><td class="py-1 pr-3 font-mono text-cyan-400">LIO-SAM</td><td class="py-1 pr-3">Factor graph</td><td class="py-1 pr-3">LiDAR+IMU+GPS</td><td class="py-1 pr-3 text-green-400">ICP keyframes</td><td class="py-1 pr-3">Point cloud</td><td class="py-1 pr-3">BSD</td><td class="py-1">Outdoor LiDAR-inertial SLAM. Best for large-area drone mapping.</td></tr>
+                    <tr><td class="py-1 pr-3 font-mono text-yellow-400">cuVSLAM</td><td class="py-1 pr-3">GPU opt (VIO)</td><td class="py-1 pr-3">Stereo+IMU (1–4 cams)</td><td class="py-1 pr-3 text-green-400">Yes (&gt;1 km)</td><td class="py-1 pr-3">Sparse 3D</td><td class="py-1 pr-3">NVIDIA (free binary)</td><td class="py-1">Production Jetson deployment. 60 Hz on Orin NX. Isaac ROS native.</td></tr>
                 </tbody>
             </table>
         </div>
@@ -773,7 +1224,12 @@ print(f"Matched {kpts0.shape[0]} pairs (RANSAC still recommended for pose estima
     </div>
 
     <h4>Monocular Depth Estimation: Depth Anything v2 (2024)</h4>
-    <p>Depth Anything v2 (Yang et al., NeurIPS 2024) uses a DINOv2 ViT-Large encoder pretrained on 142M images, fine-tuned on 595K labeled depth images + 62M synthetic images using a teacher-student self-training strategy. It produces relative depth maps (not metric) from a single RGB frame — the best publicly available monocular depth model as of 2025. Metric versions (fine-tuned on KITTI outdoor or NYU-Depth indoor with real scale) produce absolute depth estimates suitable for drone obstacle awareness at modest range (&lt;10m) without a stereo camera.</p>
+    <p>Depth Anything v2 (Yang et al., NeurIPS 2024) uses a DINOv2 ViT-Large encoder pretrained on 142M images, fine-tuned on 595K labeled depth images + 62M synthetic images using a teacher-student self-training strategy. It produces relative depth maps (not metric) from a single RGB frame — the best publicly available monocular depth model as of 2025. Metric versions (fine-tuned on KITTI outdoor or NYU-Depth indoor with real scale) produce absolute depth estimates suitable for drone obstacle awareness at modest range (&lt;15m) without a stereo camera. See Section 11.E for model variants, performance table, and inference code.</p>
+
+    <figure class="my-6">
+        <img src="images/m11_aerial_detection.jpg" alt="Aerial view from drone showing urban scene" class="rounded-lg w-full max-w-2xl mx-auto">
+        <figcaption class="text-gray-400 text-sm text-center mt-2">Top-down aerial view — typical drone perception perspective. At this altitude, pedestrians occupy ~8–20 pixels; SAHI tile-based inference and Depth Anything v2 metric depth are required for reliable detection and ranging. Source: <a href="https://www.pexels.com" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">Pexels</a> (CC0)</figcaption>
+    </figure>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
         <h4 class="mt-0 border-none text-amber-400 text-sm">Self-Supervised Depth Training: MonoDepth2 Loss (Godard et al., ICCV 2019)</h4>
@@ -963,29 +1419,34 @@ ATE RMSE computation:<br><br>
     </div>
 
     <div class="interactive-panel">
-        <h4 class="mt-0 text-white border-none">SLAM System Quick-Reference Card</h4>
+        <h4 class="mt-0 text-white border-none">Perception + SLAM Quick-Reference Card</h4>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             <div class="bg-slate-900 p-3 rounded border border-slate-700">
-                <strong class="text-sky-400 block mb-2">ROS 2 Packages (Humble / Iron / Jazzy)</strong>
+                <strong class="text-sky-400 block mb-2">ROS 2 Packages (Humble / Jazzy)</strong>
                 <ul class="text-slate-400 space-y-1 font-mono">
-                    <li>ORB-SLAM3:    ros2-orb-slam3 (community maintained)</li>
-                    <li>OpenVINS:     ov_ros2 (official, well-maintained)</li>
-                    <li>VINS-Fusion:  VINS-Fusion-ROS2 (third-party port)</li>
-                    <li>Kimera:       kimera_vio_ros (MIT, ROS2 native)</li>
-                    <li>RTAB-Map:     rtabmap_ros (official ROS2 support)</li>
-                    <li>LIO-SAM:      LIO-SAM (ROS2 branch maintained)</li>
-                    <li>LightGlue:    pip install lightglue (standalone)</li>
+                    <li>YOLO11:        pip install ultralytics</li>
+                    <li>SAM 2:         pip install sam2  (Apache 2.0)</li>
+                    <li>GroundingDINO: pip install groundingdino-py</li>
+                    <li>cuVSLAM:       isaac_ros_visual_slam (NVIDIA apt)</li>
+                    <li>ORB-SLAM3:     ros2-orb-slam3 (community)</li>
+                    <li>OpenVINS:      ov_ros2 (official, well-maintained)</li>
+                    <li>Depth-Anything-v2: pip install depth-anything-v2</li>
+                    <li>LightGlue:     pip install lightglue</li>
+                    <li>RTAB-Map:      rtabmap_ros (official ROS2)</li>
+                    <li>LIO-SAM:       LIO-SAM (ROS2 branch maintained)</li>
                 </ul>
             </div>
             <div class="bg-slate-900 p-3 rounded border border-slate-700">
-                <strong class="text-amber-400 block mb-2">Common SLAM Failure Modes and Mitigations</strong>
+                <strong class="text-amber-400 block mb-2">Common Failure Modes and Mitigations</strong>
                 <ul class="text-slate-400 space-y-1">
-                    <li><span class="text-rose-400">Textureless scene</span> — white walls, sky: add IR dot projector (OAK-D Pro active stereo) or switch to LiDAR</li>
-                    <li><span class="text-rose-400">Motion blur</span> — fast yaw rate &gt;5 rad/s: global shutter camera required; reduce camera exposure</li>
-                    <li><span class="text-rose-400">Scale divergence</span> — monocular VIO: ensure dynamic init motion (3+ axes), check IMU saturation range (±16g)</li>
-                    <li><span class="text-rose-400">Relocalization failure</span> — insufficient visual overlap: lower DBoW2 threshold; increase keyframe rate</li>
-                    <li><span class="text-rose-400">Dynamic objects</span> — moving people/vehicles: use semantic masking to exclude dynamic classes from feature tracking</li>
-                    <li><span class="text-rose-400">Lighting change</span> — sunbeams, shadows: histogram equalization or CLAHE preprocessing; learned features (SuperPoint)</li>
+                    <li><span class="text-rose-400">Small objects missed</span> — altitude &gt;30m: use SAHI tile inference or increase input resolution to 1280</li>
+                    <li><span class="text-rose-400">ID switches in tracker</span> — moving drone camera: use BoT-SORT (camera motion compensation)</li>
+                    <li><span class="text-rose-400">Thermal false positives</span> — sun-heated surfaces: use temporal averaging + background subtraction</li>
+                    <li><span class="text-rose-400">Textureless scene (SLAM)</span> — white walls, sky: add IR dot projector or switch to LiDAR</li>
+                    <li><span class="text-rose-400">Motion blur</span> — fast yaw &gt;5 rad/s: global shutter camera required</li>
+                    <li><span class="text-rose-400">Scale divergence (mono VIO)</span> — ensure dynamic init motion (3+ axes), check IMU ±16g range</li>
+                    <li><span class="text-rose-400">Dynamic objects in SLAM</span> — use SAM 2 or semantic masking to exclude moving classes from feature tracking</li>
+                    <li><span class="text-rose-400">Depth failure at range</span> — DA-v2 metric depth unreliable &gt;15m; use stereo or LiDAR for far-field</li>
                 </ul>
             </div>
         </div>

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 425.2 366.5" enable-background="new 0 0 425.2 366.5" xml:space="preserve">
+<rect x="29.1" y="105.7" fill="#D1D3D4" width="133" height="223.9"/>
+<rect x="263.1" y="105.7" fill="#939598" width="132.9" height="223.9"/>
+<linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="263.138" y1="231.6573" x2="277.4887" y2="231.6573" gradientTransform="matrix(-1 0 0 -1 659.1887 449.3145)">
+	<stop  offset="0" style="stop-color:#FFF33B"/>
+	<stop  offset="5.948725e-002" style="stop-color:#FFE029"/>
+	<stop  offset="0.1303" style="stop-color:#FFD218"/>
+	<stop  offset="0.2032" style="stop-color:#FEC90F"/>
+	<stop  offset="0.2809" style="stop-color:#FDC70C"/>
+	<stop  offset="0.6685" style="stop-color:#F3903F"/>
+	<stop  offset="0.8876" style="stop-color:#ED683C"/>
+	<stop  offset="1" style="stop-color:#E93E3A"/>
+</linearGradient>
+<rect x="381.7" y="105.7" fill="url(#SVGID_1_)" width="14.4" height="223.9"/>
+<linearGradient id="SVGID_2_" gradientUnits="userSpaceOnUse" x1="29.1493" y1="217.6573" x2="43.5" y2="217.6573">
+	<stop  offset="0" style="stop-color:#FFF33B"/>
+	<stop  offset="5.948725e-002" style="stop-color:#FFE029"/>
+	<stop  offset="0.1303" style="stop-color:#FFD218"/>
+	<stop  offset="0.2032" style="stop-color:#FEC90F"/>
+	<stop  offset="0.2809" style="stop-color:#FDC70C"/>
+	<stop  offset="0.6685" style="stop-color:#F3903F"/>
+	<stop  offset="0.8876" style="stop-color:#ED683C"/>
+	<stop  offset="1" style="stop-color:#E93E3A"/>
+</linearGradient>
+<rect x="29.1" y="105.7" fill="url(#SVGID_2_)" width="14.4" height="223.9"/>
+<rect x="161.5" y="105.7" fill="#F4EEC4" width="102.1" height="223.9"/>
+<line fill="none" stroke="#ED1C24" stroke-width="4" stroke-miterlimit="10" x1="212.6" y1="105.7" x2="212.6" y2="329.6"/>
+<line fill="none" stroke="#000000" stroke-width="4" stroke-miterlimit="10" x1="36.3" y1="117.3" x2="36.3" y2="40.7"/>
+<line fill="none" stroke="#000000" stroke-width="4" stroke-miterlimit="10" x1="388.9" y1="117.3" x2="388.9" y2="41.3"/>
+<g id="g3409" transform="matrix(1.407705,0,0,1.058934,-241.018,236.7356)">
+	<path id="path3385" sodipodi:nodetypes="cc" fill="none" stroke="#010101" stroke-width="4" d="M282-183.1
+		c33.6,0,31.2-0.2,31.2-0.2"/>
+	<path id="path3403" fill="none" stroke="#010101" stroke-width="4" d="M337.9-182.5c33.6,0,33.6,0,33.6,0l0,0"/>
+	<path id="path3401" sodipodi:nodetypes="cccccccc" fill="none" stroke="#010101" stroke-width="4" d="M338.3-182l-2.8-9l-2.8,16
+		l-5.5-16.4l-3.2,15.4l-4.5-14.3l-3.2,14.8c0,0-2.6-6-3.4-8.3"/>
+</g>
+<line fill="none" stroke="#010101" stroke-width="4" x1="282" y1="43.5" x2="388.9" y2="43.5"/>
+<line fill="none" stroke="#010101" stroke-width="4" x1="156" y1="42.8" x2="36.3" y2="42.8"/>
+<rect x="168.7" y="173.3" fill="none" width="26" height="22.7"/>
+<text transform="matrix(1 0 0 1 168.6665 184.7337)" font-family="'Tahoma'" font-size="15">Li</text>
+<text transform="matrix(0.583 0 0 0.583 179.5576 179.7386)" font-family="'Tahoma'" font-size="15">+</text>
+<rect x="181.7" y="214" fill="none" width="26" height="22.7"/>
+<text transform="matrix(1 0 0 1 181.6665 225.4004)" font-family="'Tahoma'" font-size="15">Li</text>
+<text transform="matrix(0.583 0 0 0.583 192.5576 220.4053)" font-family="'Tahoma'" font-size="15">+</text>
+<rect x="228.7" y="157.3" fill="none" width="26" height="22.7"/>
+<text transform="matrix(1 0 0 1 228.6665 168.7337)" font-family="'Tahoma'" font-size="15">Li</text>
+<text transform="matrix(0.583 0 0 0.583 239.5576 163.7386)" font-family="'Tahoma'" font-size="15">+</text>
+<rect x="204.2" y="255.3" fill="none" width="26" height="22.7"/>
+<text transform="matrix(1 0 0 1 204.2115 266.7337)" font-family="'Tahoma'" font-size="15">Li</text>
+<text transform="matrix(0.583 0 0 0.583 215.1026 261.7386)" font-family="'Tahoma'" font-size="15">+</text>
+<g>
+	<g>
+		<line fill="none" stroke="#000000" stroke-width="2" stroke-miterlimit="10" x1="252" y1="164" x2="271.4" y2="164"/>
+		<g>
+			<polygon points="282,164 267.1,170.1 270.6,164 267.1,157.9 			"/>
+		</g>
+	</g>
+</g>
+<g>
+	<g>
+		<line fill="none" stroke="#000000" stroke-width="2" stroke-miterlimit="10" x1="189.2" y1="180" x2="208.6" y2="180"/>
+		<g>
+			<polygon points="219.2,180 204.3,186.1 207.8,180 204.3,173.9 			"/>
+		</g>
+	</g>
+</g>
+<g>
+	<g>
+		<line fill="none" stroke="#000000" stroke-width="2" stroke-miterlimit="10" x1="207.7" y1="221.3" x2="227.1" y2="221.3"/>
+		<g>
+			<polygon points="237.6,221.3 222.7,227.4 226.3,221.3 222.7,215.2 			"/>
+		</g>
+	</g>
+</g>
+<g>
+	<g>
+		<line fill="none" stroke="#000000" stroke-width="2" stroke-miterlimit="10" x1="226.7" y1="262.7" x2="246.1" y2="262.7"/>
+		<g>
+			<polygon points="256.7,262.7 241.7,268.8 245.3,262.7 241.7,256.6 			"/>
+		</g>
+	</g>
+</g>
+<rect x="52" y="46.7" fill="none" width="40" height="26"/>
+<text transform="matrix(1 0 0 1 52 58.0667)" font-family="'Tahoma'" font-size="15">e</text>
+<text transform="matrix(0.583 0 0 0.583 59.8955 53.0716)" font-family="'Tahoma'" font-size="15">-</text>
+<rect x="320.7" y="46.7" fill="none" width="40" height="26"/>
+<text transform="matrix(1 0 0 1 320.6667 58.0667)" font-family="'Tahoma'" font-size="15">e</text>
+<text transform="matrix(0.583 0 0 0.583 328.5622 53.0716)" font-family="'Tahoma'" font-size="15">-</text>
+<g>
+	<g>
+		<line fill="none" stroke="#000000" stroke-width="2" stroke-miterlimit="10" x1="72" y1="54.4" x2="91.4" y2="54.4"/>
+		<g>
+			<polygon points="102,54.4 87.1,60.5 90.6,54.4 87.1,48.3 			"/>
+		</g>
+	</g>
+</g>
+<g>
+	<g>
+		<line fill="none" stroke="#000000" stroke-width="2" stroke-miterlimit="10" x1="340.7" y1="54.4" x2="360.1" y2="54.4"/>
+		<g>
+			<polygon points="370.6,54.4 355.7,60.5 359.3,54.4 355.7,48.3 			"/>
+		</g>
+	</g>
+</g>
+<g>
+	<g>
+		<line fill="none" stroke="#000000" stroke-width="2" stroke-miterlimit="10" x1="48.8" y1="99.7" x2="48.8" y2="80.3"/>
+		<g>
+			<polygon points="48.8,69.7 54.9,84.6 48.8,81.1 42.7,84.6 			"/>
+		</g>
+	</g>
+</g>
+<g>
+	<g>
+		<line fill="none" stroke="#000000" stroke-width="2" stroke-miterlimit="10" x1="373.3" y1="67" x2="373.3" y2="86.4"/>
+		<g>
+			<polygon points="373.3,97 367.2,82.1 373.3,85.6 379.4,82.1 			"/>
+		</g>
+	</g>
+</g>
+<rect x="189.3" y="12" fill="none" width="46.7" height="28.7"/>
+<text transform="matrix(1 0 0 1 196.7136 23.4417)" font-family="'Tahoma'" font-size="15">Load</text>
+<rect x="55" y="214" fill="none" width="82.3" height="28.7"/>
+<text transform="matrix(1 0 0 1 61.7816 225.4001)" font-family="'Tahoma'" font-size="15">Anode (Li)</text>
+<rect x="285.3" y="214" fill="none" width="82.3" height="28.7"/>
+<text transform="matrix(1 0 0 1 299.1284 225.4001)" font-family="'Tahoma'" font-size="15">Cathode</text>
+<rect x="385" y="122" fill="none" width="50" height="35.3"/>
+<text transform="matrix(1 0 0 1 384.9973 133.4001)" font-family="'Tahoma'" font-size="15">B</text>
+<rect x="32.7" y="128.7" fill="none" width="50" height="35.3"/>
+<text transform="matrix(1 0 0 1 32.6668 140.0667)" font-family="'Tahoma'" font-size="15">A</text>
+<rect x="155.3" y="87" fill="none" width="114.7" height="25.3"/>
+<text transform="matrix(1 0 0 1 180.4685 98.3882)" fill="#ED1C24" font-family="'Tahoma'" font-size="15">Separator</text>
+<rect x="161.3" y="128.7" fill="none" width="102.7" height="32.7"/>
+<text transform="matrix(1 0 0 1 178.0811 140.0664)" font-family="'Tahoma'" font-size="15">Electrolyte</text>
+<rect x="29" y="335.2" fill="none" width="340.3" height="14.8"/>
+<text transform="matrix(1 0 0 1 29.0147 345.0802)" font-family="'Tahoma'" font-size="13">A/B: Current collectors; negative (A), positive (B)</text>
+</svg>
