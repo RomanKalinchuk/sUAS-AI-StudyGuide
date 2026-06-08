@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Git Workflow
+
+**Never run `git push`.** The user pushes manually. Only commit locally.
+
 ## Hosting
 
 This is a fully static site deployed to GitHub Pages via `.github/workflows/deploy.yml`.
