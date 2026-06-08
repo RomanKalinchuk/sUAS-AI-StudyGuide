@@ -90,7 +90,7 @@ export default `
 
     <!-- Image: RQ-11 Raven -->
     <figure class="my-6">
-        <img src="images/m1_raven_uav.jpg" alt="U.S. Army Corporal assembling an RQ-11 Raven UAV in Iraq" class="rounded-lg w-full object-cover" style="max-height:400px;">
+        <img src="images/m1_raven_uav.jpg" alt="U.S. Army Corporal assembling an RQ-11 Raven UAV in Iraq" class="rounded-lg w-full object-cover" style="height:400px;">
         <figcaption class="text-gray-400 text-sm text-center mt-2">A U.S. Army soldier assembles an AeroVironment RQ-11 Raven — the Army's standard Group 1 hand-launched ISR sUAS, weighing 4.2 lbs and providing 60–90 min endurance. Source: <a href="https://commons.wikimedia.org/wiki/File:Raven_UAV.jpg" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">Wikimedia Commons</a> (U.S. Air Force, public domain)</figcaption>
     </figure>
 
@@ -173,7 +173,7 @@ export default `
 
     <!-- Image: RQ-28A -->
     <figure class="my-6">
-        <img src="images/m1_rq28a_drone.jpg" alt="U.S. Army RQ-28A quadcopter drone during testing at Fort Benning" class="rounded-lg w-full object-cover" style="max-height:380px;">
+        <img src="images/m1_rq28a_drone.jpg" alt="U.S. Army RQ-28A quadcopter drone during testing at Fort Benning" class="rounded-lg w-full">
         <figcaption class="text-gray-400 text-sm text-center mt-2">The Army RQ-28A (Skydio X2D militarized) — the Army's first program-of-record quadcopter for Short Range Reconnaissance (SRR). 22,000+ units fielded by 2024. Source: <a href="https://www.dvidshub.net/image/7660923/rq-28a" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">DVIDS</a> (U.S. Army, public domain)</figcaption>
     </figure>
 
@@ -487,7 +487,7 @@ export default `
 
     <!-- Image: Black Hornet -->
     <figure class="my-6">
-        <img src="images/m1_black_hornet.jpg" alt="South Carolina Army National Guard soldiers training with Black Hornet Nano UAV" class="rounded-lg w-full object-cover" style="max-height:380px;">
+        <img src="images/m1_black_hornet.jpg" alt="South Carolina Army National Guard soldiers training with Black Hornet Nano UAV" class="rounded-lg w-full">
         <figcaption class="text-gray-400 text-sm text-center mt-2">S.C. Army National Guard soldiers train with the Teledyne FLIR Black Hornet 3 Nano UAV — a 33g pocket-sized ISR drone with 25 min endurance and EO/IR cameras, fielded under the Army Soldier-Borne Sensor program. Source: <a href="https://www.dvidshub.net/image/8583524" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">DVIDS</a> (U.S. Army, public domain)</figcaption>
     </figure>
 
@@ -585,7 +585,7 @@ export default `
 
     <!-- Image: sUAS Training -->
     <figure class="my-6">
-        <img src="images/m1_suas_training.jpg" alt="Air Force Tech Sgt piloting a small UAS during training" class="rounded-lg w-full object-cover" style="max-height:380px;">
+        <img src="images/m1_suas_training.jpg" alt="Air Force Tech Sgt piloting a small UAS during training" class="rounded-lg w-full">
         <figcaption class="text-gray-400 text-sm text-center mt-2">Tech. Sgt. Sean Carnes, Air Force Public Affairs Agency sUAS program manager, flying a small unmanned aircraft system during currency training at Joint Base San Antonio, October 2024. Source: <a href="https://www.dvidshub.net/image/8718527" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">DVIDS</a> (U.S. Air Force, public domain)</figcaption>
     </figure>
 

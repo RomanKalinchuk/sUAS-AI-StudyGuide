@@ -632,7 +632,7 @@ Augmented PN (APN): a_cmd = N*V_c*lambda_dot + (N/2)*a_target_perp
     <p>Loitering munitions (LMs) — also called "kamikaze drones" or "suicide drones" — combine ISR (Intelligence, Surveillance, Reconnaissance) and precision strike in a single platform. They loiter over the target area using an EO/IR sensor to find and track targets, and then dive to engage. The operator retains abort capability right up to impact in MITL systems.</p>
 
     <figure class="my-6">
-        <img src="images/m14_switchblade300.jpg" alt="AeroVironment Switchblade 300 in flight during U.S. Marine Corps exercise" class="rounded-lg w-full object-cover" style="max-height:420px;">
+        <img src="images/m14_switchblade300.jpg" alt="AeroVironment Switchblade 300 in flight during U.S. Marine Corps exercise" class="rounded-lg w-full object-cover" style="height:420px;">
         <figcaption class="text-gray-400 text-sm text-center mt-2">Switchblade 300 in flight during 1st ANGLICO USMC exercise, 2020. 3.7 lb munition with EO/IR sensor, 20+ min endurance, 30 km range. Source: <a href="https://commons.wikimedia.org/wiki/File:Switchblade_300_in_flight_(200902-M-EU630-1102).jpg" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">U.S. Marine Corps / Wikimedia Commons (Public Domain)</a></figcaption>
     </figure>
 
@@ -695,7 +695,7 @@ Augmented PN (APN): a_cmd = N*V_c*lambda_dot + (N/2)*a_target_perp
     </div>
 
     <figure class="my-6">
-        <img src="images/m14_switchblade600.jpg" alt="Switchblade 600 LASSO system with U.S. Army soldiers" class="rounded-lg w-full object-cover" style="max-height:480px;">
+        <img src="images/m14_switchblade600.jpg" alt="Switchblade 600 LASSO system with U.S. Army soldiers" class="rounded-lg w-full object-cover" style="height:480px;">
         <figcaption class="text-gray-400 text-sm text-center mt-2">Switchblade 600 (LASSO — Low Altitude Stalking and Strike Ordnance) with U.S. Army soldiers. The Block 2 adds M-code GPS, improved comms, secondary payload bay, and automated target recognition over the original. Source: <a href="https://commons.wikimedia.org/wiki/File:Low_Altitude_Stalking_and_Strike_Ordnance_(LASSO)_(Switchblade_600).jpg" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">Kevin Sterling Payne / U.S. Army (Public Domain)</a></figcaption>
     </figure>
 
