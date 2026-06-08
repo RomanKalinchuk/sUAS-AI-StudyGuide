@@ -570,7 +570,7 @@ def cloud_callback(msg):
     </div>
 
     <figure class="my-6">
-        <img src="images/m12_fastlio2_system.png" alt="FAST-LIO2 system overview diagram showing iEKF + ikd-Tree architecture" class="rounded-lg w-full">
+        <img src="images/m12_fastlio2_system.png" alt="FAST-LIO2 system overview diagram showing iEKF + ikd-Tree architecture" class="rounded-lg w-full bg-white p-3 object-contain">
         <figcaption class="text-gray-400 text-sm text-center mt-2">FAST-LIO2 system overview: iterated Extended Kalman Filter fusing LiDAR and IMU measurements with the incremental ikd-Tree map structure. Source: <a href="https://arxiv.org/abs/2107.06829" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">arXiv:2107.06829</a></figcaption>
     </figure>
 
@@ -769,7 +769,7 @@ o3d.io.write_triangle_mesh("reconstruction.ply", mesh)</code></pre>
     <h3>12.7 3D Gaussian Splatting &amp; Neural Radiance Fields for Mapping</h3>
 
     <figure class="my-6">
-        <img src="images/m12_3dgs_teaser.png" alt="3D Gaussian Splatting reconstruction teaser showing photorealistic scene rendering from discrete Gaussian primitives" class="rounded-lg w-full">
+        <img src="images/m12_3dgs_teaser.png" alt="3D Gaussian Splatting reconstruction teaser showing photorealistic scene rendering from discrete Gaussian primitives" class="rounded-lg w-full object-contain bg-black">
         <figcaption class="text-gray-400 text-sm text-center mt-2">3D Gaussian Splatting (3DGS) represents a scene as millions of semi-transparent 3D Gaussians, enabling real-time photorealistic rendering without neural network inference at render time. Source: <a href="https://github.com/graphdeco-inria/gaussian-splatting" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">graphdeco-inria/gaussian-splatting (INRIA / SIGGRAPH 2023)</a></figcaption>
     </figure>
 

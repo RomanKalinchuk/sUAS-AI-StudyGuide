@@ -308,7 +308,7 @@ export default `
     </div>
 
     <figure class="my-6">
-        <img src="images/m5_quadrotor_pitch.png" alt="Quadrotor pitch maneuver showing differential thrust between front and rear motor pairs" class="rounded-lg w-full max-w-2xl mx-auto">
+        <img src="images/m5_quadrotor_pitch.png" alt="Quadrotor pitch maneuver showing differential thrust between front and rear motor pairs" class="rounded-lg max-w-sm w-full mx-auto block">
         <figcaption class="text-gray-400 text-sm text-center mt-2">Pitch maneuver: rear motors increase thrust, front motors decrease by equal amount. The rate controller commands this differential; the mixer translates torque commands into per-motor values. Source: <a href="https://commons.wikimedia.org/wiki/File:Quadrotorpitch.svg" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">Purpy Pupple / Wikimedia Commons (CC BY-SA 3.0)</a></figcaption>
     </figure>
 
@@ -463,7 +463,7 @@ export default `
     </div>
 
     <figure class="my-6">
-        <img src="images/m5_quadrotor_hover.png" alt="Quadrotor hover diagram showing equal thrust on all four motors" class="rounded-lg w-full max-w-2xl mx-auto">
+        <img src="images/m5_quadrotor_hover.png" alt="Quadrotor hover diagram showing equal thrust on all four motors" class="rounded-lg max-w-sm w-full mx-auto block">
         <figcaption class="text-gray-400 text-sm text-center mt-2">Hover condition: all four motors produce equal thrust, net torques cancel (CW vs CCW motor pairs). The altitude controller holds vertical velocity at zero by adjusting total thrust. Source: <a href="https://commons.wikimedia.org/wiki/File:Quadrotorhover.svg" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">Purpy Pupple / Wikimedia Commons (CC BY-SA 3.0)</a></figcaption>
     </figure>
 
