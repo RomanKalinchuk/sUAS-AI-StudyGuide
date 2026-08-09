@@ -974,6 +974,9 @@ ros2 bag play /mnt/nvme/flights/20260601_143022 --rate 2.0 \
 
     <h3>8.12 Bandwidth Budget Calculator</h3>
     <p>Use this calculator to determine the required internal data bandwidth for a given sensor configuration. Results indicate which physical interface is required between the sensor layer and the companion computer. <em>Note: raw bandwidth is the CSI-2/USB load; compressed bandwidth is what flows over an RF downlink.</em></p>
+    <div class="bg-slate-900 p-3 rounded border-l-4 border-sky-500 mb-4">
+        <p class="text-slate-400 text-xs"><strong class="text-sky-400">How the two figures are derived — and why they use different pixel formats.</strong> The <em>raw</em> figure models what the image sensor actually pushes down the CSI-2 link: a Bayer mosaic at <strong class="text-slate-200">one sample per pixel</strong> at the selected bit depth (not three — demosaicing to RGB happens downstream in the ISP). The <em>compressed</em> figure models the encoder, which consumes demosaiced YUV420 at an average of 12 bits/pixel and then applies the codec ratio. Conflating these is a common sizing error that overstates CSI-2 load by 3× and sends engineers shopping for interfaces they do not need.</p>
+    </div>
 
     <div class="interactive-panel">
         <h4 class="mt-0 border-none text-white mb-6">Drone Sensor Bandwidth Calculator</h4>

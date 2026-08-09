@@ -93,8 +93,28 @@ window.loadModule = function (id) {
     if (id === 'm17_workflow') updateWorkflow(null, 1);
 
     if (window.Prism) setTimeout(() => Prism.highlightAll(), 50);
+    renderMath(container);
     updateProgress();
 };
+
+// KaTeX loads with `defer`, so it may not be ready for the first module render.
+// Retry briefly rather than silently leaving raw TeX on screen.
+function renderMath(container, attempt = 0) {
+    if (typeof window.renderMathInElement !== 'function') {
+        if (attempt < 20) setTimeout(() => renderMath(container, attempt + 1), 100);
+        return;
+    }
+    window.renderMathInElement(container, {
+        // Only \( \) and \[ \] — never bare $, which would eat dollar amounts
+        // like "$249 ... $3,499" that appear throughout the hardware modules.
+        delimiters: [
+            { left: '\\(', right: '\\)', display: false },
+            { left: '\\[', right: '\\]', display: true }
+        ],
+        ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+        throwOnError: false
+    });
+}
 
 window.updateProgress = function () {
     const activeId = document.querySelector('.nav-item.active')?.id.replace('nav-', '');

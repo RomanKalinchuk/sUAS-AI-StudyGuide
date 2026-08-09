@@ -7,10 +7,17 @@ export function calcDataBandwidth() {
     const compress   = parseInt(document.getElementById('bw-compression').value);
     const imuRate    = parseInt(document.getElementById('bw-imu').value);
 
-    // Raw bandwidth: cameras × width × height × 3 channels × bit-depth × fps (bits/sec)
-    const rawBps   = cameras * w * h * 3 * bitdepth * fps;
-    // Compressed video after codec
-    const videoBps = rawBps / compress;
+    // Raw sensor bandwidth on the CSI-2 / USB link.
+    // An image sensor emits a Bayer mosaic: ONE sample per pixel at the selected
+    // bit depth, not three. (Cross-check: 4K@60 RAW10 = 3840*2160*10*60 = 4.98 Gbps,
+    // which is why a 4-lane D-PHY link at 10 Gbps comfortably carries it.)
+    const rawBps = cameras * w * h * bitdepth * fps;
+
+    // The video encoder consumes demosaiced YUV420, which averages 12 bits/pixel
+    // at 8-bit component depth (Y full-res + U,V at quarter resolution).
+    const YUV420_BITS_PER_PIXEL = 12;
+    const encoderInputBps = cameras * w * h * YUV420_BITS_PER_PIXEL * fps;
+    const videoBps = encoderInputBps / compress;
     // IMU: 6 axes (3 accel + 3 gyro) × 4 bytes × 8 bits × sample rate
     const imuBps   = 6 * 4 * 8 * imuRate;
     // MAVLink telemetry: nominal ~50 kbps

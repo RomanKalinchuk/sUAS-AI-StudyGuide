@@ -1,7 +1,7 @@
 export default `
 <div class="fade-in">
     <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 5</span>
-    <div class="inline-flex items-center gap-2 bg-amber-900/30 border border-amber-700/50 rounded px-3 py-1 mb-3 text-xs font-mono text-amber-400">ArduPilot 4.5/4.6 · PX4 v1.14/v1.15 · ChibiOS / NuttX RTOS</div>
+    <div class="inline-flex items-center gap-2 bg-amber-900/30 border border-amber-700/50 rounded px-3 py-1 mb-3 text-xs font-mono text-amber-400">ArduPilot 4.7.0 (Jul 2026) · PX4 v1.16 · ChibiOS / NuttX RTOS</div>
     <h2>Flight Controller Architecture, PID Control &amp; Flight Modes</h2>
     <p>The flight controller is the drone's brainstem — a dedicated hard-real-time embedded computer that runs nested PID control loops at 400–1000 Hz and must never miss a scheduling deadline. This module dissects the two dominant open-source autopilot stacks (ArduPilot and PX4), the full PID cascade from GPS position to motor PWM, every major flight mode, the failsafe architecture, MAVLink 2 / DDS communication, and the simulation environments used for development and validation.</p>
 
@@ -15,8 +15,8 @@ export default `
             <thead class="bg-slate-700 text-slate-300">
                 <tr>
                     <th class="p-3">Attribute</th>
-                    <th class="p-3 text-sky-400">PX4 v1.15 (Aug 2025)</th>
-                    <th class="p-3 text-amber-400">ArduPilot 4.5/4.6 (2024–2025)</th>
+                    <th class="p-3 text-sky-400">PX4 v1.16 (current stable)</th>
+                    <th class="p-3 text-amber-400">ArduPilot 4.7.0 (21 Jul 2026)</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-700 text-slate-300">
@@ -76,9 +76,9 @@ export default `
                     <td class="p-3">17 ag-spray operators cited ArduPilot logs for FAA ground-risk mitigations 2024–2025; common in academia</td>
                 </tr>
                 <tr class="bg-slate-800/50">
-                    <td class="p-3 font-semibold text-white">New in 2024–2025</td>
-                    <td class="p-3">v1.14: Dynamic control allocation default, new preflight failure reporting. v1.15: Error-State KF, PX4 ROS 2 Interface Library, Zenoh pico, Throw Mode, Gazebo default.</td>
-                    <td class="p-3">4.5 LTS: EKF3 dual-lane switching, long-distance double-precision EKF. 4.6: Blue UAS native mode, ADS-B ID broadcast, improved VTOL transitions.</td>
+                    <td class="p-3 font-semibold text-white">Recent releases</td>
+                    <td class="p-3">v1.14: Dynamic control allocation default. v1.15: Error-State KF, PX4 ROS 2 Interface Library, Zenoh pico, Gazebo default. <strong class="text-white">v1.16:</strong> bidirectional ESC protocols, built-in flight-log encryption, full rover architecture overhaul (dedicated rover firmware, airframe IDs 50000–52000), improved simulation fidelity, new board support (CUAV 7-Nano, MicroAir, BlueRobotics Navigator, 3DR Control Zero H7 OEM Rev G).</td>
+                    <td class="p-3">4.5 LTS: EKF3 dual-lane switching, long-distance double-precision EKF. 4.6: Blue UAS native mode, ADS-B ID broadcast, improved VTOL transitions. <strong class="text-white">4.7.0 (21 Jul 2026):</strong> released across Copter, Rover, and Sub together; broad new board support (TBS LUCID H7 / H7 V3, CORVON743V2, BCubeF745v2), new drivers (TMP119 temperature, lsm6dsv IMU on Navigator, ASM330LHH axis-order fix), and two safety fixes worth noting — terrain failsafe now triggers when a mission terrain altitude cannot be retrieved, and pilot yaw input is correctly ignored during RTL.</td>
                 </tr>
             </tbody>
         </table>
@@ -163,23 +163,23 @@ export default `
 
     <div class="bg-slate-800/60 border border-sky-700/60 rounded-xl p-6 mb-6">
         <h3 class="text-sky-400 font-bold text-lg mb-3">PID Control Law</h3>
-        <p class="text-slate-300 text-sm mb-4">Given an error signal $e(t) = r(t) - y(t)$ where $r$ is the setpoint (reference) and $y$ is the measured output, the PID controller computes a corrective output $u(t)$:</p>
+        <p class="text-slate-300 text-sm mb-4">Given an error signal \\(e(t) = r(t) - y(t)\\) where \\(r\\) is the setpoint (reference) and \\(y\\) is the measured output, the PID controller computes a corrective output \\(u(t)\\):</p>
         <div class="bg-slate-900 rounded-lg p-4 font-mono text-center text-white text-base mb-4">
-            $u(t) = K_p \, e(t) \;+\; K_i \int_0^t e(\tau)\,d\tau \;+\; K_d \,\dfrac{de(t)}{dt}$
+            \\(u(t) = K_p \\, e(t) \\;+\\; K_i \\int_0^t e(\\tau)\\,d\\tau \\;+\\; K_d \\,\\dfrac{de(t)}{dt}\\)
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div class="bg-slate-900 p-4 rounded border-l-4 border-sky-500">
-                <strong class="text-sky-400 block mb-2">Proportional — $K_p \cdot e(t)$</strong>
-                <p class="text-slate-300">Output proportional to current error. Higher $K_p$ = faster response but more overshoot. <span class="text-amber-400">Too high: oscillation.</span> Too low: sluggish, won't hold attitude in wind.</p>
-                <p class="text-slate-400 text-xs mt-2">In rate loop: $K_p$ controls how aggressively the FC reacts to a rate error vs the gyro setpoint.</p>
+                <strong class="text-sky-400 block mb-2">Proportional — \\(K_p \\cdot e(t)\\)</strong>
+                <p class="text-slate-300">Output proportional to current error. Higher \\(K_p\\) = faster response but more overshoot. <span class="text-amber-400">Too high: oscillation.</span> Too low: sluggish, won't hold attitude in wind.</p>
+                <p class="text-slate-400 text-xs mt-2">In rate loop: \\(K_p\\) controls how aggressively the FC reacts to a rate error vs the gyro setpoint.</p>
             </div>
             <div class="bg-slate-900 p-4 rounded border-l-4 border-emerald-500">
-                <strong class="text-emerald-400 block mb-2">Integral — $K_i \int e \, dt$</strong>
+                <strong class="text-emerald-400 block mb-2">Integral — \\(K_i \\int e \\, dt\\)</strong>
                 <p class="text-slate-300">Accumulates past errors to eliminate steady-state offset. Essential for compensating for wind drift, motor imbalance, and CG offsets. <span class="text-amber-400">Too high: I-term windup → slow oscillation after disturbance.</span></p>
                 <p class="text-slate-400 text-xs mt-2">ArduPilot and PX4 both implement anti-windup clamping: the integrator is limited to ±IMAX to prevent saturation during aggressive maneuvers.</p>
             </div>
             <div class="bg-slate-900 p-4 rounded border-l-4 border-violet-500">
-                <strong class="text-violet-400 block mb-2">Derivative — $K_d \frac{de}{dt}$</strong>
+                <strong class="text-violet-400 block mb-2">Derivative — \\(K_d \\frac{de}{dt}\\)</strong>
                 <p class="text-slate-300">Reacts to rate of change of error — damps overshoots. Acts as a "predictor." <span class="text-amber-400">Too high: amplifies sensor noise → high-frequency oscillation + motor heat.</span></p>
                 <p class="text-slate-400 text-xs mt-2">Always applied through a low-pass filter (ArduPilot: ATC_RAT_RLL_FLTD ~20 Hz; PX4: IMU_DGYRO_CUTOFF). The filter trades noise rejection for derivative phase lag.</p>
             </div>
@@ -193,7 +193,7 @@ export default `
 
     <div class="bg-slate-800/60 border border-amber-700/60 rounded-xl p-6 mb-6">
         <h3 class="text-amber-400 font-bold text-lg mb-3">Discrete-Time PID — What Actually Runs on the Microcontroller</h3>
-        <p class="text-slate-300 text-sm mb-3">The continuous-time PID is discretized using the Tustin (bilinear) method for the derivative term and backward Euler for the integrator, at sample period $T_s = 1/400\,\text{Hz} = 2.5\,\text{ms}$:</p>
+        <p class="text-slate-300 text-sm mb-3">The continuous-time PID is discretized using the Tustin (bilinear) method for the derivative term and backward Euler for the integrator, at sample period \\(T_s = 1/400\\,\\text{Hz} = 2.5\\,\\text{ms}\\):</p>
         <div class="bg-slate-900 rounded-lg p-4 font-mono text-sm text-slate-300 space-y-2">
             <div><span class="text-sky-400">// Proportional:</span>   P = Kp * e[n]</div>
             <div><span class="text-sky-400">// Integral (backward Euler, clamped):</span></div>
@@ -203,7 +203,7 @@ export default `
             <div class="pl-4">D_filt = alpha * D_raw + (1 - alpha) * D_filt_prev;  <span class="text-slate-500">// alpha = 2*pi*fc*Ts / (1 + 2*pi*fc*Ts)</span></div>
             <div><span class="text-sky-400">// Output:</span>   u[n] = P + I_accum + D_filt;</div>
         </div>
-        <p class="text-slate-400 text-xs mt-3">ArduPilot applies the derivative filter only on the D-term (not on the error signal itself) to avoid derivative kick on step setpoint changes. The LPF cutoff frequency (ATC_RAT_RLL_FLTD, default 20 Hz) must be tuned along with $K_d$.</p>
+        <p class="text-slate-400 text-xs mt-3">ArduPilot applies the derivative filter only on the D-term (not on the error signal itself) to avoid derivative kick on step setpoint changes. The LPF cutoff frequency (ATC_RAT_RLL_FLTD, default 20 Hz) must be tuned along with \\(K_d\\).</p>
     </div>
 
     <!-- ============================================================ -->
@@ -258,9 +258,9 @@ export default `
                 </div>
             </div>
             <div class="grid grid-cols-3 gap-3 text-xs font-mono text-slate-300">
-                <div><span class="text-slate-500">In:</span> Attitude quaternion error $q_{err} = q_{target}^{-1} \otimes q_{est}$</div>
+                <div><span class="text-slate-500">In:</span> Attitude quaternion error \\(q_{err} = q_{target}^{-1} \\otimes q_{est}\\)</div>
                 <div><span class="text-slate-500">Logic:</span> P-only on quaternion error (avoids gimbal lock inherent in Euler angles). No I/D — rate loop handles dynamics.</div>
-                <div><span class="text-slate-500">Out:</span> Angular rate setpoint $\boldsymbol{\omega}_{sp}$ (rad/s)</div>
+                <div><span class="text-slate-500">Out:</span> Angular rate setpoint \\(\\boldsymbol{\\omega}_{sp}\\) (rad/s)</div>
             </div>
             <div class="text-xs text-slate-500 mt-1">ArduPilot: ATC_ANG_RLL/PIT/YAW_P (~4.5) &nbsp;|&nbsp; PX4: MC_ROLL_P, MC_PITCH_P, MC_YAW_P</div>
             <div class="text-xs text-slate-400 mt-1">Runs at 400 Hz (ArduPilot) / 250 Hz (PX4) because attitude dynamics have bandwidth ~10–20 Hz. Nyquist requires &gt;40 Hz; 250–400 Hz gives 12–20× margin for stability.</div>
@@ -536,7 +536,7 @@ export default `
         <h3 class="text-sky-400 font-bold text-lg mb-3">ArduPilot AUTOTUNE Process</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div class="space-y-3 text-slate-300">
-                <p>AUTOTUNE (flight mode 17) performs a series of controlled <em>twitches</em> in each axis (roll, pitch, yaw independently) while holding altitude in AltHold or Loiter. It measures the step response and uses a Ziegler-Nichols-inspired iterative algorithm to find optimal $K_p$, $K_i$, $K_d$ values.</p>
+                <p>AUTOTUNE (flight mode 17) performs a series of controlled <em>twitches</em> in each axis (roll, pitch, yaw independently) while holding altitude in AltHold or Loiter. It measures the step response and uses a Ziegler-Nichols-inspired iterative algorithm to find optimal \\(K_p\\), \\(K_i\\), \\(K_d\\) values.</p>
                 <div class="bg-slate-900 rounded p-3 font-mono text-xs">
                     <div class="text-slate-400 mb-1">Procedure:</div>
                     <div>1. Arm + take off in AltHold at ~5 m</div>

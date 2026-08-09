@@ -122,7 +122,7 @@ export default `
     </div>
 
     <!-- Stereo camera comparison table -->
-    <h4 class="text-white font-bold mt-6 mb-3">Stereo Camera Comparison (2025)</h4>
+    <h4 class="text-white font-bold mt-6 mb-3">Stereo Camera Comparison (2026)</h4>
     <div class="overflow-x-auto my-6">
         <table class="w-full text-sm text-left">
             <thead class="bg-slate-700 text-slate-300">
@@ -372,7 +372,7 @@ finally:
     <h3>12.3 LiDAR for Drones</h3>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-4">
-        <h4 class="mt-0 border-none text-white text-sm">LiDAR Sensor Comparison Matrix (2025)</h4>
+        <h4 class="mt-0 border-none text-white text-sm">LiDAR Sensor Comparison Matrix (2026)</h4>
         <div class="overflow-x-auto">
             <table class="w-full text-xs text-slate-300 mt-2">
                 <thead>
@@ -483,7 +483,7 @@ finally:
         <h4 class="mt-0 border-none text-amber-400 text-sm">Livox Mid-360: Non-Repetitive Scan Pattern &amp; Mid-360S (2024)</h4>
         <p class="text-slate-300 text-sm">Unlike conventional spinning LiDARs that trace the same circle each revolution (creating periodic blind spots between beams), the Livox Mid-360 uses a non-repetitive Lissajous scan pattern. Each 100 ms integration window produces a different point distribution. After 1 second, point cloud density approaches full coverage of the 360°×59° FOV — the opposite of spinning LiDAR behavior, rewarding dwell time with density rather than speed.</p>
         <p class="text-slate-300 text-sm mt-2"><strong>Mid-360S (2024 successor):</strong> Updated hardware with improved range precision (≤2 cm at 10 m) and enhanced reliability. Same mechanical dimensions (65×65×60 mm) and IP67 rating. Drop-in replacement in existing drone frames. The ROS 2 driver publishes <code>sensor_msgs/PointCloud2</code> on <code>/livox/lidar</code>; time-stamped per-point data allows motion de-skewing in FAST-LIO2.</p>
-        <p class="text-slate-300 text-sm mt-2"><strong>Why it dominates drone SLAM:</strong> 265 g weight, 6.5 W average power, 360° horizontal coverage, and native support in FAST-LIO2 for non-repetitive scan patterns make it the de facto standard for sub-2 kg autonomous drone LiDAR SLAM builds in 2024–2025.</p>
+        <p class="text-slate-300 text-sm mt-2"><strong>Why it dominates drone SLAM:</strong> 265 g weight, 6.5 W average power, 360° horizontal coverage, and native support in FAST-LIO2 for non-repetitive scan patterns make it the de facto standard for sub-2 kg autonomous drone LiDAR SLAM builds through 2026.</p>
     </div>
 
     <!-- YouTube: FAST-LIO2 on UAV -->
@@ -531,7 +531,7 @@ def cloud_callback(msg):
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-4">
         <h4 class="mt-0 border-none text-sky-400">LiDAR-Inertial SLAM: FAST-LIO2, LIO-SAM &amp; KISS-ICP</h4>
-        <p class="text-slate-300 text-sm">When GPS is denied or unreliable (indoor, urban canyon, jamming), LiDAR-inertial SLAM provides drift-resistant odometry by tightly fusing raw LiDAR scans with IMU preintegration. Three dominant systems for drone use in 2024–2025:</p>
+        <p class="text-slate-300 text-sm">When GPS is denied or unreliable (indoor, urban canyon, jamming), LiDAR-inertial SLAM provides drift-resistant odometry by tightly fusing raw LiDAR scans with IMU preintegration. Three dominant systems for drone use as of 2026:</p>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3 mb-4">
             <div>
                 <p class="text-slate-400 text-xs font-semibold mb-1">FAST-LIO2 (HKU MARS Lab)</p>
@@ -774,7 +774,7 @@ o3d.io.write_triangle_mesh("reconstruction.ply", mesh)</code></pre>
     </figure>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700 mb-4">
-        <h4 class="mt-0 border-none text-amber-400 text-sm">3D Gaussian Splatting (3DGS) — SIGGRAPH 2023 to Drone SLAM 2024</h4>
+        <h4 class="mt-0 border-none text-amber-400 text-sm">3D Gaussian Splatting (3DGS) — SIGGRAPH 2023 to Drone SLAM 2026</h4>
         <p class="text-slate-300 text-sm"><strong>3DGS</strong> (Kerbl et al., INRIA, SIGGRAPH 2023) represents a scene as an explicit collection of millions of 3D Gaussian primitives. Each Gaussian has position (mean), covariance (orientation + size), opacity, and spherical-harmonic color. Rendering is done via fast differentiable rasterization — no neural network ray-marching at inference time.</p>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
             <div>
@@ -792,6 +792,8 @@ o3d.io.write_triangle_mesh("reconstruction.ply", mesh)</code></pre>
                     <li><strong>Gaussian-LIC (2024):</strong> LiDAR-Inertial-Camera fusion with 3DGS backend — real-time photo-realistic SLAM using Livox LiDAR + IMU + camera.</li>
                     <li><strong>DroneSplat (2024):</strong> Robust 3DGS reconstruction specifically addressing drone imagery challenges (rolling shutter, motion blur, altitude changes).</li>
                     <li><strong>SAFER-Splat (2024):</strong> Control Barrier Functions for safe navigation using online 3DGS maps — real-time obstacle avoidance within a Gaussian Splatting representation.</li>
+                    <li><strong>GS-LIVO / GS-LIVM (ICCV 2025):</strong> Real-time LiDAR-inertial-visual odometry with a Gaussian mapping backend — the line of work that made 3DGS a live SLAM map rather than an offline reconstruction.</li>
+                    <li><strong>Splat-LOAM / LIVE-GS / PINGS (2025–2026):</strong> Gaussian LiDAR odometry and mapping, globally consistent online LIV state estimation, and hybrid point-based implicit maps that unify Gaussian splats with signed-distance fields — the last being significant because a distance field is what a planner actually wants.</li>
                     <li><strong>LiDAR-enhanced 3DGS (2025):</strong> Fuses LiDAR point cloud depth priors into 3DGS optimization — reduces training time and improves geometric accuracy for UAV survey.</li>
                 </ul>
             </div>

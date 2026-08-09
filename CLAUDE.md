@@ -50,6 +50,11 @@ public/
 **CDN dependencies** (loaded in `index.html` — no npm install required):
 - `chart.js@4.4.2` — used by `hwChart.js`
 - `prism.js@1.29.0` + language packs: python, c, cpp, bash, json, yaml — syntax highlighting
+- `katex@0.16.11` + its `auto-render` contrib script — math rendering (loaded with `defer`)
+
+**Math notation** — modules write inline math as `\\(` … `\\)` in the JS source, which yields `\( … \)` in the emitted HTML string. `main.js` calls `renderMath()` after every module load, which invokes `renderMathInElement` with **only** `\(…\)` and `\[…\]` delimiters registered. Bare `$…$` is deliberately NOT a delimiter, because the hardware modules are full of dollar amounts (`~$249`, `$3,499`) that KaTeX would otherwise treat as math. Because KaTeX loads with `defer`, `renderMath()` retries every 100 ms (up to 20 times) until `window.renderMathInElement` exists.
+
+**Escaping LaTeX in template literals** — inside a template literal, `\f`, `\b`, `\r`, `\t`, and `\v` are escape sequences, so writing `\frac` silently produces a formfeed character. **All TeX commands in module sources must use double backslashes** (`\\frac`, `\\partial`, `\\hat`). Only `m5_flightcontrol.js` and `m9_ekf.js` currently contain math.
 
 ## Key Conventions
 

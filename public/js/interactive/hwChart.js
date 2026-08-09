@@ -8,15 +8,21 @@ export function initHardwareChart() {
     Chart.defaults.color = '#94a3b8';
     Chart.defaults.font.family = "'Fira Code', monospace";
 
+    // TOPS figures are vendor peak numbers at INT8 unless noted. They are NOT
+    // directly comparable across architectures — see the caveat in Module 4.
+    // Jetson Orin figures are JetPack 6.2+ "Super" values.
     const data = [
-        { x: 600,  y: 100, r: 25, label: 'Jetson Orin NX',       cat: 'GPU',    color: 'rgba(16, 185, 129, 0.7)' },
-        { x: 2000, y: 275, r: 40, label: 'Jetson AGX Orin 64GB',   cat: 'GPU',    color: 'rgba(16, 185, 129, 0.7)' },
-        { x: 150,  y: 26,  r: 15, label: 'Hailo-8',               cat: 'NPU',    color: 'rgba(168, 85, 247, 0.7)' },
-        { x: 130,  y: 13,  r: 12, label: 'RPi 5 + Hailo-8L',      cat: 'Hybrid', color: 'rgba(236, 72, 153, 0.7)' },
-        { x: 120,  y: 6,   r: 10, label: 'Orange Pi 5 (RK3588)',   cat: 'SoC',    color: 'rgba(245, 158, 11, 0.7)'  },
-        { x: 100,  y: 4,   r: 8,  label: 'Coral Edge TPU',         cat: 'NPU',    color: 'rgba(168, 85, 247, 0.7)' },
-        { x: 450,  y: 15,  r: 15, label: 'Qualcomm RB5',           cat: 'DSP',    color: 'rgba(14, 165, 233, 0.7)'  },
-        { x: 349,  y: 1.4,  r: 7,  label: 'AMD Kria KR260',         cat: 'FPGA',   color: 'rgba(56, 189, 248, 0.7)'  }
+        { x: 249,  y: 67,  r: 20, label: 'Jetson Orin Nano Super 8GB', cat: 'GPU',    watts: '7-25W',  color: 'rgba(16, 185, 129, 0.7)' },
+        { x: 700,  y: 157, r: 28, label: 'Jetson Orin NX Super 16GB',  cat: 'GPU',    watts: '10-40W', color: 'rgba(16, 185, 129, 0.7)' },
+        { x: 2000, y: 275, r: 36, label: 'Jetson AGX Orin 64GB',       cat: 'GPU',    watts: '15-60W', color: 'rgba(16, 185, 129, 0.7)' },
+        { x: 3500, y: 2070, r: 46, label: 'Jetson AGX Thor T5000 (FP4)', cat: 'GPU',  watts: '40-130W', color: 'rgba(52, 211, 153, 0.7)' },
+        { x: 150,  y: 26,  r: 15, label: 'Hailo-8',                    cat: 'NPU',    watts: '2.5W',   color: 'rgba(168, 85, 247, 0.7)' },
+        { x: 250,  y: 40,  r: 17, label: 'Hailo-10H (INT4)',           cat: 'NPU',    watts: '<5W',    color: 'rgba(168, 85, 247, 0.7)' },
+        { x: 130,  y: 13,  r: 12, label: 'RPi 5 + Hailo-8L',           cat: 'Hybrid', watts: '~10W',   color: 'rgba(236, 72, 153, 0.7)' },
+        { x: 120,  y: 6,   r: 10, label: 'Orange Pi 5 (RK3588)',       cat: 'SoC',    watts: '5-10W',  color: 'rgba(245, 158, 11, 0.7)'  },
+        { x: 100,  y: 4,   r: 8,  label: 'Coral Edge TPU',             cat: 'NPU',    watts: '2W',     color: 'rgba(168, 85, 247, 0.7)' },
+        { x: 450,  y: 12,  r: 14, label: 'Qualcomm QCS6490',           cat: 'DSP',    watts: '3-7W',   color: 'rgba(14, 165, 233, 0.7)'  },
+        { x: 349,  y: 1.4, r: 7,  label: 'AMD Kria KR260',             cat: 'FPGA',   watts: '~15W',   color: 'rgba(56, 189, 248, 0.7)'  }
     ];
 
     hwChartInst = new Chart(ctx, {
@@ -61,8 +67,9 @@ export function initHardwareChart() {
                             return [
                                 `Hardware: ${d.label}`,
                                 `Architecture: ${d.cat}`,
-                                `Cost: $${d.x}`,
-                                `Performance: ${d.y} TOPS`
+                                `Cost: ~$${d.x}`,
+                                `Performance: ${d.y} TOPS`,
+                                `Power: ${d.watts}`
                             ];
                         }
                     }

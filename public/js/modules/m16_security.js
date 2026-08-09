@@ -13,7 +13,7 @@ export default `
     <h3>16.1 MAVLink Protocol Security</h3>
     <p>MAVLink is the dominant protocol for communication between the flight controller and ground control station (GCS) or companion computer. By default, <strong>MAVLink has no authentication</strong>. Any device that can transmit on the UART or UDP channel can send valid MAVLink messages, including <code>COMMAND_LONG</code> messages that arm motors, change flight modes, or trigger RTL.</p>
 
-    <h4>MAVLink v2 Packet Signing (HMAC-SHA256)</h4>
+    <h4>MAVLink v2 Packet Signing (keyed SHA-256, 48-bit truncated)</h4>
     <p>MAVLink v2 introduced an optional signing mechanism. When enabled, 13 bytes are appended to each packet: a <strong>link ID</strong> (1 byte, identifies the connection), a <strong>timestamp</strong> (6 bytes, 1/10th milliseconds since epoch, strictly monotonically increasing), and a <strong>signature</strong> (6 bytes — the first 6 bytes of an SHA-256 HMAC over key + header + payload + CRC + link_id + timestamp). The signing key is 32 bytes, shared between the GCS and vehicle. Signing provides <em>authentication</em> but not <em>confidentiality</em> — the payload remains in cleartext.</p>
 
     <div class="insight-box">
@@ -202,7 +202,7 @@ mavproxy.py --master /dev/ttyUSB0 --baud 57600
 
     <!-- ═══════════════════════════════════════════════════════════════ -->
     <h3>16.3 RF Jamming, Detection, and FHSS</h3>
-    <p>RC link jamming transmits high-power broadband noise on the control link frequency (2.4 GHz or 900 MHz), raising the noise floor until the receiver can no longer decode packets. From the drone's perspective, packet loss rises to 100% and the RC failsafe triggers. Jamming events increased dramatically in 2024–2025 in conflict-adjacent airspace.</p>
+    <p>RC link jamming transmits high-power broadband noise on the control link frequency (2.4 GHz or 900 MHz), raising the noise floor until the receiver can no longer decode packets. From the drone's perspective, packet loss rises to 100% and the RC failsafe triggers. Jamming events increased dramatically from 2024 onward in conflict-adjacent airspace, and by 2026 GNSS interference is routinely reported well outside active conflict zones, affecting commercial aviation and civil UAS operations alike.</p>
 
     <h4>ArduPilot RC Failsafe Response</h4>
     <p>When <code>FS_THR_ENABLE</code> is set (default: enabled), ArduPilot detects RC signal loss by monitoring the throttle channel. If it drops below <code>FS_THR_VALUE</code> (default: 975 µs PWM) for more than <code>FS_THR_DELAY</code> seconds (default: 1.0 s), it activates the failsafe action. Options: <code>FS_THR_ENABLE=1</code> → RTL; <code>=2</code> → continue mission if in Auto; <code>=3</code> → Land immediately. For AI/autonomous missions, value 2 is often correct: a jamming event should not abort an in-progress mission.</p>
@@ -491,7 +491,42 @@ ros2 run mavros mavros_node --ros-args --enclave /mavros_node</code></pre>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════ -->
-    <h3>16.8 Counter-UAS Defeat Systems (2024–2025)</h3>
+    <h3>16.8 Counter-UAS Defeat Systems (through 2026)</h3>
+
+    <figure class="my-6">
+        <img src="images/m16_cuas_drone_defender.jpg" alt="U.S. Army soldiers conducting a counter-unmanned aerial system drill with a handheld RF defeat device" class="rounded-lg w-full object-cover" style="height:420px;">
+        <figcaption class="text-gray-400 text-sm text-center mt-2">Soldiers of the 3rd Cavalry Regiment conduct a counter-unmanned aerial system drill with a handheld directional RF defeat device. Systems of this class work by overwhelming the drone's C2 and GNSS receivers within a directional beam — which is precisely why they are ineffective against the fiber-optic-guided aircraft discussed below. Source: <a href="https://commons.wikimedia.org/wiki/File:Brave_Rifles_conduct_counter-unmanned_aerial_system_drill.jpg" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">Wikimedia Commons</a> (U.S. Army, public domain)</figcaption>
+    </figure>
+
+    <div class="bg-slate-800/60 border border-amber-700/60 rounded-xl p-5 mb-6">
+        <h4 class="text-amber-400 font-bold text-base mt-0 mb-3">The 2025–2026 Reversal: When the Target Stops Emitting</h4>
+        <p class="text-slate-300 text-sm mb-3">Nearly every detection modality in §16.7 and every soft-kill method below rests on one assumption: <strong class="text-white">the drone radiates.</strong> RF detection needs an emission to find. RF fingerprinting needs a waveform to classify. Jamming needs a link to disrupt. GPS spoofing needs a receiver that trusts GNSS. Fiber-optic-controlled drones (Module 6, §6.4b) invalidate all four at once — control and video run down a trailed glass fiber, so there is no emission to detect, geolocate, classify, or jam.</p>
+        <p class="text-slate-300 text-sm mb-3">The operational consequence has been observed in Ukraine and, since mid-2026, in other theaters as the technique spreads: RF-based C-UAS installations that performed well against commercial and FPV airframes register nothing at all against fiber-guided ones. This is not a tuning problem or a sensitivity problem. It is a category error in the architecture — the sensor is looking for a signal that does not exist.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div class="bg-slate-900 p-4 rounded border border-slate-700">
+                <strong class="text-emerald-400 block mb-2">What still works against a fiber-guided drone</strong>
+                <ul class="text-slate-300 space-y-1 list-disc list-inside">
+                    <li><strong class="text-white">Radar</strong> — detects the physical object, indifferent to how it is commanded. Small RCS remains the hard part.</li>
+                    <li><strong class="text-white">Acoustic</strong> — propeller signature is unchanged. Short range, but modality-independent.</li>
+                    <li><strong class="text-white">Electro-optical / IR</strong> — the aircraft is still a visible, warm object.</li>
+                    <li><strong class="text-white">High-power microwave (HPM)</strong> — couples energy straight into the airframe's electronics regardless of the control path.</li>
+                    <li><strong class="text-white">Kinetic and net intercept</strong> — unaffected by the link.</li>
+                    <li><strong class="text-white">The fiber itself</strong> — a physical tether is a detectable, cuttable, traceable artifact, and it marks the launch bearing.</li>
+                </ul>
+            </div>
+            <div class="bg-slate-900 p-4 rounded border border-slate-700">
+                <strong class="text-sky-400 block mb-2">Epirus Leonidas — the reference HPM data point</strong>
+                <ul class="text-slate-300 space-y-1 list-disc list-inside">
+                    <li>Solid-state gallium-nitride, software-defined high-power microwave.</li>
+                    <li>Gen II credited with roughly <strong class="text-white">2 km</strong> effective range.</li>
+                    <li>December 2025 live-fire test defeated a <strong class="text-white">fiber-optic-guided FPV drone</strong> — the first public HPM defeat of a fiber-guided target; footage released 13 January 2026.</li>
+                    <li>Wide-beam effect engages <strong class="text-white">multiple targets simultaneously</strong>, making it one of the few economically viable answers to saturation attack — magazine depth is limited by power, not by interceptor count.</li>
+                    <li>2026: Epirus, General Dynamics Land Systems, and Kodiak AI unveiled an uncrewed HPM vehicle for autonomous C-UAS.</li>
+                </ul>
+            </div>
+        </div>
+        <p class="text-slate-400 text-xs mt-3"><strong class="text-slate-200">Design principle for C-UAS architects:</strong> layer detection modalities that fail <em>independently</em>. An installation combining RF, radar, acoustic, and EO/IR degrades gracefully when any single assumption is invalidated; one that fuses four RF-derived features has redundancy on paper and a single point of failure in practice. The same reasoning applies in reverse to the drone designer — see Module 1's discussion of emission control as a survivability property.</p>
+    </div>
     <p>Detection identifies the threat. Defeat is the kinetic or non-kinetic neutralization of it. The threat landscape in 2024–2025 is dominated by low-cost FPV combat drones (sub-$500 one-way attack platforms) requiring cost-effective defeat solutions — traditional $100k+ interceptor missiles are economically unsustainable against $500 targets.</p>
 
     <div class="bg-slate-900 p-4 rounded border-l-4 border-red-500 mb-6">
@@ -582,6 +617,17 @@ ros2 run mavros mavros_node --ros-args --enclave /mavros_node</code></pre>
     <h3>16.10 NDAA Compliance and the Chinese UAS Ban</h3>
     <p>US policy has progressively restricted Chinese-manufactured UAS from federal procurement and use. Understanding the legislative history is critical for defense engineers specifying UAS platforms for US government or DoD programs.</p>
 
+    <div class="bg-slate-800/60 border border-rose-700/60 rounded-xl p-5 mb-6">
+        <h4 class="text-rose-400 font-bold text-base mt-0 mb-3">December 2025: The Restriction Stopped Being Procurement-Only</h4>
+        <p class="text-slate-300 text-sm mb-3">Everything in the table below concerns what federal buyers may <em>purchase</em>. In December 2025 the constraint changed category and now reaches commercial operators and manufacturers who have no federal nexus at all.</p>
+        <ul class="text-slate-300 text-sm space-y-2 list-disc list-inside mb-3">
+            <li><strong class="text-white">NDAA FY2025 §1709</strong> directed the FCC to add DJI and Autel equipment to its Covered List by 22 December 2025 unless a national-security agency determined they posed no undue risk. No such determination was issued.</li>
+            <li><strong class="text-white">21–23 December 2025:</strong> an interagency determination went beyond the statutory mandate. The FCC updated the Covered List to include <strong class="text-white">all foreign-produced UAS and UAS critical components</strong> — a first-of-its-kind category-wide action, not a company-specific one.</li>
+            <li><strong class="text-white">July 2026:</strong> the FCC granted two exceptions — equipment on the DCMA Blue UAS Cleared List, and equipment assembled domestically with at least <strong class="text-white">65% U.S.-produced component value</strong>.</li>
+        </ul>
+        <p class="text-slate-400 text-sm"><strong class="text-slate-200">Why this is a security-module topic and not merely a legal one.</strong> Covered List placement blocks new FCC equipment authorizations, which blocks lawful marketing and import. The practical effect is that supply-chain provenance is now a hard design constraint on radios, flight controllers, cameras, and ESCs for <em>every</em> U.S. builder, not just defense contractors. Two engineering consequences follow: first, sourcing decisions must be verified before a part is designed in, because a late substitution of an RF module invalidates your EMC testing and often your certification evidence; second, the security rationale behind the restriction — untrusted firmware in components with network access — is exactly the threat model that the secure-boot and firmware-signing sections above exist to address. Compliance and security architecture are converging; treat them as one workstream.</p>
+    </div>
+
     <div class="overflow-x-auto my-6">
         <table class="w-full text-sm text-left">
             <thead class="bg-slate-700 text-slate-300">
@@ -641,7 +687,7 @@ ros2 run mavros mavros_node --ros-args --enclave /mavros_node</code></pre>
             </div>
             <div class="flex items-start gap-3 p-3 bg-slate-900 rounded border border-slate-700">
                 <span class="text-sky-400 w-36 flex-shrink-0">FC Protocol</span>
-                <span class="text-slate-300">MAVLink v2 signing (32-byte HMAC-SHA256 key, monotonic timestamp) + SYSID_MYGCS whitelist + SiK AES-128 radio + WireGuard for IP-over-LTE GCS link</span>
+                <span class="text-slate-300">MAVLink v2 signing (32-byte signing key, monotonic timestamp) + SYSID_MYGCS whitelist + SiK AES-128 radio + WireGuard for IP-over-LTE GCS link</span>
             </div>
             <div class="flex items-start gap-3 p-3 bg-slate-900 rounded border border-slate-700">
                 <span class="text-emerald-400 w-36 flex-shrink-0">ROS 2 / DDS</span>

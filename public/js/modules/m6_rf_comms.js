@@ -118,7 +118,19 @@ export default `
           </tbody>
         </table>
       </div>
-      <p class="text-slate-400 text-xs mt-3">Key insight: every 6 dB of link margin doubles (or halves) the maximum range. With 50 dB of margin at 5 km, range extendable to theoretical ~16 km before reaching sensitivity floor — consistent with 30+ km ELRS 900 demonstrations using directional antennas.</p>
+      <p class="text-slate-400 text-xs mt-3">Every 6 dB of link margin doubles the free-space range, because FSPL grows as the square of distance. Run that to its conclusion and something important falls out.</p>
+      <div class="bg-slate-900 border border-slate-700 rounded p-4 mt-3 text-xs">
+        <p class="text-slate-300 font-mono mb-2">d_max = 5 km · 10<sup>(50.4/20)</sup> = 5 · 331 ≈ <span class="text-rose-400">1,650 km</span></p>
+        <p class="text-slate-400">That number is obviously absurd for a 1 W radio, and the absurdity is the lesson: <strong class="text-slate-200">free-space path loss is almost never what actually limits your range.</strong> A link budget that closes with 50 dB to spare tells you the radio is not the problem — something else is. In practice the binding constraints are:</p>
+        <ul class="text-slate-400 mt-2 space-y-1 list-disc list-inside">
+          <li><strong class="text-slate-200">Radio horizon.</strong> With the aircraft at 120 m AGL and the ground antenna at 2 m, d ≈ 4.12(√120 + √2) ≈ <strong class="text-slate-200">51 km</strong>. You cannot talk through the Earth, whatever the margin says.</li>
+          <li><strong class="text-slate-200">Fresnel zone obstruction.</strong> Terrain or structures intruding into the first Fresnel zone cost far more than the geometry suggests — a ridge that merely grazes line-of-sight can take 6–20 dB.</li>
+          <li><strong class="text-slate-200">Ground reflection and multipath.</strong> Over water or flat terrain, the direct and reflected rays interfere; two-ray path loss falls off as d⁴ rather than d², not d².</li>
+          <li><strong class="text-slate-200">Local noise floor.</strong> Receiver sensitivity assumes a quiet band. Near a city, ISM-band noise raises the effective floor by 10–20 dB, and every one of those decibels comes straight off your margin.</li>
+          <li><strong class="text-slate-200">Antenna pattern and polarization.</strong> The 2 dBi dipole figure holds only in the antenna's equatorial plane. A banking aircraft can put the ground station in an antenna null and drop 20 dB instantly — which is why link loss so often happens in a turn rather than at maximum distance.</li>
+        </ul>
+        <p class="text-slate-400 mt-2">This is why real ELRS 900 demonstrations land in the 30–50 km band with directional ground antennas — horizon-limited, not sensitivity-limited — and why the practical engineering work is antenna placement, diversity, and clear Fresnel geometry rather than chasing transmit power.</p>
+      </div>
     </div>
 
     <!-- ================================================================
@@ -128,10 +140,11 @@ export default `
     <p>ExpressLRS is the dominant open-source RC link for performance and long-range applications, built on Semtech LoRa transceivers. The critical design decision is the transceiver chip per band.</p>
 
     <div class="bg-slate-800/60 border border-sky-700/60 rounded-xl p-6 mb-6">
-      <h3 class="text-sky-400 font-bold text-lg mb-3">ELRS Firmware Milestones (2024–2025)</h3>
+      <h3 class="text-sky-400 font-bold text-lg mb-3">ELRS Firmware Milestones (through Aug 2026)</h3>
       <ul class="text-slate-300 text-sm space-y-2">
         <li><strong class="text-amber-400">ELRS 3.5.x (2024, Final STM32 release):</strong> Native MAVLink support — direct two-way MAVLink tunneling over the RC link, enabling Mission Planner telemetry, waypoint upload, and parameter changes in flight. FSK &#96;K&#96; modes added — SubGHz band jumps from 200 Hz to <strong>1000 Hz</strong> maximum packet rate. Last release to support STM32-based hardware (Happymodel PP, early NamimnoRC, FrSky ELRS).</li>
-        <li><strong class="text-amber-400">ELRS 4.0.x (February 2025):</strong> ESP32/ESP8285-only. Drops all STM32 hardware. Introduces doubled telemetry bandwidth in Gemini mode. Incompatible with v3.x hardware — upgrade both TX and RX together.</li>
+        <li><strong class="text-amber-400">ELRS 4.0.0 (6 February 2026):</strong> ESP32/ESP8285-only — drops all STM32 hardware. Doubled telemetry bandwidth in Gemini mode. <strong class="text-white">Major versions are not cross-compatible:</strong> v4 firmware will not link with v3 firmware, so transmitter and every receiver must be upgraded together. Plan this as a fleet-wide maintenance event, not a per-airframe update.</li>
+        <li><strong class="text-amber-400">ELRS 4.1.0 (17 July 2026) — current:</strong> Improved dynamic-power algorithm, bind phrase configurable directly from the handset, and refined telemetry behaviour that suppresses spurious "Telemetry Lost" warnings. The 3.x line remains maintained in parallel (3.6.4, June 2026) for fleets that cannot yet retire STM32 hardware.</li>
       </ul>
     </div>
 
@@ -339,6 +352,43 @@ export default `
     </ul>
 
     <!-- ================================================================
+         6.4b FIBER-OPTIC CONTROL LINKS
+    ================================================================ -->
+    <div class="bg-slate-800/60 border border-amber-700/60 rounded-xl p-6 mb-8">
+      <h3 class="text-amber-400 font-bold text-lg mb-3">The Anti-Jam Endgame: Tethered Fiber-Optic Control</h3>
+      <p class="text-slate-300 text-sm mb-4">Every technique in §6.4 — FHSS, DSSS, processing gain, adaptive hopping — is a way of making a radio link <em>harder</em> to jam. None makes it impossible, because all of them still radiate, and anything that radiates can be detected, direction-found, and overwhelmed by enough power in the right band. Since 2025 the most effective answer deployed at scale abandons the premise entirely: <strong class="text-white">run the control link down a glass fiber.</strong></p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
+        <div class="bg-slate-900 p-4 rounded border border-slate-700">
+          <strong class="text-emerald-400 block mb-2">How it works</strong>
+          <ul class="text-slate-300 text-xs space-y-1 list-disc list-inside">
+            <li>A spool of single-mode fiber is carried on the aircraft and pays out as it flies.</li>
+            <li>Control uplink and video downlink both travel as light through the fiber — typically a single strand, bidirectional over separate wavelengths.</li>
+            <li>Spool lengths in service run <strong class="text-white">10–20 km</strong>; reported effectiveness stays high at 20 km where RF links have already failed.</li>
+            <li>Latency is set by the speed of light in glass (~5 µs/km) — about 100 µs at 20 km, far below any RF protocol's framing delay.</li>
+          </ul>
+        </div>
+        <div class="bg-slate-900 p-4 rounded border border-slate-700">
+          <strong class="text-sky-400 block mb-2">Why it defeats the entire EW stack</strong>
+          <ul class="text-slate-300 text-xs space-y-1 list-disc list-inside">
+            <li><strong class="text-white">Nothing to jam.</strong> No RF energy carries the control signal, so noise and barrage jamming have no coupling path.</li>
+            <li><strong class="text-white">Nothing to direction-find.</strong> The aircraft is RF-silent, defeating passive geolocation of the platform <em>and</em> of the operator — normally the more valuable target.</li>
+            <li><strong class="text-white">Nothing to fingerprint.</strong> ML-based RF classifiers (§6.9, Module 16) have no emission to classify.</li>
+            <li><strong class="text-white">No spectrum coordination.</strong> Many aircraft can operate in the same space with zero mutual interference — no frequency plan at all.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 p-4 rounded border-l-4 border-rose-500 mb-4">
+        <strong class="text-rose-400 block mb-1 text-sm">The costs are real and they are structural</strong>
+        <p class="text-slate-400 text-xs">The fiber snags on vegetation, wires, and structures; it constrains aggressive maneuvering and rules out orbiting a point. The spool adds mass and consumes itself every sortie, so the aircraft is effectively one-way — you do not get it back. Cost per airframe runs roughly 3–5× an equivalent RF build. And the paid-out fiber physically traces a line back to the launch point, which is a counterintelligence problem the RF version does not have. Fiber is not a strictly better link; it is a different set of trade-offs that happens to dominate specifically when the adversary owns the spectrum.</p>
+      </div>
+
+      <p class="text-slate-300 text-sm mb-2"><strong class="text-white">The countermeasure response, and the general lesson.</strong> Because fiber removes the RF attack surface, counter-UAS moved to effects that ignore the control link altogether. In December 2025 Epirus demonstrated its <strong class="text-white">Leonidas</strong> high-power microwave system defeating a fiber-optic FPV aircraft in live fire — the first public HPM kill of a fiber-guided target, with footage released 13 January 2026. HPM couples energy directly into the airframe's electronics no matter how it is commanded.</p>
+      <p class="text-slate-400 text-sm">For an RF engineer the transferable principle is this: <strong class="text-slate-200">countermeasures target the layer you depend on.</strong> Harden the waveform and the adversary attacks the antenna; remove the antenna and they attack the silicon. Resilience comes from having an independent fallback at a <em>different</em> layer — which is exactly the argument for the pre-loaded autonomous mission profile in Module 1, where the aircraft completes its task with no control link of any kind.</p>
+    </div>
+
+    <!-- ================================================================
          6.5 MAVLink 2 SECURITY
     ================================================================ -->
     <h3>6.5 MAVLink 2 Security: Signed Messages and HMAC-SHA256</h3>
@@ -480,7 +530,7 @@ export default `
     </div>
 
     <h4>4G LTE / 5G Cellular BLOS C2 Links</h4>
-    <p>Cellular networks provide beyond-line-of-sight (BLOS) C2 without dedicated RF infrastructure. The FAA approved 203 BVLOS waivers in 2024 (25% of all Part 107 waivers). Key characteristics:</p>
+    <p>Cellular networks provide beyond-line-of-sight (BLOS) C2 without dedicated RF infrastructure. This is the link class whose regulatory footing is about to change: the FAA's Part 108 BVLOS final rule reached OIRA review on 10 July 2026, with publication expected late 2026 or early 2027 and a 6–12 month transition after that. Until it takes effect, BVLOS still runs on individual waivers and exemptions. Key characteristics:</p>
     <ul class="text-slate-300 text-sm space-y-1">
         <li><strong>LTE latency:</strong> 30–100 ms one-way — acceptable for autonomous waypoint following but marginal for manual control</li>
         <li><strong>5G Sub-6 GHz latency:</strong> 10–30 ms one-way; 5G mmWave: &lt;10 ms but requires line-of-sight to base station</li>

@@ -87,7 +87,7 @@ export default `
                     <td class="p-3 text-slate-300">150–200 Wh/kg</td>
                     <td class="p-3 text-emerald-400">160–210 Wh/kg</td>
                     <td class="p-3 text-emerald-300">180–270 Wh/kg</td>
-                    <td class="p-3 text-sky-400">240–300 Wh/kg</td>
+                    <td class="p-3 text-sky-400">280–320 Wh/kg</td>
                 </tr>
                 <tr class="bg-slate-900">
                     <td class="p-3 text-slate-400">Max cont. C-rate</td>
@@ -136,7 +136,7 @@ export default `
                     <td class="p-3 text-slate-300">Tattu 22000mAh 6S 25C (2,650g)</td>
                     <td class="p-3 text-slate-300">Tattu HV 22000mAh 6S 25C (22.8V nom)</td>
                     <td class="p-3 text-slate-300">iNsight 6S 10000mAh 10C (700g)</td>
-                    <td class="p-3 text-slate-300">iNsight Semi-Solid 251.7 Wh/kg</td>
+                    <td class="p-3 text-slate-300">Grepow / GSL semi-solid UAV packs, ~300 Wh/kg</td>
                 </tr>
             </tbody>
         </table>
@@ -148,8 +148,14 @@ export default `
     </div>
 
     <div class="bg-slate-900 p-4 rounded border-l-4 border-sky-500 mb-6">
-        <strong class="text-sky-400 block mb-1">2025 Development: Semi-Solid-State UAV Batteries</strong>
-        <p class="text-slate-400 text-sm">Semi-solid-state Li-ion cells (ceramic electrolyte layer replacing liquid) are now commercially available for UAV use. A 6S 22000mAh semi-solid pack achieves ~251.7 Wh/kg at 1,963g — roughly 30% better than premium LiPo at similar weight — while offering improved thermal safety and 500–1000+ cycle life. Not yet at parity with LiPo on peak discharge current, but suitable for cruise-dominated missions. <a href="https://insightfpv.com/products/solid-state-li-ion-battery" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">iNsightFPV semi-solid-state line</a>.</p>
+        <strong class="text-sky-400 block mb-1">Semi-Solid-State UAV Batteries — Mainstream as of 2026</strong>
+        <p class="text-slate-400 text-sm mb-2">Semi-solid-state Li-ion cells replace most of the liquid electrolyte with a gel/ceramic composite, typically paired with a silicon-carbon anode (~5–10 wt% Si). They are no longer emerging technology — they are the default upgrade path for industrial UAV packs. Current figures:</p>
+        <ul class="text-slate-400 text-sm space-y-1 list-disc list-inside">
+            <li><strong class="text-slate-200">Cell level:</strong> 350–400 Wh/kg typical, with vendor claims to ~420 Wh/kg; independently characterized pouch cells land near 348 Wh/kg.</li>
+            <li><strong class="text-slate-200">Pack level:</strong> 303–313 Wh/kg measured on real UAV packs. Budget <strong>280–320 Wh/kg</strong> as the honest 2026 pack-level planning number.</li>
+            <li><strong class="text-slate-200">Cycle life:</strong> 800–1,000 cycles; operating range −20 °C to +60 °C.</li>
+        </ul>
+        <p class="text-slate-400 text-sm mt-2">The trade remains peak current: these cells will not match a race-spec LiPo's C-rate, so they suit cruise- and loiter-dominated missions rather than aggressive maneuvering. Improved thermal stability is a genuine secondary benefit — a meaningful consideration for BVLOS operations over populated areas where a pack fire is a public-safety event, not just a lost airframe.</p>
     </div>
 
     <!-- ============================================================ -->
@@ -428,7 +434,27 @@ export default `
 
     <!-- ============================================================ -->
     <h3>3.7 ESC Architecture and Firmware Selection</h3>
-    <p>Electronic Speed Controllers (ESCs) convert the high-voltage bus into variable 3-phase AC for brushless motors. The firmware defines protocol support, telemetry capabilities, and tuning behavior. As of 2024–2025, the landscape has consolidated: BLHeli_32 development officially stopped in 2023; AM32 is now the actively developed open-source standard.</p>
+    <p>Electronic Speed Controllers (ESCs) convert the high-voltage bus into variable 3-phase AC for brushless motors. The firmware defines protocol support, telemetry capabilities, and tuning behavior. The landscape has now fully consolidated around two open-source projects, split by MCU class rather than by vendor:</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 text-sm">
+        <div class="bg-slate-900 p-4 rounded border-l-4 border-emerald-500">
+            <strong class="text-emerald-400 block mb-1">AM32 — 32-bit hardware</strong>
+            <p class="text-slate-400 text-xs">Open source (MIT). Runs on 32-bit ARM ESCs (STM32 G4/F0, AT32). The successor to BLHeli_32 and the default target for any new 32-bit ESC. Actively developed.</p>
+        </div>
+        <div class="bg-slate-900 p-4 rounded border-l-4 border-sky-500">
+            <strong class="text-sky-400 block mb-1">Bluejay — 8-bit BLHeli_S hardware</strong>
+            <p class="text-slate-400 text-xs">Open source. Revives the enormous installed base of BLHeli_S ESCs (EFM8BB1/BB2 8-bit MCUs) with full RPM filtering and EDT (Extended DShot Telemetry). The recommended firmware for 8-bit hardware.</p>
+        </div>
+        <div class="bg-slate-900 p-4 rounded border-l-4 border-rose-500">
+            <strong class="text-rose-400 block mb-1">BLHeli_32 — discontinued</strong>
+            <p class="text-slate-400 text-xs">Development ended in 2023; no new features, no bug fixes, no new hardware. Existing ESCs keep flying indefinitely, but treat the platform as frozen — do not design it into a new build.</p>
+        </div>
+    </div>
+
+    <div class="bg-slate-900 p-4 rounded border-l-4 border-amber-500 mb-6">
+        <strong class="text-amber-400 block mb-1">Identify before you flash</strong>
+        <p class="text-slate-400 text-sm">BLHeli_S and BLHeli_32 are entirely different firmware families running on entirely different silicon, despite the confusingly similar names — the "_S" is 8-bit, the "_32" is 32-bit ARM. Flashing the wrong family bricks the ESC. Read the MCU marking on the board or query the ESC through your configurator before writing anything to it.</p>
+    </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div class="bg-slate-900 p-6 rounded border border-slate-700 text-sm">
@@ -438,7 +464,7 @@ export default `
                     <thead><tr class="text-slate-400"><th class="text-left pb-2 pr-2">Feature</th><th class="text-left pb-2 pr-2">BLHeli_32</th><th class="text-left pb-2 pr-2">AM32</th><th class="text-left pb-2">KISS</th></tr></thead>
                     <tbody class="text-slate-300">
                         <tr><td class="py-1 pr-2">License</td><td class="pr-2">Closed</td><td class="pr-2 text-emerald-400">Open (MIT)</td><td>Proprietary</td></tr>
-                        <tr><td class="py-1 pr-2">Development</td><td class="text-rose-400 pr-2">Stopped 2023</td><td class="text-emerald-400 pr-2">Active</td><td>Active</td></tr>
+                        <tr><td class="py-1 pr-2">Development</td><td class="text-rose-400 pr-2">Discontinued 2023</td><td class="text-emerald-400 pr-2">Active (current standard)</td><td>Active</td></tr>
                         <tr><td class="py-1 pr-2">MCU</td><td class="pr-2">ARM M3 only</td><td class="pr-2">M0/M3/M4/STM32/AT32</td><td>Proprietary ARM</td></tr>
                         <tr><td class="py-1 pr-2">DSHOT</td><td class="pr-2">150/300/600/1200</td><td class="pr-2">150/300/600</td><td>150/300/600</td></tr>
                         <tr><td class="py-1 pr-2">Bidir DSHOT</td><td class="pr-2">Yes (v32.7+)</td><td class="pr-2 text-emerald-400">Yes</td><td>Yes</td></tr>
@@ -551,6 +577,14 @@ export default `
             </div>
         </div>
         <div class="bg-slate-900 p-4 rounded border border-slate-700 text-sm font-mono">
+            <strong class="text-sky-400 block mb-2">INA228 / INA238 — 20-bit, 85V max bus ← for 12S and above</strong>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-slate-300 text-xs">
+                <div>Bus voltage: 0–85V (covers 12S–20S)<br>Shunt voltage: ±163.84mV<br>Resolution: 20-bit ADC (INA228)</div>
+                <div>Integrated energy and charge accumulators — the device counts coulombs in hardware, so the flight controller does not have to integrate current itself</div>
+                <div>Includes a temperature sensor for shunt-resistance compensation, which materially improves accuracy on high-current heavy-lift rails</div>
+            </div>
+        </div>
+        <div class="bg-slate-900 p-4 rounded border border-slate-700 text-sm font-mono">
             <strong class="text-amber-400 block mb-2">INA3221 — Triple-channel, 26V max, multi-rail monitoring</strong>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-slate-300 text-xs">
                 <div>3 independent channels<br>Each: bus V + shunt V<br>Bus range: 0–26V</div>
@@ -642,7 +676,11 @@ export default `
 
     <div class="bg-slate-800/60 border border-sky-700/60 rounded-xl p-6 mb-4">
         <h3 class="text-sky-400 font-bold text-lg mb-3">Why ~23,000µF?</h3>
-        <p class="text-slate-300 text-sm">Under a full-throttle motor spike, battery voltage can sag from 22V to 18V for ~20ms. The capacitor bank must supply 3.5A to the Jetson's BEC during that 20ms window while voltage only drops a further 3V. Working backwards: <strong>C = I × t / ΔV = 3.5A × 0.020s / 3V ≈ 23,300µF</strong>. Use low-ESR caps — standard electrolytics waste 1.05V across their internal resistance at this current; Rubycon ZLH wastes only ~0.05V.</p>
+        <p class="text-slate-300 text-sm mb-3">Under a full-throttle motor spike, battery voltage can sag from 22V to 18V for ~20ms. The capacitor bank must supply 3.5A to the Jetson's BEC during that 20ms window while voltage only drops a further 3V. Working backwards: <strong>C = I × t / ΔV = 3.5A × 0.020s / 3V ≈ 23,300µF</strong>. Use low-ESR caps — standard electrolytics waste 1.05V across their internal resistance at this current; Rubycon ZLH wastes only ~0.05V.</p>
+        <div class="bg-slate-900 p-4 rounded border-l-4 border-amber-500">
+            <strong class="text-amber-400 block mb-1 text-sm">Do not confuse this bank with the ESC bus caps from §3.4</strong>
+            <p class="text-slate-400 text-xs">They solve different problems at different timescales and both are required. The <strong class="text-slate-200">§3.4 bus capacitors (2,000–4,700 µF)</strong> sit at the ESC power inputs and absorb <em>switching-frequency ripple</em> in the 1–50 kHz band — they protect the ESCs and keep motor commutation noise off the main rail. The <strong class="text-slate-200">§3.11 bank (~23,000 µF)</strong> sits at the companion-computer BEC input and rides out a <em>multi-millisecond sag event</em> so the Jetson never sees an undervoltage. A design with only the first will still brown out the AI computer on a hard throttle step; a design with only the second leaves the ESCs exposed to their own ripple. Size them independently, place each within centimetres of the load it protects, and never assume one bank at the battery can serve both.</p>
+        </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-xs font-mono">
@@ -685,8 +723,8 @@ export default `
                     <p>PEM stack (cruise power) + small LiPo buffer (peak/transient power). The fuel cell cannot respond fast enough to throttle transients alone — the battery handles the first 100–500ms of any thrust change.</p>
                 </div>
                 <div>
-                    <p class="text-white font-bold font-sans mb-1">Performance (2024–2025)</p>
-                    <p>AVIC / Tsinghua fixed-wing: 30-hour continuous flight (April 2025). K1000ULE multirotor: 75-hour endurance. US Army $20M contract for K1000, Oct 2024. Intelligent Energy PEM cells commercially available.</p>
+                    <p class="text-white font-bold font-sans mb-1">Performance and Status (2026)</p>
+                    <p>Production-ready PEM systems began shipping in early 2026, with the first certified platforms delivered to customers. Representative figures: commercial multirotors reaching ~150 min flight (roughly 3× a comparable battery aircraft); a 2.4 kW stack against a 600 W cruise load yields ~2.4 h. Long-endurance fixed-wing records run to 30 h. Intelligent Energy PEM modules remain the common COTS building block.</p>
                 </div>
             </div>
             <p class="text-slate-400 text-xs mt-3">References: <a href="https://www.intelligent-energy.com/our-industries/uav/" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">Intelligent Energy UAV fuel cells</a> · <a href="https://www.defensenews.com/land/2024/10/30/us-army-buys-long-flying-solar-drones-to-watch-over-pacific-units/" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">Defense News: Army K1000 contract</a></p>
@@ -737,7 +775,7 @@ export default `
                 <li><span class="text-white font-semibold">MIL-STD-810H:</span> Environmental — thermal, shock, vibration, altitude (important for high-altitude ISR). Batteries tested at −40°C to +70°C operating range.</li>
                 <li><span class="text-white font-semibold">MIL-STD-461F:</span> EMI/EMC — motor switching noise must not interfere with comms equipment on the same platform.</li>
                 <li><span class="text-white font-semibold">MIL-STD-704F:</span> Aircraft electrical power characteristics — relevant for hybrid power supplies connected to MIL-standard avionics.</li>
-                <li><span class="text-white font-semibold">NDAA Section 848:</span> Prohibits DoD procurement of UAS or batteries from five named Chinese manufacturers (DJI, Autel, JOUAV, etc.) without a waiver.</li>
+                <li><span class="text-white font-semibold">NDAA Section 848 (FY2020):</span> Prohibits DoD procurement of UAS and UAS components produced in covered foreign countries (China, Russia, Iran, North Korea) without a waiver. The American Security Drone Act later extended equivalent restrictions government-wide, to all federal agencies, contractors, and grant recipients.</li>
             </ul>
         </div>
         <div class="bg-slate-800/60 border border-rose-700/60 rounded-xl p-6">
@@ -752,8 +790,14 @@ export default `
     </div>
 
     <div class="bg-slate-900 p-4 rounded border-l-4 border-sky-500 mb-6">
-        <strong class="text-sky-400 block mb-1">Supply Chain Compliance</strong>
-        <p class="text-slate-400 text-sm">For DoD programs, verify battery and ESC supply chain against the UFLPA (Uyghur Forced Labor Prevention Act) entity list and NDAA Section 848 prohibited manufacturers list. Approved vendors (as of 2025) include Tattu/Gens Ace (verify current status), Maxell, EnerTek, Bren-Tronics, and Ultralife for military-grade UAV batteries. Document chain-of-custody for all battery lots used in operational systems.</p>
+        <strong class="text-sky-400 block mb-1">Supply Chain Compliance — Substantially Tightened, December 2025</strong>
+        <p class="text-slate-400 text-sm mb-2">This is the area of Module 3 that has changed most, and it now affects commercial builders as much as defense ones. Sequence of events:</p>
+        <ul class="text-slate-400 text-sm space-y-1 list-disc list-inside mb-2">
+            <li><strong class="text-slate-200">NDAA FY2025 §1709</strong> directed the FCC to add DJI and Autel equipment to its Covered List by 22 December 2025 unless national-security agencies cleared them. No such determination was made.</li>
+            <li><strong class="text-slate-200">21–23 December 2025:</strong> an interagency determination went considerably further than the statute required — the FCC's Covered List was updated to encompass <strong class="text-slate-200">all foreign-produced UAS and UAS critical components</strong>, not merely DJI and Autel.</li>
+            <li><strong class="text-slate-200">July 2026:</strong> the FCC granted two exceptions — equipment on the DCMA Blue UAS Cleared List, and equipment assembled domestically with at least <strong class="text-slate-200">65% U.S.-produced component value</strong>.</li>
+        </ul>
+        <p class="text-slate-400 text-sm">Covered List placement blocks new FCC equipment authorizations, which in practice blocks lawful U.S. marketing and import of the affected gear. The practical consequence for a power-systems engineer: your BMS, your smart-battery telemetry radio, and your ESC are all potentially "critical components." Verify sourcing against the UFLPA entity list and current Covered List <em>before</em> you design a part in, not at the procurement stage. Document chain-of-custody for every battery lot in an operational system, and expect the exemption boundaries to keep moving — check the current FCC and DCMA guidance rather than relying on any summary, including this one.</p>
     </div>
 
     <!-- ============================================================ -->

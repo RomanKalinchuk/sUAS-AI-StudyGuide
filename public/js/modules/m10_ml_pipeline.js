@@ -2,7 +2,7 @@ export default `
 <div class="fade-in">
     <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 10</span>
     <h2>ML Pipeline for Drone Edge-AI: Data &rarr; Train &rarr; Optimize &rarr; Deploy</h2>
-    <p>A complete production ML pipeline for autonomous drone perception covers six tightly linked stages: collect and curate domain-specific data, annotate it, train with transfer learning, compress and quantize the model, build a hardware-optimized inference engine, and close the loop with on-device monitoring. Each stage has drone-specific pitfalls. This module covers the full pipeline end-to-end with 2025-era tooling: JetPack 6.x, TensorRT 10.x, NVIDIA TAO Toolkit 6.x, DeepStream 7.x, and YOLO11.</p>
+    <p>A complete production ML pipeline for autonomous drone perception covers six tightly linked stages: collect and curate domain-specific data, annotate it, train with transfer learning, compress and quantize the model, build a hardware-optimized inference engine, and close the loop with on-device monitoring. Each stage has drone-specific pitfalls. This module covers the full pipeline end-to-end with 2026-era tooling: JetPack 6.x/7, TensorRT 10.x, NVIDIA TAO Toolkit 6.x, DeepStream 7.x, and YOLO26.</p>
 
     <!-- Pipeline Overview Flowchart -->
     <div class="my-8">
@@ -21,7 +21,7 @@ export default `
                 <div class="flex items-center text-slate-500 text-lg">&rarr;</div>
                 <div class="bg-emerald-900/60 border border-emerald-500/50 p-4 text-center flex flex-col justify-center w-36">
                     <div class="text-emerald-400 font-bold text-sm">3. TRAIN</div>
-                    <div class="text-slate-300 text-xs mt-1">PyTorch 2.x + YOLO11 / TAO</div>
+                    <div class="text-slate-300 text-xs mt-1">PyTorch 2.x + YOLO26 / TAO</div>
                 </div>
                 <div class="flex items-center text-slate-500 text-lg">&rarr;</div>
                 <div class="bg-amber-900/60 border border-amber-500/50 p-4 text-center flex flex-col justify-center w-36">
@@ -187,7 +187,54 @@ export default `
     </div>
 
     <h3>10.5 Model Selection (2025)</h3>
-    <p>YOLO11 (October 2024) introduced C3k2 blocks and C2PSA spatial attention modules, replacing C2f from YOLOv8. YOLO12 (February 2025) added area-attention for ~1.2% mAP gain but toolchain support is still maturing. YOLO11 remains the recommended edge deployment choice &mdash; mature TensorRT, Hailo, and RKNN pipelines are all YOLO11-validated.</p>
+    <p>The detector lineage matters because each generation changed what deployment looks like, not just the mAP number. YOLOv8 established the C2f backbone and the modern Ultralytics API. YOLO11 (October 2024) introduced C3k2 blocks and C2PSA spatial attention. YOLO12 (February 2025) added area-attention for roughly 1.2% mAP. <strong class="text-white">YOLO26 (January 2026) is the current recommendation</strong>, and it is the first release in years whose headline change is architectural rather than incremental.</p>
+
+    <div class="bg-slate-800/60 border border-emerald-700/60 rounded-xl p-5 mb-6">
+        <h4 class="text-emerald-400 font-bold text-base mt-0 mb-3">YOLO26 — Why NMS-Free Matters More Than the mAP Gain</h4>
+        <p class="text-slate-300 text-sm mb-3">YOLO26 ships a <strong class="text-white">one-to-one detection head that produces final predictions without non-maximum suppression</strong>. Every prior YOLO generation emitted hundreds of overlapping candidate boxes that a separate NMS pass then filtered. Removing that step changes three things that matter far more on an aircraft than a point of mAP:</p>
+        <ul class="text-slate-300 text-sm space-y-2 list-disc list-inside mb-3">
+            <li><strong class="text-white">Latency becomes deterministic.</strong> NMS cost scales with how many objects are in frame — an empty sky is cheap, a cluttered urban scene is expensive. That means the old pipeline's worst-case latency arrived exactly when the scene was most demanding. A one-to-one head costs the same every frame, which is what a control loop actually needs.</li>
+            <li><strong class="text-white">Export stops being fragile.</strong> NMS was the part of the graph that most often failed to convert cleanly to TensorRT, ONNX, or a vendor NPU compiler, forcing custom plugins or CPU fallback. An end-to-end graph exports as one artifact.</li>
+            <li><strong class="text-white">The CPU stops being the bottleneck.</strong> On NPU-based accelerators, NMS frequently ran on the host CPU while the NPU idled. Ultralytics reports up to 43% faster CPU inference for YOLO26 overall.</li>
+        </ul>
+        <p class="text-slate-400 text-xs">Supporting changes: <strong class="text-slate-200">DFL removal</strong> simplifies the head while keeping an unconstrained regression range; <strong class="text-slate-200">Progressive Loss</strong> shifts training emphasis toward the inference-time architecture; <strong class="text-slate-200">STAL (Small-Target-Aware Label assignment)</strong> improves positive-label coverage for small objects — directly relevant to aerial imagery, where targets are a handful of pixels; and <strong class="text-slate-200">MuSGD</strong>, a hybrid SGD/Muon optimizer borrowed from LLM training practice. YOLO26 is also a single multi-task family covering detection, instance and semantic segmentation, monocular depth, classification, pose, and oriented bounding boxes (OBB) — OBB being the natural fit for overhead imagery where objects have arbitrary heading.</p>
+    </div>
+
+    <div class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden mb-6">
+        <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">YOLO26 Detection Variants &mdash; COCO</div>
+        <div class="p-4 overflow-x-auto">
+            <table class="w-full text-xs font-mono text-slate-300">
+                <thead class="text-slate-400 border-b border-slate-700">
+                    <tr><th class="py-1 pr-6 text-left">Model</th><th class="py-1 pr-6 text-left">Params (M)</th><th class="py-1 pr-6 text-left">mAP<sup>50-95</sup></th><th class="py-1 pr-6 text-left">CPU ONNX (ms)</th><th class="py-1 text-left">T4 TensorRT (ms)</th></tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-slate-800"><td class="py-1 pr-6 text-emerald-400">YOLO26n</td><td class="py-1 pr-6">2.4</td><td class="py-1 pr-6">40.9</td><td class="py-1 pr-6">38.9</td><td class="py-1">1.7</td></tr>
+                    <tr class="border-b border-slate-800"><td class="py-1 pr-6 text-emerald-400">YOLO26s</td><td class="py-1 pr-6">9.5</td><td class="py-1 pr-6">48.6</td><td class="py-1 pr-6">87.2</td><td class="py-1">2.5</td></tr>
+                    <tr class="border-b border-slate-800"><td class="py-1 pr-6">YOLO26m</td><td class="py-1 pr-6">20.4</td><td class="py-1 pr-6">53.1</td><td class="py-1 pr-6">220.0</td><td class="py-1">4.7</td></tr>
+                    <tr class="border-b border-slate-800"><td class="py-1 pr-6">YOLO26l</td><td class="py-1 pr-6">24.8</td><td class="py-1 pr-6">55.0</td><td class="py-1 pr-6">286.2</td><td class="py-1">6.2</td></tr>
+                    <tr><td class="py-1 pr-6">YOLO26x</td><td class="py-1 pr-6">55.7</td><td class="py-1 pr-6">57.5</td><td class="py-1 pr-6">525.8</td><td class="py-1">11.8</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="text-slate-400 text-xs px-4 pb-3">Compare against the YOLO11 table below: YOLO26n reaches 40.9 mAP with 2.4M parameters where YOLO11n managed 39.5 with 2.6M — better accuracy from a smaller model, before counting the NMS savings. Note these are T4 datacenter-GPU latencies; a Jetson Orin Nano will be several times slower, so use them for <em>relative</em> comparison between variants, not for sizing your loop rate.</p>
+    </div>
+
+    <div class="my-8">
+        <h3 class="text-xl font-bold text-white mb-3">Video: Deploying YOLO26 Without NMS</h3>
+        <p class="text-slate-400 text-sm mb-3">Ultralytics' own short walkthrough of what removing non-maximum suppression changes at export and deployment time. Vertical format — sized accordingly.</p>
+        <div class="mx-auto" style="max-width:320px;">
+            <div class="relative w-full" style="padding-bottom:177.78%;">
+                <iframe class="absolute inset-0 w-full h-full rounded-lg" src="https://www.youtube.com/embed/mvuy6rYrnEU" title="Deploy Ultralytics YOLO26 Anywhere — No NMS Required" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-slate-900 p-4 rounded border-l-4 border-amber-500 mb-6">
+        <strong class="text-amber-400 block mb-1">When to stay on YOLO11</strong>
+        <p class="text-slate-400 text-sm">YOLO11 remains a perfectly good production detector and has the deepest ecosystem validation — mature TensorRT, Hailo HEF, and RKNN conversion paths, and years of accumulated deployment knowledge. Stay on it if your vendor NPU compiler does not yet handle the YOLO26 one-to-one head cleanly (verify before committing — this is the single most important thing to test on non-NVIDIA accelerators), if you have a qualified model already flying and no performance complaint, or if your certification evidence is tied to a frozen model version. Migrate when you are starting fresh, when post-processing latency variance is hurting your control loop, or when small-object recall at altitude is your limiting factor.</p>
+    </div>
+
+    <p class="text-slate-300 text-sm mb-3">The YOLO11 figures below remain a useful reference point, both for fleets already deployed on it and for understanding what YOLO26 improved on.</p>
 
     <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-lg border border-slate-700 mb-6">
         <div class="bg-[#252526] px-4 py-2 border-b border-slate-700 text-xs font-mono text-slate-400">YOLO11 Detection Variants &mdash; COCO val2017</div>

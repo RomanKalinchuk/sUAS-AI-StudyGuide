@@ -43,25 +43,36 @@ export default `
     </div>
 
     <h4 class="text-sky-300">Weight Penalty Worked Example</h4>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div class="bg-slate-900 p-4 rounded border border-slate-700 text-center text-sm">
             <div class="text-slate-400 text-xs uppercase tracking-wider mb-2">Base Drone (no AI)</div>
             <div class="text-2xl font-bold text-white font-mono">1.5 kg</div>
-            <div class="text-emerald-400 font-mono mt-2 text-lg">80.5 W</div>
+            <div class="text-emerald-400 font-mono mt-2 text-lg">95.4 W</div>
             <div class="text-slate-500 text-xs mt-1">to hover (4× 12" props, FM 0.70)</div>
         </div>
         <div class="bg-sky-900/30 p-4 rounded border border-sky-600 text-center text-sm">
             <div class="text-sky-400 text-xs uppercase tracking-wider mb-2">AI Payload Added</div>
             <div class="text-2xl font-bold text-white font-mono">+300 g</div>
-            <div class="text-sky-300 font-mono mt-2 text-lg">+24.9 W</div>
+            <div class="text-sky-300 font-mono mt-2 text-lg">+30.0 W</div>
             <div class="text-slate-400 text-xs mt-1">extra hover power required</div>
         </div>
         <div class="bg-rose-900/20 p-4 rounded border border-rose-700/50 text-center text-sm">
             <div class="text-rose-400 text-xs uppercase tracking-wider mb-2">With AI (1.8 kg total)</div>
             <div class="text-2xl font-bold text-white font-mono">1.8 kg</div>
-            <div class="text-rose-400 font-mono mt-2 text-lg">105.4 W</div>
-            <div class="text-slate-400 text-xs mt-1">to hover (+31% more power)</div>
+            <div class="text-rose-400 font-mono mt-2 text-lg">125.4 W</div>
+            <div class="text-slate-400 text-xs mt-1">to hover (+31.5% more power)</div>
         </div>
+    </div>
+
+    <div class="bg-slate-900 border border-slate-700 rounded p-4 text-sm mb-6">
+        <div class="text-slate-400 text-xs uppercase tracking-wider mb-2">Work the numbers yourself — this is the calculation you will repeat on every design</div>
+        <div class="font-mono text-xs text-slate-300 space-y-1">
+            <div>Rotor radius R = 6" = 0.1524 m &nbsp;→&nbsp; A_total = 4 · π · 0.1524² = <span class="text-sky-300">0.2919 m²</span></div>
+            <div>sqrt(2 · ρ · A) = sqrt(2 · 1.225 · 0.2919) = <span class="text-sky-300">0.8456</span></div>
+            <div class="pt-1">At 1.5 kg: T = 14.72 N &nbsp;→&nbsp; T<sup>3/2</sup> = 56.45 &nbsp;→&nbsp; P_ideal = 56.45 / 0.8456 = 66.8 W &nbsp;→&nbsp; ÷ FM 0.70 = <span class="text-emerald-400">95.4 W</span></div>
+            <div>At 1.8 kg: T = 17.66 N &nbsp;→&nbsp; T<sup>3/2</sup> = 74.21 &nbsp;→&nbsp; P_ideal = 74.21 / 0.8456 = 87.8 W &nbsp;→&nbsp; ÷ FM 0.70 = <span class="text-rose-400">125.4 W</span></div>
+        </div>
+        <p class="text-slate-400 text-xs mt-3">Notice that the <em>percentage</em> penalty — (1.8/1.5)<sup>3/2</sup> = 1.315, i.e. +31.5% — is completely independent of FM, air density, and rotor size. Those terms all cancel in the ratio. That is why the 3/2 exponent is the one piece of aerodynamics worth memorizing: mass fraction alone tells you the power penalty, before you have chosen a single component.</p>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════
@@ -87,7 +98,7 @@ export default `
                 <tr class="bg-slate-800/50"><td class="p-3 text-white">Large multirotor (&gt;12" props)</td><td class="p-3 text-emerald-400">0.65 – 0.75</td><td class="p-3 text-slate-300">T-Motor / KDE quality; turbulent Re regime</td></tr>
                 <tr class="bg-slate-800"><td class="p-3 text-white">Standard multirotor (5"–12")</td><td class="p-3 text-amber-400">0.55 – 0.70</td><td class="p-3 text-slate-300">Most commercial platforms</td></tr>
                 <tr class="bg-slate-800/50"><td class="p-3 text-white">Micro-rotor (Re ≈ 70,000)</td><td class="p-3 text-rose-400">0.50 – 0.65</td><td class="p-3 text-slate-300">Scale effects dominate; laminar separation</td></tr>
-                <tr class="bg-slate-800"><td class="p-3 text-white">Toroidal propeller (MIT LL 2023–2025)</td><td class="p-3 text-emerald-400">~equiv + −10 dB</td><td class="p-3 text-slate-300">Same thrust at same power; much quieter</td></tr>
+                <tr class="bg-slate-800"><td class="p-3 text-white">Toroidal propeller (MIT Lincoln Lab)</td><td class="p-3 text-emerald-400">~equiv + −10 dB</td><td class="p-3 text-slate-300">Same thrust at same power; much quieter</td></tr>
             </tbody>
         </table>
     </div>
@@ -182,8 +193,8 @@ export default `
     </div>
 
     <div class="bg-slate-800/60 border border-sky-700/60 rounded-xl p-6 mb-6">
-        <h3 class="text-sky-400 font-bold text-lg mb-3">Toroidal Propellers — 2023–2025 Development</h3>
-        <p class="text-slate-300 text-sm">MIT Lincoln Laboratory's <a href="https://www.ll.mit.edu/partner-us/available-technologies/toroidal-propeller-0" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">toroidal propeller design</a> loops blade tips back to form a closed ring, eliminating discrete tip vortices — the primary noise source on conventional props. 2023–2025 testing shows: <strong>acoustic signature reduced by ~10 dB SPL</strong> at half the operating distance, with thrust levels identical to conventional designs at the same power input. The closed-loop structure also increases blade stiffness, reducing flutter. DoD counter-UAS implications are significant: quieter drones are harder to detect acoustically.</p>
+        <h3 class="text-sky-400 font-bold text-lg mb-3">Toroidal Propellers — Acoustic Signature Reduction</h3>
+        <p class="text-slate-300 text-sm">MIT Lincoln Laboratory's <a href="https://www.ll.mit.edu/partner-us/available-technologies/toroidal-propeller-0" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">toroidal propeller design</a> loops blade tips back to form a closed ring, eliminating discrete tip vortices — the primary noise source on conventional props. Testing through 2025–2026 shows: <strong>acoustic signature reduced by ~10 dB SPL</strong> at half the operating distance, with thrust levels identical to conventional designs at the same power input. The closed-loop structure also increases blade stiffness, reducing flutter. DoD counter-UAS implications are significant: quieter drones are harder to detect acoustically.</p>
     </div>
 
     <h4 class="text-sky-300">Translational Lift &amp; Forward-Flight Power</h4>
@@ -192,7 +203,7 @@ export default `
         P(v) = P_hover · [ sqrt( (v⁴ / 4v_h⁴) + 1 ) − v² / (2v_h²) ]<br>
         <span class="text-slate-400 text-xs">where v_h = sqrt(T / (2ρA)) = induced velocity in hover</span>
     </div>
-    <p class="text-sm text-slate-300 mb-2">Power dips <strong>10–15% below hover at ~5–8 m/s</strong> (translational lift), then rises steeply above ~12 m/s as parasite drag dominates. For a 2 kg drone with 12" props: v_h ≈ 4.5 m/s; range-optimal cruise ≈ <strong>5.9 m/s (21 km/h)</strong>.</p>
+    <p class="text-sm text-slate-300 mb-2">Power dips <strong>10–15% below hover at ~5–8 m/s</strong> (translational lift), then rises steeply above ~12 m/s as parasite drag dominates. For the 2 kg / 12"-prop drone used throughout this module: v_h ≈ 5.2 m/s, and range-optimal cruise ≈ <strong>6.9 m/s (25 km/h)</strong> — derived in §2.10.</p>
     <div class="insight-box mb-6">
         <div class="insight-label">Design Implication</div>
         <p class="text-slate-200 text-sm mt-1"><strong>Variable-pitch propellers</strong> (T-Motor MF series) decouple RPM from thrust — the motor runs at its efficiency peak while pitch handles rapid thrust changes. The mechanism adds ~20–50 g per arm but delivers better control bandwidth than RPM modulation alone and improves hover efficiency by 2.6–7.5%.</p>
@@ -213,13 +224,19 @@ export default `
                 <tr><th class="p-3">Chemistry</th><th class="p-3">k range</th><th class="p-3">Typical k</th><th class="p-3">Capacity loss at 6C</th></tr>
             </thead>
             <tbody class="divide-y divide-slate-700">
-                <tr class="bg-slate-800"><td class="p-3 text-white">LiPo (polymer)</td><td class="p-3 text-slate-300">1.05 – 1.15</td><td class="p-3 text-emerald-400">1.08</td><td class="p-3 text-amber-400">~18%</td></tr>
-                <tr class="bg-slate-800/50"><td class="p-3 text-white">Li-ion 21700 cells</td><td class="p-3 text-slate-300">1.10 – 1.30</td><td class="p-3 text-amber-400">1.15</td><td class="p-3 text-rose-400">~28%</td></tr>
+                <tr class="bg-slate-800"><td class="p-3 text-white">LiPo (polymer)</td><td class="p-3 text-slate-300">1.05 – 1.15</td><td class="p-3 text-emerald-400">1.08</td><td class="p-3 text-amber-400">~13%</td></tr>
+                <tr class="bg-slate-800/50"><td class="p-3 text-white">Li-ion 21700 cells</td><td class="p-3 text-slate-300">1.10 – 1.30</td><td class="p-3 text-amber-400">1.15</td><td class="p-3 text-rose-400">~24%</td></tr>
                 <tr class="bg-slate-800"><td class="p-3 text-white">LiFePO₄</td><td class="p-3 text-slate-300">1.02 – 1.10</td><td class="p-3 text-emerald-400">1.05</td><td class="p-3 text-emerald-400">~9%</td></tr>
             </tbody>
         </table>
     </div>
-    <p class="text-sm text-slate-300 mb-4">Example: A 5,000 mAh LiPo (k = 1.08) at 6C (30 A) delivers only <strong>4,110 mAh</strong> — an 18% penalty planners must account for. The Peukert equation is valid at constant current; variable-throttle missions require a dynamic EKF-based model.</p>
+    <p class="text-sm text-slate-300 mb-2">Capacity loss above is computed against a 1C reference draw. Worked example — a 5,000 mAh LiPo (k = 1.08, I_rated = 1C = 5 A) discharged at 6C (30 A):</p>
+    <div class="bg-slate-900 border border-slate-700 rounded p-4 font-mono text-xs text-slate-300 mb-4 space-y-1">
+        <div>C_eff = 5,000 · (5 / 30)<sup>0.08</sup> = 5,000 · (0.1667)<sup>0.08</sup></div>
+        <div>(0.1667)<sup>0.08</sup> = exp(0.08 · ln 0.1667) = exp(0.08 · −1.7918) = exp(−0.1433) = 0.8665</div>
+        <div>C_eff = <span class="text-amber-400">4,332 mAh</span> &nbsp;→&nbsp; a <span class="text-amber-400">13.3% penalty</span> the mission planner must budget for</div>
+    </div>
+    <p class="text-sm text-slate-300 mb-4">Two cautions. First, the Peukert exponent is only defined relative to a stated reference current — quoting "k = 1.08" without saying what I_rated is makes the number meaningless. Second, the equation assumes <em>constant</em> current. A real mission is a throttle-varying load, so production packs estimate remaining energy with a dynamic equivalent-circuit model in an EKF (see Module 9) rather than by applying Peukert directly.</p>
 
     <h4 class="text-sky-300">State of Charge (SoC) Estimation</h4>
     <div class="overflow-x-auto my-6">
@@ -230,7 +247,7 @@ export default `
             <tbody class="divide-y divide-slate-700">
                 <tr class="bg-slate-800"><td class="p-3 text-white">Voltage-based (OCV lookup)</td><td class="p-3 text-rose-400">±5 – 10%</td><td class="p-3 text-slate-300">Only valid at rest; flat LiPo OCV curve makes it unreliable mid-flight</td></tr>
                 <tr class="bg-slate-800/50"><td class="p-3 text-white">Coulomb counting</td><td class="p-3 text-amber-400">±2 – 5%</td><td class="p-3 text-slate-300">Integrates I·dt; cumulative drift requires periodic OCV re-anchor</td></tr>
-                <tr class="bg-slate-800"><td class="p-3 text-white">Extended Kalman Filter (EKF)</td><td class="p-3 text-emerald-400">±1 – 3%</td><td class="p-3 text-slate-300">Fuses voltage + current via ECM model; self-correcting; 2024 standard in smart packs</td></tr>
+                <tr class="bg-slate-800"><td class="p-3 text-white">Extended Kalman Filter (EKF)</td><td class="p-3 text-emerald-400">±1 – 3%</td><td class="p-3 text-slate-300">Fuses voltage + current via ECM model; self-correcting; the standard approach in modern smart packs</td></tr>
             </tbody>
         </table>
     </div>
@@ -274,7 +291,13 @@ export default `
         <span class="text-slate-400 text-xs">Orin NX at 12 V: ΔI = 1.83 A, t_rise = 1 ms, ΔV = 0.2 V → C_min = 9.15 mF</span>
     </div>
     <p class="text-sm text-slate-300 mb-2">In practice a <strong>10–47 mF low-ESR bulk capacitor bank</strong> (electrolytic + X5R MLCC mix) at the AI board power input is standard. For cold-environment missions, raise the low-battery land threshold from 3.3 V/cell to <strong>3.6 V/cell</strong> to compensate for elevated voltage sag masking true SoC.</p>
-    <p class="text-sm text-slate-300 mb-6">Dynamic power mode management via <code>nvpmodel</code> from a ROS 2 node: <code>sudo nvpmodel -m 0</code> (max performance) and <code>sudo nvpmodel -m 1</code> (efficiency). Switching dynamically based on <code>/fmu/out/battery_status</code> saves ~2 minutes on a mixed ISR mission.</p>
+    <p class="text-sm text-slate-300 mb-2">Dynamic power-mode management via <code>nvpmodel</code> from a ROS 2 node lets the aircraft trade inference throughput for endurance as the battery drains. On a JetPack 6.2+ Orin Nano Super the available modes are <strong>7 W</strong>, <strong>15 W</strong>, <strong>25 W</strong>, and <strong>MAXN_SUPER</strong> (uncapped — highest CPU/GPU/DLA/PVA clocks). Query the actual numbering on your own board rather than assuming it, because the index-to-mode mapping differs between module variants and JetPack releases:</p>
+    <div class="bg-slate-900 border border-slate-700 rounded p-4 font-mono text-xs text-sky-300 mb-3 space-y-1">
+        <div>sudo nvpmodel -q --verbose &nbsp;<span class="text-slate-400"># list modes and current selection</span></div>
+        <div>sudo nvpmodel -m &lt;id&gt; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-slate-400"># switch mode (id from the query above)</span></div>
+        <div>sudo jetson_clocks &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-slate-400"># pin clocks to the max of the selected mode</span></div>
+    </div>
+    <p class="text-sm text-slate-300 mb-6">Switching dynamically on <code>/fmu/out/battery_status</code> recovers roughly 2 minutes on a mixed ISR mission. One caution: a mode change is not instantaneous and briefly perturbs clocks, so trigger it during transit rather than mid-approach, and never inside a control loop that assumes fixed inference latency.</p>
 
     <!-- ═══════════════════════════════════════════════════════════════
          2.5  THERMAL DYNAMICS
@@ -346,10 +369,15 @@ export default `
             </div>
         </div>
         <div class="mt-6 p-6 bg-slate-900 rounded border border-slate-700 text-center">
-            <p class="text-slate-400 text-xs uppercase tracking-wider mb-2">Estimated Junction Temperature (Tj)</p>
-            <div id="tj-result" class="text-4xl font-mono text-emerald-400 font-bold tracking-tight">65 °C</div>
+            <p class="text-slate-400 text-xs uppercase tracking-wider mb-2">Estimated Module Case Temperature (T<sub>case</sub>)</p>
+            <div id="tj-result" class="text-4xl font-mono text-emerald-400 font-bold tracking-tight">65.0 °C</div>
             <div id="tj-status" class="mt-2 text-sm font-bold text-emerald-500">SAFE OPERATING ZONE</div>
-            <p class="text-xs text-slate-500 mt-4 max-w-lg mx-auto">Calculated assuming a standard aluminum finned heatsink (Base Rθ ≈ 2.5 °C/W in still air). Convective heat transfer coefficient (h) scales with √Velocity, reducing Rθ.</p>
+            <div id="tj-detail" class="mt-3 text-xs font-mono text-slate-400">R_heatsink = 1.00 °C/W  ·  estimated junction Tj ≈ 75.0 °C</div>
+            <p class="text-xs text-slate-500 mt-4 max-w-lg mx-auto">Model: T_case = T_ambient + P · R_heatsink, with a standard aluminium finned heatsink (R ≈ 2.5 °C/W in still air) and the convective coefficient scaling as √velocity. Junction is then estimated as T_case + P · θ_jc. Thresholds track the <strong>80 °C module case limit</strong> from NVIDIA's Orin thermal design guide — the same limit cited above.</p>
+        </div>
+        <div class="mt-4 bg-slate-900 p-4 rounded border-l-4 border-amber-500">
+            <strong class="text-amber-400 block mb-1 text-sm">Read the airflow slider carefully</strong>
+            <p class="text-slate-400 text-xs">Drag velocity to 0 and watch what happens: a 20 W module in a sealed 45 °C bay reaches 95 °C case — well past throttling — before it has flown anywhere. This is the single most common thermal mistake in drone integration. Engineers validate the compute stack on a bench with the enclosure open, then seal it into a carbon-fibre body for flight and cannot explain why inference frame rate collapses two minutes into every mission. <strong class="text-slate-200">Prop wash is a design resource:</strong> ducting even 3–5 m/s of rotor downwash across the heatsink roughly halves its thermal resistance and costs nothing in mass or power. Design the airflow path before you design the enclosure.</p>
         </div>
     </div>
 
@@ -416,7 +444,7 @@ export default `
     <!-- ═══════════════════════════════════════════════════════════════
          2.7  EDGE AI SILICON: 2025 SWaP-C COMPARISON
     ════════════════════════════════════════════════════════════════ -->
-    <h3>2.7 Edge AI Silicon: A 2025 SWaP-C Comparison</h3>
+    <h3>2.7 Edge AI Silicon: A 2026 SWaP-C Comparison</h3>
     <p>The "right" AI chip for a drone is never the most powerful — it is the one that delivers sufficient throughput within the power and mass budget. <strong>TOPS/Watt</strong> is the primary SWaP metric. Peak TOPS figures are theoretical maximums; real-world sustained inference at batch size 1 (forced by real-time video) typically achieves 30–60% of peak.</p>
 
     <div class="overflow-x-auto my-6">
@@ -437,16 +465,17 @@ export default `
                 <tr class="bg-slate-800"><td class="p-3 text-white">Google Coral Edge TPU</td><td class="p-3 text-slate-300">4 TOPS</td><td class="p-3 text-emerald-400">2 W</td><td class="p-3 text-sky-400">2.0</td><td class="p-3 text-slate-300">~16 g (USB)</td><td class="p-3 text-slate-300">TFLite-only, lowest cost entry</td></tr>
                 <tr class="bg-slate-800/50"><td class="p-3 text-white">Qualcomm QCS6490 SoM</td><td class="p-3 text-slate-300">12 TOPS (NPU)</td><td class="p-3 text-slate-300">3 – 7 W</td><td class="p-3 text-sky-400">~2.5</td><td class="p-3 text-slate-300">~25 g</td><td class="p-3 text-slate-300">Complete drone-brain SoC + ISP</td></tr>
                 <tr class="bg-slate-800"><td class="p-3 text-white">Rockchip RK3588 (SBC)</td><td class="p-3 text-slate-300">6 TOPS (NPU)</td><td class="p-3 text-slate-300">5 – 10 W</td><td class="p-3 text-amber-400">~1.0</td><td class="p-3 text-slate-300">~50 g (SBC)</td><td class="p-3 text-slate-300">Budget full-Linux; RKNN Toolkit 2</td></tr>
-                <tr class="bg-slate-800/50"><td class="p-3 text-white">Jetson Orin Nano 8 GB</td><td class="p-3 text-slate-300">40 TOPS</td><td class="p-3 text-amber-400">7 – 15 W</td><td class="p-3 text-amber-400">2.7 – 5.7</td><td class="p-3 text-slate-300">~45 g</td><td class="p-3 text-slate-300">CUDA ecosystem, full PyTorch</td></tr>
-                <tr class="bg-slate-800"><td class="p-3 text-white">Jetson Orin NX 16 GB</td><td class="p-3 text-slate-300">157 TOPS*</td><td class="p-3 text-rose-400">10 – 40 W</td><td class="p-3 text-sky-400">3.9 – 15.7</td><td class="p-3 text-slate-300">~70 g</td><td class="p-3 text-slate-300">SLAM + detection + mission planning</td></tr>
+                <tr class="bg-slate-800/50"><td class="p-3 text-white">Jetson Orin Nano Super 8 GB</td><td class="p-3 text-slate-300">67 TOPS*</td><td class="p-3 text-amber-400">7 – 25 W</td><td class="p-3 text-amber-400">2.7 – 9.6</td><td class="p-3 text-slate-300">~45 g</td><td class="p-3 text-slate-300">CUDA ecosystem, full PyTorch</td></tr>
+                <tr class="bg-slate-800"><td class="p-3 text-white">Jetson Orin NX Super 16 GB</td><td class="p-3 text-slate-300">157 TOPS*</td><td class="p-3 text-rose-400">10 – 40 W</td><td class="p-3 text-sky-400">3.9 – 15.7</td><td class="p-3 text-slate-300">~70 g</td><td class="p-3 text-slate-300">SLAM + detection + mission planning</td></tr>
+                <tr class="bg-slate-800/50"><td class="p-3 text-white">Jetson AGX Thor T5000</td><td class="p-3 text-slate-300">2,070 FP4 TFLOPS</td><td class="p-3 text-rose-400">40 – 130 W</td><td class="p-3 text-slate-500">n/a (different metric)</td><td class="p-3 text-slate-300">~350 g w/ heatsink</td><td class="p-3 text-slate-300">Foundation models; &gt;15 kg airframes only</td></tr>
             </tbody>
         </table>
     </div>
-    <p class="text-xs text-slate-500 mb-4">* Orin NX 157 TOPS via JetPack 6.2 Super Mode (2024 firmware update, no hardware change). Real-world batch-1 inference is 30–60% of peak TOPS.</p>
+    <p class="text-xs text-slate-500 mb-4">* Orin Nano 67 TOPS and Orin NX 157 TOPS are both Super Mode figures, unlocked by the JetPack 6.2 firmware update with no hardware change — the same physical module that shipped as "40 TOPS" in 2024 is the "67 TOPS" module today. Older tutorials and datasheets still quote the pre-Super numbers, so always check which figure a benchmark used. Real-world batch-1 inference is 30–60% of peak TOPS. Note also that TOPS across vendors is not directly comparable: Hailo quotes INT4 for the 10H and INT8 for the 8, NVIDIA quotes sparse INT8, and Thor quotes FP4 TFLOPS — these are different units measuring different arithmetic.</p>
 
     <div class="insight-box mb-4">
-        <div class="insight-label">2025 Pareto-Optimal Stack</div>
-        <p class="text-slate-200 text-sm mt-1">Many 2024–2025 drone AI builds pair a <strong>Hailo-8</strong> (deterministic vision inference at 10 TOPS/W) with a <strong>Jetson Orin Nano</strong> (flexible SLAM, path planning, full CUDA). Combined ~$220 hardware delivers 66 TOPS with a blended efficiency of 4–6 TOPS/W. The Hailo handles perception; the Jetson handles cognition.</p>
+        <div class="insight-label">The 2026 Pareto-Optimal Stack</div>
+        <p class="text-slate-200 text-sm mt-1">The classic split-brain build pairs a <strong>Hailo-8</strong> (deterministic vision inference at ~10 TOPS/W, no DRAM of its own) with a <strong>Jetson Orin Nano Super</strong> (flexible SLAM, planning, full CUDA). The Hailo handles perception at fixed latency; the Jetson handles cognition. What changed in 2026 is that the Orin Nano Super's jump to 67 TOPS closed much of the gap — for many sub-3 kg builds a single Orin Nano now carries the whole load, and the second accelerator buys you <em>latency determinism</em> rather than raw throughput. Add the Hailo when you need a perception path that cannot be stalled by whatever else the GPU is doing; skip it when you are throughput-bound and want one toolchain instead of two. The <strong>Hailo-10H</strong> (40 TOPS INT4, under 5 W, AEC-Q100 Grade 2 qualified with automotive production starting 2026) extends the same idea to generative workloads — roughly 10 tokens/s on a 7B LLM inside a 5 W budget.</p>
     </div>
 
     <h4 class="text-sky-300">Quantization: Precision vs. Power</h4>
@@ -463,13 +492,17 @@ export default `
             </tbody>
         </table>
     </div>
-    <p class="text-sm text-slate-300 mb-6">INT8 on the Orin NX reduces sustained inference power from ~18 W to ~12 W — a 33% saving for only ~1.2% mAP degradation on typical aerial detection. 2025 model compression (pruning + knowledge distillation on YOLOv8) reduces parameters 60.7% and FLOPs 64.6% while retaining 96.7% mAP (MDPI Sensors 2025). The compressed model runs 11.76 FPS on Jetson Nano vs ~7 FPS uncompressed — and draws proportionally less power.</p>
+    <p class="text-sm text-slate-300 mb-3">INT8 on the Orin NX reduces sustained inference power from ~18 W to ~12 W — a 33% saving for only ~1.2% mAP degradation on typical aerial detection. Structured pruning plus knowledge distillation compounds this: published YOLO-family results cut parameters by ~61% and FLOPs by ~65% while retaining ~97% of baseline mAP, roughly a 1.7× throughput gain on constrained hardware, with power falling proportionally.</p>
+    <div class="insight-box mb-6">
+        <div class="insight-label">Quantization Is a Power Decision, Not Just a Speed Decision</div>
+        <p class="text-slate-200 text-sm mt-1">Engineers usually reach for INT8 to hit a frame rate. On an aircraft the more valuable effect is the <em>watts you did not spend</em>. Six watts saved on a 2 kg platform drawing ~170 W total is roughly 3.5% of the power budget — about 1.5 minutes of additional flight time on a 44-minute mission, for a fraction of a percent of accuracy. That trade is almost always correct. The exception is small-object detection at altitude, where the targets occupy few pixels and INT8 activation clipping costs disproportionately more mAP than the aggregate number suggests — validate on <em>your</em> altitude band, not on COCO.</p>
+    </div>
 
     <!-- ═══════════════════════════════════════════════════════════════
          2.8  NEXT-GENERATION BATTERY TECHNOLOGIES
     ════════════════════════════════════════════════════════════════ -->
     <h3>2.8 Next-Generation Battery Technologies</h3>
-    <p>The drone industry's endurance ceiling is fundamentally set by energy storage chemistry. A wave of new technologies is breaking the 200 Wh/kg LiPo wall with real commercial deployments in 2024–2025.</p>
+    <p>The drone industry's endurance ceiling is fundamentally set by energy storage chemistry. A wave of new technologies has broken through the 200 Wh/kg LiPo wall, and as of 2026 these are shipping products rather than lab curiosities — semi-solid-state packs are in industrial UAV service and silicon-anode cells are in production for delivery and defense platforms.</p>
 
     <div class="overflow-x-auto my-6">
         <table class="w-full text-sm text-left">
@@ -478,16 +511,16 @@ export default `
                     <th class="p-3">Technology</th>
                     <th class="p-3">Specific Energy</th>
                     <th class="p-3">Specific Power</th>
-                    <th class="p-3">Status (2025)</th>
+                    <th class="p-3">Status (Aug 2026)</th>
                     <th class="p-3">Drone Notes</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-700">
                 <tr class="bg-slate-800"><td class="p-3 text-white">LiPo pack (commercial)</td><td class="p-3 text-slate-400">150 – 200 Wh/kg</td><td class="p-3 text-slate-300">400 – 1,500 W/kg</td><td class="p-3 text-emerald-400">Mature</td><td class="p-3 text-slate-300">Dominant for &lt;30 min missions</td></tr>
                 <tr class="bg-slate-800/50"><td class="p-3 text-white">Li-ion 21700 cells (Samsung 50E)</td><td class="p-3 text-sky-400">250 – 280 Wh/kg</td><td class="p-3 text-slate-300">250 – 500 W/kg</td><td class="p-3 text-emerald-400">Mature</td><td class="p-3 text-slate-300">Higher energy, lower max C-rate</td></tr>
-                <tr class="bg-slate-800"><td class="p-3 text-white">Semi-solid state (Grepow 2024)</td><td class="p-3 text-sky-400">300 – 350 Wh/kg</td><td class="p-3 text-slate-300">200 – 400 W/kg</td><td class="p-3 text-emerald-400">Commercial now</td><td class="p-3 text-slate-300">Better stability; 50–75% endurance gain</td></tr>
-                <tr class="bg-slate-800/50"><td class="p-3 text-white">Li-Silicon SiCore (Amprius 2025)</td><td class="p-3 text-amber-400">450 – 500 Wh/kg</td><td class="p-3 text-slate-300">300 – 800 W/kg</td><td class="p-3 text-amber-400">Early production</td><td class="p-3 text-slate-300">AeroVironment, FLIR, DoD programs</td></tr>
-                <tr class="bg-slate-800"><td class="p-3 text-white">All-solid-state (CATL, QuantumScape)</td><td class="p-3 text-rose-400">~500 Wh/kg (cell)</td><td class="p-3 text-slate-300">200 – 500 W/kg</td><td class="p-3 text-rose-400">Small batch ~2027</td><td class="p-3 text-slate-300">CATL targeting drones as first market</td></tr>
+                <tr class="bg-slate-800"><td class="p-3 text-white">Semi-solid state (Si-C anode)</td><td class="p-3 text-sky-400">350 – 400 Wh/kg cell<br><span class="text-xs text-slate-400">280 – 320 Wh/kg pack</span></td><td class="p-3 text-slate-300">200 – 400 W/kg</td><td class="p-3 text-emerald-400">Mainstream for industrial UAV</td><td class="p-3 text-slate-300">800–1,000 cycles; −20 to +60 °C; the default 2026 upgrade path</td></tr>
+                <tr class="bg-slate-800/50"><td class="p-3 text-white">Li-Silicon SiCore (Amprius)</td><td class="p-3 text-amber-400">450 Wh/kg typ.<br><span class="text-xs text-slate-400">500 Wh/kg validated</span></td><td class="p-3 text-slate-300">300 – 800 W/kg</td><td class="p-3 text-amber-400">In production</td><td class="p-3 text-slate-300">1,150–1,300 Wh/L. Shipping to drone customers; Airbus AALTO, Matternet (2026). NDAA-compliant supply chain</td></tr>
+                <tr class="bg-slate-800"><td class="p-3 text-white">All-solid-state (CATL, QuantumScape)</td><td class="p-3 text-rose-400">~500 Wh/kg (cell)</td><td class="p-3 text-slate-300">200 – 500 W/kg</td><td class="p-3 text-rose-400">Still pre-volume; ~2027</td><td class="p-3 text-slate-300">Drones remain a named first market — low volume, high value tolerates early cost</td></tr>
                 <tr class="bg-slate-800/50"><td class="p-3 text-white">H₂ PEM fuel cell (system-level)</td><td class="p-3 text-emerald-400">400 – 600 Wh/kg</td><td class="p-3 text-slate-300">50 – 200 W/kg</td><td class="p-3 text-emerald-400">Commercial now</td><td class="p-3 text-slate-300">Endurance; 7+ hr flight demonstrated</td></tr>
                 <tr class="bg-slate-800"><td class="p-3 text-white">Supercapacitor (EDLC)</td><td class="p-3 text-slate-500">1 – 10 Wh/kg</td><td class="p-3 text-emerald-400">5,000 – 50,000 W/kg</td><td class="p-3 text-emerald-400">Mature</td><td class="p-3 text-slate-300">Transient burst buffer only, not primary</td></tr>
             </tbody>
@@ -571,9 +604,14 @@ export default `
     <p class="text-sm text-slate-300 mb-2">From Bauersfeld &amp; Scaramuzza (ETH Zurich, 2022):</p>
     <div class="bg-slate-900 border border-slate-700 rounded p-4 font-mono text-sm text-sky-300 mb-4">
         v_optimal = v_h × 3<sup>1/4</sup> ≈ 1.32 × v_h<br>
-        <span class="text-slate-400 text-xs">For the 2 kg example: v_h = sqrt(50 / 2.45) ≈ 4.5 m/s → v_opt ≈ 5.9 m/s (21 km/h)</span>
+        <span class="text-slate-400 text-xs">v_h = sqrt(DL / 2ρ), where DL = T/A is disk loading — not sqrt(T / 2ρ). Forgetting the area term is the most common slip here.</span>
     </div>
-    <p class="text-sm text-slate-300 mb-4">At range-optimal speed, aero power is approximately 85% of hover power (translational lift benefit). Estimated max range: <strong>~18 km on a single 4S 10 Ah pack</strong>.</p>
+    <div class="bg-slate-900 border border-slate-700 rounded p-4 font-mono text-xs text-slate-300 mb-4 space-y-1">
+        <div>DL = T / A = 19.62 N / 0.2919 m² = <span class="text-sky-300">67.2 N/m²</span></div>
+        <div>v_h = sqrt(67.2 / (2 · 1.225)) = sqrt(27.4) = <span class="text-sky-300">5.24 m/s</span></div>
+        <div>v_opt = 1.316 · 5.24 = <span class="text-emerald-400">6.9 m/s (24.8 km/h)</span></div>
+    </div>
+    <p class="text-sm text-slate-300 mb-4">At range-optimal speed, aero power is approximately 85% of hover power (the translational-lift benefit). Total draw becomes 0.85 · 147 + 8 + 15.5 ≈ 148 W, giving 125.8 Wh / 148 W ≈ 51 min aloft. Estimated max still-air range: <strong>6.9 m/s × 3,050 s ≈ 21 km on a single 4S 10 Ah pack</strong>. Subtract reserve and headwind before you plan a real sortie against that number — a 4 m/s headwind on the outbound leg cuts usable radius by roughly a third.</p>
 
     <h4 class="text-sky-300">Typical 2 kg AI Drone Weight Budget</h4>
     <div class="overflow-x-auto my-6">
@@ -601,7 +639,7 @@ export default `
 
     <div class="insight-box mb-6">
         <div class="insight-label">The Battery Rules Everything</div>
-        <p class="text-slate-200 text-sm mt-1">At 29% of MTOW, the battery is the largest single mass item — more than all four motors, ESCs, and props combined. Switching from a 200 Wh/kg LiPo pack to a 450 Wh/kg Li-Si pack at the same mass more than doubles flight time, without changing a single line of AI code or a single motor turn.</p>
+        <p class="text-slate-200 text-sm mt-1">At 29% of MTOW, the battery is the largest single mass item — more than all four motors, ESCs, and props combined. Moving from a 200 Wh/kg LiPo pack to a 450 Wh/kg silicon-anode pack of identical mass more than doubles stored energy without changing a single line of AI code or a single motor turn. Two caveats keep this honest: compare <em>pack</em>-level figures on both sides (a 450 Wh/kg cell typically lands near 300–320 Wh/kg once BMS, casing, and wiring are counted), and check the C-rate — high-energy silicon cells deliver less peak current per gram than a race-spec LiPo, so an aggressive airframe may become sag-limited before it becomes energy-limited. The chemistry that wins an endurance mission is not automatically the chemistry that survives a hard evasive maneuver.</p>
     </div>
 
     <h4 class="text-sky-300">Dynamic Power Management — Mission Phase Strategy</h4>
@@ -618,7 +656,7 @@ export default `
             </tbody>
         </table>
     </div>
-    <p class="text-sm text-slate-300 mb-4">2024 research shows dynamically swapping to a lighter model (YOLOv8n INT8 vs YOLOv8m FP16) when SoC drops below a threshold achieves ~40% power reduction with only 3–5% mAP degradation — effectively recovering 4–8 minutes of flight time per mission.</p>
+    <p class="text-sm text-slate-300 mb-4">Model-tier switching is the software counterpart to <code>nvpmodel</code>: dynamically dropping to a lighter detector (a nano-scale INT8 model in place of a medium FP16 one) once SoC crosses a threshold cuts inference power by roughly 40% for 3–5% mAP degradation, recovering 4–8 minutes of flight per mission. Keep both engines resident in memory and swap the pointer — rebuilding a TensorRT engine in flight takes seconds you do not have.</p>
 
     <!-- ═══════════════════════════════════════════════════════════════
          2.11  EXTERNAL REFERENCES

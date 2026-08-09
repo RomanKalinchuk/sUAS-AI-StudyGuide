@@ -235,7 +235,7 @@ export default `
     <p>The <strong>nav2 SMAC Planner</strong> (Steve Macenski, Open Navigation LLC) provides three kinodynamically-aware A* variants that produce smoother, more physically realistic paths than vanilla A*. Unlike standard A* which ignores robot kinematics, SMAC searches the robot's configuration space including heading.</p>
 
     <div class="interactive-panel">
-        <h4 class="mt-0 text-white border-none">SMAC Planner Variants (nav2 2025)</h4>
+        <h4 class="mt-0 text-white border-none">SMAC Planner Variants (Nav2)</h4>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
             <div class="bg-slate-900 p-3 rounded border border-slate-700">
                 <strong class="text-sky-400 block mb-1">SmacPlanner2D</strong>
@@ -274,7 +274,7 @@ export default `
     <p>TEB represents the path as a sequence of robot poses with explicit timestamps: {(x_1,y_1,theta_1,t_1), ..., (x_n,y_n,theta_n,t_n)}. This is an "elastic band" because it is optimized iteratively. The optimization objective penalizes: deviation from the global plan, obstacle proximity, excessive acceleration, violation of the drone's minimum turning radius, and time. TEB handles <strong>kinodynamic constraints</strong> directly — you can specify max angular acceleration, max lateral velocity, and minimum clearance as hard constraints in the graph. For quadrotors, set <code>min_turning_radius: 0.0</code> (holonomic) and <code>footprint_model.type: "circular"</code>.</p>
 
     <h3>13.7 MPPI Controller — Model Predictive Path Integral</h3>
-    <p>MPPI (Model Predictive Path Integral) is the recommended local planner in nav2 as of 2024–2025 for agile drone navigation. Unlike DWA and TEB, MPPI is a <strong>stochastic sampling-based MPC</strong>: it forward-simulates thousands of randomly perturbed control sequences in parallel, evaluates each with a cost function, and computes the optimal control as an information-theoretically weighted average. Critically, the cost function does not need to be convex or differentiable — enabling complex multi-objective behaviors impossible with optimization-based methods. MPPI runs at 100+ Hz on a modest Intel i5 CPU via SIMD-vectorized rollouts.</p>
+    <p>MPPI (Model Predictive Path Integral) is the recommended local planner in Nav2 as of 2026 for agile drone navigation. Unlike DWA and TEB, MPPI is a <strong>stochastic sampling-based MPC</strong>: it forward-simulates thousands of randomly perturbed control sequences in parallel, evaluates each with a cost function, and computes the optimal control as an information-theoretically weighted average. Critically, the cost function does not need to be convex or differentiable — enabling complex multi-objective behaviors impossible with optimization-based methods. MPPI runs at 100+ Hz on a modest Intel i5 CPU via SIMD-vectorized rollouts.</p>
 
     <div class="interactive-panel bg-[#0d1320] border-slate-700">
         <h4 class="mt-0 border-none text-white">MPPI Algorithm Flow</h4>
@@ -304,7 +304,7 @@ export default `
 
     <div class="insight-box">
         <div class="insight-label">MPPI vs DWA vs TEB — WHEN TO USE EACH</div>
-        <p class="text-slate-200 text-sm mt-1">Use <strong>MPPI</strong> when you need the highest-quality local planning with non-convex objectives (default nav2 recommendation for drones, 2025). Use <strong>TEB</strong> when hard kinodynamic constraints matter and you prefer a deterministic optimizer. Use <strong>DWA</strong> on resource-constrained hardware where simplicity and low CPU cost are priorities — it degrades gracefully but produces lower-quality paths than MPPI.</p>
+        <p class="text-slate-200 text-sm mt-1">Use <strong>MPPI</strong> when you need the highest-quality local planning with non-convex objectives (default Nav2 recommendation for drones). Use <strong>TEB</strong> when hard kinodynamic constraints matter and you prefer a deterministic optimizer. Use <strong>DWA</strong> on resource-constrained hardware where simplicity and low CPU cost are priorities — it degrades gracefully but produces lower-quality paths than MPPI.</p>
     </div>
 
     <div class="overflow-x-auto my-6">

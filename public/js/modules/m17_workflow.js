@@ -200,7 +200,7 @@ export default `
             <div class="bg-slate-900 p-4 rounded border border-slate-700">
                 <strong class="text-rose-400 block mb-2">AI / Inference</strong>
                 <ul class="list-disc pl-4 text-slate-400 space-y-1">
-                    <li><strong class="text-white">YOLOv8 / YOLOv11</strong> (Ultralytics) → TensorRT INT8 engine. 30–120 Hz on Orin Nano.</li>
+                    <li><strong class="text-white">YOLO26</strong> (Ultralytics) → TensorRT INT8 engine. NMS-free, so post-processing latency is constant rather than scene-dependent. 30–120 Hz on Orin Nano Super. YOLO11 remains a valid choice where a vendor NPU compiler has not yet validated the YOLO26 head.</li>
                     <li><strong class="text-white">NVIDIA DeepStream 7.x</strong> — Multi-stream pipeline with GStreamer. Handles camera → decode → inference → encode → stream as a single optimized graph.</li>
                     <li><strong class="text-white">TAO Toolkit</strong> — Transfer learning from NVIDIA pre-trained models with domain-specific fine-tuning.</li>
                 </ul>
@@ -216,7 +216,7 @@ export default `
             <div class="bg-slate-900 p-4 rounded border border-slate-700">
                 <strong class="text-teal-400 block mb-2">Security &amp; Supply Chain</strong>
                 <ul class="list-disc pl-4 text-slate-400 space-y-1">
-                    <li><strong class="text-white">Blue UAS Framework</strong> (DCMA, 2025) — 39+ cleared platforms, 165+ cleared components. Required for DoD programs under the DIU sUAS dominance initiative.</li>
+                    <li><strong class="text-white">Blue UAS Cleared List</strong> — moved from DIU to DCMA on 3 Dec 2025; the DCMA portal is authoritative. 39+ cleared platforms, 165+ cleared components. Required for DoD programs, and since the FCC Covered List action of Dec 2025 it is also a route to lawful U.S. sale (see Module 16).</li>
                     <li><strong class="text-white">SBOM (CycloneDX / SPDX)</strong> — Required for DoD software per EO 14028. Generate with Syft, scan CVEs with Grype.</li>
                     <li><strong class="text-white">MAVLink 2 Signed Messages</strong> — HMAC-SHA256 link authentication. Parameter: <code>SERIAL_SIGNING_KEY</code></li>
                 </ul>

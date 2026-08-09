@@ -65,9 +65,9 @@ export default `
     <p>The classical Kalman Filter (Kalman, 1960) is the optimal minimum-variance estimator for a linear system with Gaussian noise. The system model is:</p>
     <div class="bg-slate-900 border border-sky-800/50 rounded-lg p-4 mb-4 font-mono text-sm text-slate-200">
         <div class="text-slate-400 text-xs uppercase tracking-widest mb-2">Process &amp; Measurement Models</div>
-        <p class="mb-1"><strong class="text-sky-400">Process:</strong> $x_k = F_{k-1} x_{k-1} + B_{k-1} u_{k-1} + w_{k-1}$</p>
-        <p class="mb-1"><strong class="text-sky-400">Measurement:</strong> $z_k = H_k x_k + v_k$</p>
-        <p class="text-slate-400 text-xs mt-2">where $w_{k-1} \sim \mathcal{N}(0, Q_k)$ (process noise) and $v_k \sim \mathcal{N}(0, R_k)$ (measurement noise). $F$ = state transition matrix, $H$ = measurement matrix, $B$ = control input matrix, $u$ = control vector.</p>
+        <p class="mb-1"><strong class="text-sky-400">Process:</strong> \\(x_k = F_{k-1} x_{k-1} + B_{k-1} u_{k-1} + w_{k-1}\\)</p>
+        <p class="mb-1"><strong class="text-sky-400">Measurement:</strong> \\(z_k = H_k x_k + v_k\\)</p>
+        <p class="text-slate-400 text-xs mt-2">where \\(w_{k-1} \\sim \\mathcal{N}(0, Q_k)\\) (process noise) and \\(v_k \\sim \\mathcal{N}(0, R_k)\\) (measurement noise). \\(F\\) = state transition matrix, \\(H\\) = measurement matrix, \\(B\\) = control input matrix, \\(u\\) = control vector.</p>
     </div>
 
     <h4>Step-by-Step EKF Derivation</h4>
@@ -76,16 +76,16 @@ export default `
     <p>Given nonlinear process and measurement models:</p>
     <div class="bg-slate-900 border border-amber-800/40 rounded-lg p-4 mb-4 font-mono text-sm text-slate-200">
         <div class="text-slate-400 text-xs uppercase tracking-widest mb-2">Nonlinear System Models</div>
-        <p class="mb-1"><strong class="text-amber-400">Process:</strong> $x_k = f(x_{k-1}, u_{k-1}) + w_{k-1}$</p>
-        <p class="mb-1"><strong class="text-amber-400">Measurement:</strong> $z_k = h(x_k) + v_k$</p>
-        <p class="text-slate-400 text-xs mt-2">$f(\cdot)$ = nonlinear state transition function, $h(\cdot)$ = nonlinear measurement function.</p>
+        <p class="mb-1"><strong class="text-amber-400">Process:</strong> \\(x_k = f(x_{k-1}, u_{k-1}) + w_{k-1}\\)</p>
+        <p class="mb-1"><strong class="text-amber-400">Measurement:</strong> \\(z_k = h(x_k) + v_k\\)</p>
+        <p class="text-slate-400 text-xs mt-2">\\(f(\\cdot)\\) = nonlinear state transition function, \\(h(\\cdot)\\) = nonlinear measurement function.</p>
     </div>
 
     <p>The Jacobians are computed at the current state estimate:</p>
     <div class="bg-slate-900 border border-emerald-800/40 rounded-lg p-4 mb-4 font-mono text-sm text-slate-200">
         <div class="text-slate-400 text-xs uppercase tracking-widest mb-2">Jacobian Linearization</div>
-        <p class="mb-1">$F_k = \left.\frac{\partial f}{\partial x}\right|_{\hat{x}_{k-1|k-1}}$ &nbsp; (Jacobian of process model w.r.t. state)</p>
-        <p class="mt-2">$H_k = \left.\frac{\partial h}{\partial x}\right|_{\hat{x}_{k|k-1}}$ &nbsp; (Jacobian of measurement model w.r.t. state)</p>
+        <p class="mb-1">\\(F_k = \\left.\\frac{\\partial f}{\\partial x}\\right|_{\\hat{x}_{k-1|k-1}}\\) &nbsp; (Jacobian of process model w.r.t. state)</p>
+        <p class="mt-2">\\(H_k = \\left.\\frac{\\partial h}{\\partial x}\\right|_{\\hat{x}_{k|k-1}}\\) &nbsp; (Jacobian of measurement model w.r.t. state)</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -94,46 +94,46 @@ export default `
             <div class="font-mono text-xs space-y-3 text-slate-200">
                 <div>
                     <div class="text-slate-400 mb-1">1. Propagate state mean:</div>
-                    <div>$\hat{x}_{k|k-1} = f(\hat{x}_{k-1|k-1}, u_{k-1})$</div>
+                    <div>\\(\\hat{x}_{k|k-1} = f(\\hat{x}_{k-1|k-1}, u_{k-1})\\)</div>
                 </div>
                 <div>
                     <div class="text-slate-400 mb-1">2. Propagate covariance:</div>
-                    <div>$P_{k|k-1} = F_k P_{k-1|k-1} F_k^T + Q_k$</div>
+                    <div>\\(P_{k|k-1} = F_k P_{k-1|k-1} F_k^T + Q_k\\)</div>
                 </div>
             </div>
-            <div class="mt-3 text-xs text-sky-300 bg-sky-900/20 p-2 rounded">State grows more uncertain; $P$ inflates due to $Q_k$.</div>
+            <div class="mt-3 text-xs text-sky-300 bg-sky-900/20 p-2 rounded">State grows more uncertain; \\(P\\) inflates due to \\(Q_k\\).</div>
         </div>
         <div class="bg-slate-900 p-5 rounded border-l-4 border-emerald-500">
             <strong class="text-emerald-400 block mb-3 text-sm uppercase tracking-wider">Update Step</strong>
             <div class="font-mono text-xs space-y-3 text-slate-200">
                 <div>
                     <div class="text-slate-400 mb-1">1. Innovation (measurement residual):</div>
-                    <div>$\tilde{y}_k = z_k - h(\hat{x}_{k|k-1})$</div>
+                    <div>\\(\\tilde{y}_k = z_k - h(\\hat{x}_{k|k-1})\\)</div>
                 </div>
                 <div>
                     <div class="text-slate-400 mb-1">2. Innovation covariance:</div>
-                    <div>$S_k = H_k P_{k|k-1} H_k^T + R_k$</div>
+                    <div>\\(S_k = H_k P_{k|k-1} H_k^T + R_k\\)</div>
                 </div>
                 <div>
                     <div class="text-slate-400 mb-1">3. Kalman gain:</div>
-                    <div>$K_k = P_{k|k-1} H_k^T S_k^{-1}$</div>
+                    <div>\\(K_k = P_{k|k-1} H_k^T S_k^{-1}\\)</div>
                 </div>
                 <div>
                     <div class="text-slate-400 mb-1">4. Update state:</div>
-                    <div>$\hat{x}_{k|k} = \hat{x}_{k|k-1} + K_k \tilde{y}_k$</div>
+                    <div>\\(\\hat{x}_{k|k} = \\hat{x}_{k|k-1} + K_k \\tilde{y}_k\\)</div>
                 </div>
                 <div>
                     <div class="text-slate-400 mb-1">5. Update covariance (Joseph form for stability):</div>
-                    <div>$P_{k|k} = (I - K_k H_k) P_{k|k-1} (I - K_k H_k)^T + K_k R_k K_k^T$</div>
+                    <div>\\(P_{k|k} = (I - K_k H_k) P_{k|k-1} (I - K_k H_k)^T + K_k R_k K_k^T\\)</div>
                 </div>
             </div>
-            <div class="mt-3 text-xs text-emerald-300 bg-emerald-900/20 p-2 rounded">$P$ shrinks; the Kalman gain $K_k$ optimally blends model vs sensor.</div>
+            <div class="mt-3 text-xs text-emerald-300 bg-emerald-900/20 p-2 rounded">\\(P\\) shrinks; the Kalman gain \\(K_k\\) optimally blends model vs sensor.</div>
         </div>
     </div>
 
     <div class="insight-box mb-6">
         <div class="insight-label">Interpreting the Kalman Gain</div>
-        <p class="text-slate-200 text-sm mt-1">$K_k = P_{k|k-1} H_k^T (H_k P_{k|k-1} H_k^T + R_k)^{-1}$. When $R_k \to 0$ (sensor is very accurate), $K \to H^{-1}$ — trust the sensor completely. When $P_{k|k-1} \to 0$ (model prediction is very accurate), $K \to 0$ — ignore the sensor. The filter automatically finds the minimum-variance balance.</p>
+        <p class="text-slate-200 text-sm mt-1">\\(K_k = P_{k|k-1} H_k^T (H_k P_{k|k-1} H_k^T + R_k)^{-1}\\). When \\(R_k \\to 0\\) (sensor is very accurate), \\(K \\to H^{-1}\\) — trust the sensor completely. When \\(P_{k|k-1} \\to 0\\) (model prediction is very accurate), \\(K \\to 0\\) — ignore the sensor. The filter automatically finds the minimum-variance balance.</p>
     </div>
 
     <figure class="my-6">
@@ -182,8 +182,8 @@ export default `
                 </tr>
                 <tr class="bg-slate-800">
                     <td class="p-3 text-slate-300 font-semibold">Computational cost</td>
-                    <td class="p-3 text-emerald-400">$O(n^2)$ — lowest</td>
-                    <td class="p-3 text-amber-400">$O(n^2)$ sigma points, ~2-3× EKF cost</td>
+                    <td class="p-3 text-emerald-400">\\(O(n^2)\\) — lowest</td>
+                    <td class="p-3 text-amber-400">\\(O(n^2)\\) sigma points, ~2-3× EKF cost</td>
                     <td class="p-3 text-emerald-400">Similar to EKF</td>
                 </tr>
                 <tr class="bg-slate-900">
@@ -215,18 +215,18 @@ export default `
     </div>
 
     <h4>Unscented Kalman Filter (UKF) — The Sigma Point Method</h4>
-    <p>Instead of computing a Jacobian, the UKF selects $2n+1$ deterministic <strong>sigma points</strong> around the current estimate, propagates them all through the nonlinear function, and fits a Gaussian to the output cloud. For an $n$-state system, the sigma points are:</p>
+    <p>Instead of computing a Jacobian, the UKF selects \\(2n+1\\) deterministic <strong>sigma points</strong> around the current estimate, propagates them all through the nonlinear function, and fits a Gaussian to the output cloud. For an \\(n\\)-state system, the sigma points are:</p>
     <div class="bg-slate-900 border border-amber-800/40 rounded-lg p-4 mb-4 font-mono text-sm text-slate-200">
-        <p class="mb-2">$\mathcal{X}_0 = \hat{x}$, &nbsp; $\mathcal{X}_i = \hat{x} + \left(\sqrt{(n+\lambda)P}\right)_i$, &nbsp; $\mathcal{X}_{i+n} = \hat{x} - \left(\sqrt{(n+\lambda)P}\right)_i$</p>
-        <p class="text-slate-400 text-xs">where $\lambda = \alpha^2(n+\kappa) - n$ is a scaling parameter. This achieves 3rd-order accuracy for Gaussian distributions without computing any derivatives.</p>
+        <p class="mb-2">\\(\\mathcal{X}_0 = \\hat{x}\\), &nbsp; \\(\\mathcal{X}_i = \\hat{x} + \\left(\\sqrt{(n+\\lambda)P}\\right)_i\\), &nbsp; \\(\\mathcal{X}_{i+n} = \\hat{x} - \\left(\\sqrt{(n+\\lambda)P}\\right)_i\\)</p>
+        <p class="text-slate-400 text-xs">where \\(\\lambda = \\alpha^2(n+\\kappa) - n\\) is a scaling parameter. This achieves 3rd-order accuracy for Gaussian distributions without computing any derivatives.</p>
     </div>
 
     <h4>Error-State Kalman Filter (ESKF) — Navigating on SO(3)</h4>
-    <p>The ESKF splits the state into a <strong>nominal state</strong> (propagated with full nonlinear kinematics, no noise) and an <strong>error state</strong> (small perturbations tracked by a linear Kalman filter). For rotations, the error is represented as a rotation vector $\delta\theta \in \mathbb{R}^3$ in the Lie algebra $\text{so}(3)$, avoiding the overparameterization of quaternions. The nominal rotation integrates as $R_k = R_{k-1} \exp(\omega \Delta t)$; the error covariance stays a well-conditioned $3\times3$ block. VINS-Mono, FAST-LIO2, and SLAM algorithms widely use ESKF for this reason.</p>
+    <p>The ESKF splits the state into a <strong>nominal state</strong> (propagated with full nonlinear kinematics, no noise) and an <strong>error state</strong> (small perturbations tracked by a linear Kalman filter). For rotations, the error is represented as a rotation vector \\(\\delta\\theta \\in \\mathbb{R}^3\\) in the Lie algebra \\(\\text{so}(3)\\), avoiding the overparameterization of quaternions. The nominal rotation integrates as \\(R_k = R_{k-1} \\exp(\\omega \\Delta t)\\); the error covariance stays a well-conditioned \\(3\\times3\\) block. VINS-Mono, FAST-LIO2, and SLAM algorithms widely use ESKF for this reason.</p>
 
     <!-- ===== 9.4 EKF3 State Vector ===== -->
     <h3>9.4 The EKF3 State Vector: All 24 States</h3>
-    <p>The ArduPilot EKF3 tracks 24 quantities simultaneously. Each state has an associated uncertainty, and the filter knows how all 24 uncertainties correlate with each other through the $24 \times 24$ covariance matrix $P$. This allows it to say "my position is drifting, therefore my velocity estimate is also suspect."</p>
+    <p>The ArduPilot EKF3 tracks 24 quantities simultaneously. Each state has an associated uncertainty, and the filter knows how all 24 uncertainties correlate with each other through the \\(24 \\times 24\\) covariance matrix \\(P\\). This allows it to say "my position is drifting, therefore my velocity estimate is also suspect."</p>
 
     <div class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden mb-6">
         <div class="px-4 py-3 bg-slate-800 text-xs font-mono text-slate-400 uppercase tracking-widest">EKF3 State Vector — 24 States</div>
@@ -450,7 +450,7 @@ def ekf_update(x_pred, P_pred, z_baro):
                 </tr>
                 <tr class="bg-slate-900">
                     <td class="p-3 text-slate-300 font-semibold">Covariance update form</td>
-                    <td class="p-3 text-slate-300">Standard $(I - KH)P$</td>
+                    <td class="p-3 text-slate-300">Standard \\((I - KH)P\\)</td>
                     <td class="p-3 text-slate-300">Joseph stabilized form for better numerical conditioning</td>
                 </tr>
                 <tr class="bg-slate-800">
@@ -514,20 +514,20 @@ def ekf_update(x_pred, P_pred, z_baro):
     <h4>GPS Outlier Rejection (Innovation Gating)</h4>
     <p>The EKF tests each GPS reading before fusing it. The test statistic is the <strong>normalized innovation squared (NIS)</strong>:</p>
     <div class="bg-slate-900 border border-slate-700 rounded-lg p-4 mb-4 font-mono text-sm text-slate-200">
-        <p>$\text{NIS} = \tilde{y}_k^T S_k^{-1} \tilde{y}_k$</p>
-        <p class="text-slate-400 text-xs mt-2">This is chi-squared distributed with $m$ degrees of freedom ($m$ = measurement dimension). Gate threshold: $\text{NIS} &lt; \chi^2_{m, 0.997}$. ArduPilot expresses this as a sigma multiplier: EK3_POS_I_GATE default = 500 (nominally ~22σ in the linearized sense — very permissive to avoid spurious rejection).</p>
+        <p>\\(\\text{NIS} = \\tilde{y}_k^T S_k^{-1} \\tilde{y}_k\\)</p>
+        <p class="text-slate-400 text-xs mt-2">This is chi-squared distributed with \\(m\\) degrees of freedom (\\(m\\) = measurement dimension). Gate threshold: \\(\\text{NIS} &lt; \\chi^2_{m, 0.997}\\). ArduPilot expresses this as a sigma multiplier: EK3_POS_I_GATE default = 500 (nominally ~22σ in the linearized sense — very permissive to avoid spurious rejection).</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div class="bg-slate-900 p-4 rounded border border-slate-700 text-sm text-center">
             <div class="text-2xl mb-2 text-sky-400 font-mono font-bold">1</div>
             <strong class="text-white block mb-1">Compute Innovation</strong>
-            <p class="text-slate-400 text-xs">$\tilde{y} = z_\text{GPS} - h(\hat{x}_{k|k-1})$ — how far does GPS deviate from the filter's prediction?</p>
+            <p class="text-slate-400 text-xs">\\(\\tilde{y} = z_\\text{GPS} - h(\\hat{x}_{k|k-1})\\) — how far does GPS deviate from the filter's prediction?</p>
         </div>
         <div class="bg-slate-900 p-4 rounded border border-slate-700 text-sm text-center">
             <div class="text-2xl mb-2 text-sky-400 font-mono font-bold">2</div>
             <strong class="text-white block mb-1">Scale by Innovation Covariance</strong>
-            <p class="text-slate-400 text-xs">$S_k = H P_{k|k-1} H^T + R$. A 5 m error is OK when position uncertainty is large; it is an outlier when uncertainty is small.</p>
+            <p class="text-slate-400 text-xs">\\(S_k = H P_{k|k-1} H^T + R\\). A 5 m error is OK when position uncertainty is large; it is an outlier when uncertainty is small.</p>
         </div>
         <div class="bg-slate-900 p-4 rounded border border-slate-700 text-sm text-center">
             <div class="text-2xl mb-2 text-sky-400 font-mono font-bold">3</div>
@@ -540,12 +540,12 @@ def ekf_update(x_pred, P_pred, z_baro):
     <p>Barometer is the primary altitude source because GPS vertical accuracy is typically 3× worse than horizontal. <code>EK3_ALT_M_NSE</code> (default 1.0 m) is the assumed barometer noise standard deviation. Increase it if your baro is noisy (e.g., helicopter downwash) or if a cover/foam is not installed.</p>
 
     <h4>Magnetometer Yaw Update</h4>
-    <p>The EKF predicts the expected magnetometer reading from the current attitude quaternion plus the estimated Earth + body magnetic field states. The innovation $\tilde{y} = m_\text{measured} - m_\text{predicted}$ primarily corrects yaw. EKF3's 3-axis fusion avoids the pitch-angle singularity that afflicted single-axis heading updates in earlier filters.</p>
+    <p>The EKF predicts the expected magnetometer reading from the current attitude quaternion plus the estimated Earth + body magnetic field states. The innovation \\(\\tilde{y} = m_\\text{measured} - m_\\text{predicted}\\) primarily corrects yaw. EKF3's 3-axis fusion avoids the pitch-angle singularity that afflicted single-axis heading updates in earlier filters.</p>
 
     <h4>Optical Flow Update (GPS-Denied Horizontal Velocity)</h4>
     <p>Optical flow sensors measure pixel displacement. The EKF converts this to body-frame translational velocity using the gyro reading and rangefinder altitude:</p>
     <div class="bg-slate-900 border border-slate-700 rounded-lg p-4 mb-4 font-mono text-sm text-slate-200">
-        <p>$v_\text{body} = \text{flow\_rate\_rad/s} \times h_\text{agl}$ &nbsp; (minus gyro rotational component)</p>
+        <p>\\(v_\\text{body} = \\text{flow\\_rate\\_rad/s} \\times h_\\text{agl}\\) &nbsp; (minus gyro rotational component)</p>
         <p class="text-slate-400 text-xs mt-2">Set <code>EK3_SRC1_VELXY=5</code> for optical flow as sole horizontal velocity source in GPS-denied operation. Requires a downward-pointing rangefinder for AGL height. Flow quality below EK3_FLOW_QUAL_MIN is discarded.</p>
     </div>
 
@@ -601,7 +601,7 @@ def ekf_update(x_pred, P_pred, z_baro):
         <li>Set <code>VISO_TYPE=1</code> (Intel T265) or <code>VISO_TYPE=2</code> (other VIO) to enable the companion-computer interface bridge</li>
     </ol>
 
-    <p class="text-sm text-slate-300">For PX4, set <code>EKF2_EV_CTRL</code> bitmask (bit 0: horizontal position, bit 1: vertical, bit 2: velocity, bit 3: yaw) and send pose via <code>ODOMETRY</code> (MSG #331) which includes a full $6\times6$ covariance matrix — allowing the EKF to weight the VIO measurement by the VIO algorithm's own confidence.</p>
+    <p class="text-sm text-slate-300">For PX4, set <code>EKF2_EV_CTRL</code> bitmask (bit 0: horizontal position, bit 1: vertical, bit 2: velocity, bit 3: yaw) and send pose via <code>ODOMETRY</code> (MSG #331) which includes a full \\(6\\times6\\) covariance matrix — allowing the EKF to weight the VIO measurement by the VIO algorithm's own confidence.</p>
 
     <!-- ===== 9.11 Health / Failsafe ===== -->
     <h3>9.11 EKF Health Monitoring and Failsafe</h3>
@@ -763,7 +763,7 @@ def ekf_update(x_pred, P_pred, z_baro):
         </div>
         <div class="bg-slate-900 p-4 rounded border border-amber-800/50">
             <strong class="text-amber-400 block mb-2 text-sm">Deep Kalman Filter (DKF)</strong>
-            <p class="text-slate-400 text-xs">Learns the process model $f(\cdot)$ and measurement model $h(\cdot)$ from data using neural network function approximators, while keeping the KF Bayesian update structure. Effective when the physics model is partially unknown (e.g., aerodynamic drag coefficients).</p>
+            <p class="text-slate-400 text-xs">Learns the process model \\(f(\\cdot)\\) and measurement model \\(h(\\cdot)\\) from data using neural network function approximators, while keeping the KF Bayesian update structure. Effective when the physics model is partially unknown (e.g., aerodynamic drag coefficients).</p>
             <p class="text-slate-400 text-xs mt-2">2025 PeerJ paper on advanced ESKF shows hybrid outperforms classical by 40% on RMSE for aggressive maneuvers.</p>
         </div>
         <div class="bg-slate-900 p-4 rounded border border-emerald-800/50">

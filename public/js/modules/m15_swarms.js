@@ -294,6 +294,17 @@ CBBA Phase 2 — Consensus (repeat until stable):
 
     <h3>15.6 Military Programs & Combat Applications</h3>
 
+    <div class="bg-slate-800/60 border border-amber-700/60 rounded-xl p-5 mb-6">
+        <h4 class="text-amber-400 font-bold text-base mt-0 mb-3">Programmatic Reality Check — Where the Flagship Efforts Actually Stand (2026)</h4>
+        <p class="text-slate-300 text-sm mb-3">Swarm programs are announced far more often than they are delivered, and an engineer reading this material should be able to distinguish a demonstrated capability from a funded intention. Two data points worth carrying:</p>
+        <ul class="text-slate-300 text-sm space-y-2 list-disc list-inside mb-3">
+            <li><strong class="text-white">Replicator</strong> — launched in 2023 with roughly $1B initial funding to field thousands of attritable autonomous systems across domains. It <strong class="text-white">missed its August 2025 delivery target</strong> and was restructured under a new organization, the Defense Autonomous Warfare Group (DAWG).</li>
+            <li><strong class="text-white">DARPA OFFSET</strong> — targeted swarms of 250+ air and ground robots supporting infantry units, and produced substantial published research on swarm tactics and human-swarm interfaces. Its lasting contribution has been the tooling and the tactics vocabulary rather than a fielded system.</li>
+        </ul>
+        <p class="text-slate-400 text-sm mb-2"><strong class="text-slate-200">Why swarms are harder to field than to demonstrate.</strong> A choreographed light show flies hundreds of aircraft with centrally planned trajectories, a clean RF environment, precise GNSS, and no adversary — none of which survive contact with an operational setting. The genuinely hard problems are the ones this module's earlier sections address: consensus under packet loss and Byzantine failure (§15.3), task reallocation when aircraft are lost mid-mission (§15.4), and coordination when GNSS is denied so every agent's position estimate is drifting independently. Add to that the operator-workload question — one person cannot supervise fifty aircraft under the human-judgment requirements discussed in Module 14 — and the delivery gap becomes easier to understand.</p>
+        <p class="text-slate-400 text-sm">The current direction of travel is toward <strong class="text-slate-200">natural-language swarm tasking</strong>, where an operator issues an intent ("survey this block, report vehicles") and the swarm decomposes it into per-agent assignments — the Tier 3 deliberative layer from Module 1 applied to a fleet rather than a single aircraft. That is a promising architecture and an unsolved verification problem: it is genuinely difficult to prove what a swarm will do before it does it.</p>
+    </div>
+
     <figure class="my-6">
         <img src="images/m15_drone_swarm_formation.jpg" alt="US Army drone swarm prepared for formation flight during Marne Focus 2024 at Fort Stewart, Georgia" class="rounded-lg w-full">
         <figcaption class="text-gray-400 text-sm text-center mt-2">A drone swarm operated by the Threat System Management Office prepares to fly in formation during Marne Focus 2024 at Fort Stewart, Georgia, April 7, 2024. Source: <a href="https://www.dvidshub.net/image/8334790/marne-focus-2024-drone-swarm" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">DVIDS / Staff Sgt. Jacob Slaymaker, U.S. Army (Public Domain)</a></figcaption>

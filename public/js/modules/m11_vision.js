@@ -2,7 +2,7 @@ export default `
 <div class="fade-in">
     <span class="text-sky-500 font-mono tracking-widest text-sm uppercase">Module 11</span>
     <h2>Perception, Computer Vision &amp; Visual SLAM</h2>
-    <p>Autonomous drone perception operates at two levels: <strong>object-level understanding</strong> — detecting, classifying, and tracking targets in real time — and <strong>geometric self-localization</strong> — recovering the drone's own pose by mapping the environment. This module covers both: from YOLO11/RT-DETR real-time detection and SAM 2 video segmentation, through multi-object tracking, thermal IR processing, and monocular depth estimation, to the full mathematical stack of Visual SLAM — camera geometry, optical flow, Visual-Inertial Odometry, loop closure, and deep learning frontiers. Hardware coverage spans edge deployment on Jetson Orin NX, FLIR thermal cameras, and NVIDIA Isaac ROS cuVSLAM.</p>
+    <p>Autonomous drone perception operates at two levels: <strong>object-level understanding</strong> — detecting, classifying, and tracking targets in real time — and <strong>geometric self-localization</strong> — recovering the drone's own pose by mapping the environment. This module covers both: from YOLO26/RT-DETR real-time detection and SAM 2 video segmentation, through multi-object tracking, thermal IR processing, and monocular depth estimation, to the full mathematical stack of Visual SLAM — camera geometry, optical flow, Visual-Inertial Odometry, loop closure, and deep learning frontiers. Hardware coverage spans edge deployment on Jetson Orin NX, FLIR thermal cameras, and NVIDIA Isaac ROS cuVSLAM.</p>
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 my-6 text-center text-xs">
         <div class="bg-slate-800 border border-slate-700 rounded-lg p-3"><span class="text-sky-400 font-bold block text-lg">YOLO11</span><span class="text-slate-400">Real-time detection</span></div>
@@ -407,7 +407,7 @@ if danger_mask.any():
     </div>
 
     <h3>11.G NVIDIA Isaac ROS cuVSLAM (2025)</h3>
-    <p>NVIDIA's <strong>cuVSLAM</strong> (CUDA-accelerated Visual SLAM) is the production SLAM library shipped with <strong>Isaac ROS</strong> — NVIDIA's GPU-accelerated ROS 2 package collection. cuVSLAM is a stereo-visual-inertial odometry system optimized to run entirely on NVIDIA GPU/DLA, leaving the CPU free for mission logic. It is the recommended SLAM solution for Jetson-based drone platforms as of 2025.</p>
+    <p>NVIDIA's <strong>cuVSLAM</strong> (CUDA-accelerated Visual SLAM) is the production SLAM library shipped with <strong>Isaac ROS</strong> — NVIDIA's GPU-accelerated ROS 2 package collection. cuVSLAM is a stereo-visual-inertial odometry system optimized to run entirely on NVIDIA GPU/DLA, leaving the CPU free for mission logic. It remains the recommended production SLAM solution for Jetson-based drone platforms in 2026 — see §11.8b for where learned geometric models now outperform it on robustness.</p>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div class="interactive-panel bg-[#0d1320] border-slate-700">
@@ -1180,6 +1180,42 @@ optimized poses via triangulation or Bundle Adjustment (more expensive).<br>
 ORB-SLAM3 runs full Global BA asynchronously after Essential Graph optimization.
     </div>
 </details>
+
+    <h3>11.8b Geometric Foundation Models — the 2026 Shift in SLAM</h3>
+    <p>Everything up to this point describes the classical SLAM pipeline: detect features, match them, estimate geometry, optimize a pose graph. That pipeline is precise, well-understood, and — as of 2026 — no longer the most <em>robust</em> option when conditions degrade. A multi-paradigm evaluation of UAV SLAM under degraded visual conditions published in 2026 produced results that should change how you architect a GPS-denied navigation stack.</p>
+
+    <div class="bg-slate-800/60 border border-rose-700/60 rounded-xl p-5 mb-6">
+        <h4 class="text-rose-400 font-bold text-base mt-0 mb-3">Measured Robustness Under Degradation (2026 UAV Evaluation)</h4>
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs">
+                <thead class="text-slate-400 border-b border-slate-700">
+                    <tr><th class="p-2 text-left">System</th><th class="p-2 text-left">Paradigm</th><th class="p-2 text-left">Tracking success</th><th class="p-2 text-left">Degraded ATE</th></tr>
+                </thead>
+                <tbody class="text-slate-300 divide-y divide-slate-800">
+                    <tr><td class="p-2 text-amber-400">ORB-SLAM3</td><td class="p-2">Classical feature-based</td><td class="p-2 text-rose-400">62.4% overall — <strong>0% under dense haze</strong></td><td class="p-2 text-slate-500">n/a where tracking fails</td></tr>
+                    <tr><td class="p-2 text-sky-400">DPVO / DROID-SLAM</td><td class="p-2">Learned dense/recurrent</td><td class="p-2 text-amber-400">Substantially more robust than classical</td><td class="p-2">—</td></tr>
+                    <tr><td class="p-2 text-emerald-400">DUSt3R</td><td class="p-2">ViT geometric foundation model</td><td class="p-2 text-emerald-400"><strong>96.5%</strong> — highest tested</td><td class="p-2">—</td></tr>
+                    <tr><td class="p-2 text-emerald-400">MASt3R</td><td class="p-2">ViT geometric foundation model</td><td class="p-2 text-emerald-400">High</td><td class="p-2 text-emerald-400"><strong>0.027 m</strong> — lowest tested</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="text-slate-400 text-xs mt-3">The 0% figure is the one to internalize. ORB-SLAM3 does not degrade gracefully in dense haze — it fails completely, because there are no repeatable corner features to detect. Every classical feature-based system shares this failure mode: fog, smoke, dust, heavy rain, low light, and low-texture scenes (snowfields, open water, fresh concrete) all remove the thing the algorithm depends on. If your aircraft must navigate without GNSS in exactly those conditions — which is when GNSS-denied navigation matters most — a feature-based VIO alone is not a sufficient answer.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-sm">
+        <div class="bg-slate-900 p-4 rounded border border-slate-700">
+            <strong class="text-emerald-400 block mb-2">What a Geometric Foundation Model does differently</strong>
+            <p class="text-slate-400 text-xs mb-2">DUSt3R, MASt3R, and VGGT take uncalibrated monocular RGB images and directly regress dense 3D point maps plus camera poses — no feature detector, no explicit matching stage, no calibration file. The geometry is learned prior knowledge rather than something recovered from correspondences at runtime.</p>
+            <p class="text-slate-400 text-xs">That is precisely why they survive haze: the model infers plausible scene structure from context the way a human pilot does, instead of requiring crisp corners to triangulate. <strong class="text-slate-200">MASt3R-SLAM</strong> extends this to a full real-time dense SLAM system that works with uncalibrated cameras, and by 2026 it is being folded into commercial drone workflows for indoor inspection and rapid site mapping.</p>
+        </div>
+        <div class="bg-slate-900 p-4 rounded border border-slate-700">
+            <strong class="text-amber-400 block mb-2">The catch: compute</strong>
+            <p class="text-slate-400 text-xs mb-2">MASt3R-SLAM runs around 15 FPS on an <strong class="text-slate-200">RTX 4090</strong>. That is a 450W desktop GPU. Nothing in this class runs on a 25W Orin Nano today at useful rates, so these are not yet drop-in replacements for cuVSLAM or VINS-Fusion on a small airframe.</p>
+            <p class="text-slate-400 text-xs">Where they are already practical: larger platforms carrying Thor-class compute; post-flight reconstruction from onboard-recorded imagery; and as a <strong class="text-slate-200">recovery layer</strong> — run cheap VIO continuously, and invoke a foundation model only when VIO loses tracking, to re-localize before dead-reckoning drift becomes unrecoverable. That hybrid is the pragmatic 2026 architecture.</p>
+        </div>
+    </div>
+
+    <p class="text-slate-300 text-sm mb-6">Related work worth tracking: <strong class="text-white">VGGT</strong> won best paper at CVPR 2025 and <strong class="text-white">VGGT-Omega</strong> was a best-paper finalist at CVPR 2026; <strong class="text-white">VGGT-SLAM</strong> pairs the model with SL(4) factor-graph optimization to build globally consistent maps. <strong class="text-white">CoMo3R-SLAM</strong> targets collaborative monocular dense SLAM across outdoor multi-agent systems — directly relevant to the swarm mapping problem in Module 15. The engineering takeaway for a drone architect is not "replace your VIO," but rather: <em>know which of your perception components fail hard versus fail soft, and make sure the hard-failing ones are never your only source of pose.</em></p>
 
     <h3>11.9 Deep Learning Frontiers in Perception</h3>
     <p>Classical geometric SLAM excels in textured, static, well-lit environments. Deep learning extends capability to low-texture surfaces, dynamic scenes, night imagery, and produces richer maps with semantic understanding.</p>

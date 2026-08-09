@@ -48,7 +48,7 @@ export default `
                         <li>> Power: 7W efficiency / 15W performance</li>
                         <li>> Price: ~$149 (module, volume)</li>
                         <li>> JetPack: 6.x, Ubuntu 22.04, CUDA 12.6</li>
-                        <li>> Reality Check: Adequate for single-stream inference (YOLO11n/s). Memory bandwidth at 68 GB/s bottlenecks concurrent multi-model loads. Upgrade to Nano Super for new designs.</li>
+                        <li>> Reality Check: Adequate for single-stream inference (YOLO26n/s). Memory bandwidth at 68 GB/s bottlenecks concurrent multi-model loads. Upgrade to Nano Super for new designs.</li>
                     </ul>
                 </div>
                 <div class="bg-slate-900 p-4 rounded border border-emerald-700">
@@ -61,7 +61,7 @@ export default `
                         <li>> Price: ~$249 (developer kit)</li>
                         <li>> JetPack: 6.2+ required for Super Mode; Ubuntu 22.04, CUDA 12.6, TensorRT 10.x</li>
                         <li>> Form: Same module footprint as base Nano — carrier boards are compatible</li>
-                        <li>> Reality Check: <span class="text-emerald-400">Default recommendation for sub-5kg AI drone builds as of 2025.</span> The 102 GB/s bandwidth eliminates the bottleneck that forced model-size trade-offs between YOLO11m and VSLAM. Switch to 7W during cruise, 25W during active inference.</li>
+                        <li>> Reality Check: <span class="text-emerald-400">Default recommendation for sub-5kg AI drone builds as of 2026.</span> The 102 GB/s bandwidth eliminates the bottleneck that forced model-size trade-offs between YOLO26m and VSLAM. Switch to 7W during cruise, 25W during active inference.</li>
                     </ul>
                 </div>
                 <div class="bg-slate-900 p-4 rounded border border-sky-700">
@@ -106,6 +106,23 @@ export default `
                         </ul>
                     </div>
                 </div>
+                <div class="bg-slate-900 p-4 rounded border border-sky-800 md:col-span-2">
+                    <strong class="text-sky-400 text-lg block mb-2">Jetson Thor T3000 / T2000 — Mainstream Thor <span class="text-xs bg-sky-900/50 px-2 py-0.5 rounded">ANNOUNCED JULY 2026 · SHIPS Q1 2027</span></strong>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs text-slate-300 mt-2">
+                        <ul class="space-y-1">
+                            <li>> T3000: 865 TFLOPS FP4 — 1536-core Blackwell GPU</li>
+                            <li>> T3000 CPU: 8-core Arm Neoverse</li>
+                            <li>> T3000 RAM: 32 GB LPDDR5X @ 273 GB/s</li>
+                            <li>> T3000 networking: 25 GbE</li>
+                            <li>> T2000: 400 TFLOPS — the volume/cost-down tier</li>
+                        </ul>
+                        <ul class="space-y-1">
+                            <li>> Availability: both modules Q1 2027</li>
+                            <li>> Available now: T3000 <strong>emulation mode</strong> under JetPack 7.2.1</li>
+                            <li>> Reality Check: This is the announcement that actually matters for aviation. The T5000's 128 GB and 130W ceiling were built for humanoids; the T3000 at 32 GB brings Blackwell and FP4 into a power and memory envelope a large VTOL or heavy multirotor can plausibly carry. <strong class="text-sky-400">Practical advice: start porting now against emulation.</strong> Software written today for a T3000 target runs on Thor silicon when it lands, and the memory-layout assumptions you bake in are the expensive thing to change later.</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
 
             <div class="mt-6 bg-slate-800/50 border border-sky-800/60 rounded-xl p-5 text-sm">
@@ -135,8 +152,11 @@ export default `
             </div>
 
             <div class="mt-6 bg-slate-800/50 border border-purple-800/60 rounded-xl p-5 text-sm">
-                <strong class="text-purple-400 block mb-3">JetPack 6.x — What Changed and Why It Matters</strong>
-                <p class="text-slate-300 mb-3">JetPack 6 (GA: June 2024) is a breaking change from JetPack 5. APT upgrade is not supported — a full reflash is required. JetPack 6.2 (January 2025) added Super Mode and JetPack 6.3+ (mid-2025) further refined the stack.</p>
+                <strong class="text-purple-400 block mb-3">JetPack 6.x vs JetPack 7 — Which Do You Target?</strong>
+                <p class="text-slate-300 mb-3">JetPack 6 (GA June 2024) was a breaking change from JetPack 5 — APT upgrade is not supported, a full reflash is required. JetPack 6.2 (January 2025) added Super Mode. <strong class="text-white">JetPack 7</strong> is the current generation for Thor-class hardware, moving to <strong class="text-white">Ubuntu 24.04 LTS and Linux kernel 6.8</strong>, with 7.2.1 adding T3000 emulation support.</p>
+                <div class="bg-slate-900 p-3 rounded border-l-4 border-amber-500 mb-3">
+                    <p class="text-slate-300 text-xs"><strong class="text-amber-400">The decision rule:</strong> Orin-class modules (Nano/NX/AGX Orin) run JetPack 6.x on Ubuntu 22.04, which pairs naturally with ROS 2 Humble and — via containers — Jazzy. Thor-class modules run JetPack 7 on Ubuntu 24.04, the native home of ROS 2 Jazzy. This is why ROS 2 Lyrical Luth (May 2026, Ubuntu 26.04) is <em>not</em> yet the practical on-airframe choice despite being the newest LTS: no shipping Jetson runs 26.04 natively. Target Jazzy, containerize aggressively, and let the base OS lag — fighting the vendor BSP to chase a newer Ubuntu is the classic way to lose a month.</p>
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 font-mono text-xs text-slate-300">
                     <div class="bg-slate-900 p-3 rounded border border-slate-700">
                         <strong class="text-purple-400 block mb-1">OS &amp; Kernel</strong>
@@ -199,10 +219,21 @@ export default `
                         <li>> Reality Check: Architecturally different from Hailo-8 — it is a camera SoC, not an M.2 plug-in. Designed to replace the standalone ISP in a gimballed payload. Sends inference results (bounding boxes, metadata) over MAVLink instead of raw video, which dramatically reduces bandwidth and eliminates a separate compute board. Best for smart payload gimbal designs.</li>
                     </ul>
                 </div>
+                <div class="bg-slate-900 p-4 rounded border border-purple-700">
+                    <strong class="text-purple-400 text-lg block mb-2">Hailo-10H M.2 <span class="text-xs bg-purple-900/50 px-2 py-0.5 rounded">GEN-AI AT THE EDGE</span></strong>
+                    <ul class="space-y-1 font-mono text-slate-300">
+                        <li>> Compute: 40 TOPS INT4 — note the INT4, not INT8</li>
+                        <li>> Power: under 5W for the full generative workload</li>
+                        <li>> Form: M.2, drops into an existing socket alongside a host SBC</li>
+                        <li>> Demonstrated: ~10 tokens/s on a 7B-class LLM; ~5 s/image on Stable Diffusion 2.1 — both inside the 5W envelope</li>
+                        <li>> Qualification: AEC-Q100 Grade 2 automotive, production start 2026</li>
+                        <li>> Reality Check: This is the part that makes an onboard VLM plausible without a Jetson. The trade is precision — INT4 weights cost accuracy relative to INT8, and the Dataflow Compiler still requires an offline compile step per model, so you cannot swap architectures in the field. Best fit: a fixed VLM or captioning model that must run continuously at very low power, alongside a conventional detector on separate silicon.</li>
+                    </ul>
+                </div>
                 <div class="bg-slate-900 p-4 rounded border border-amber-700">
                     <strong class="text-amber-400 text-lg block mb-2">Axelera Metis M.2 <span class="text-xs bg-amber-900/50 px-2 py-0.5 rounded">214 TOPS IN M.2 2280</span></strong>
                     <ul class="space-y-1 font-mono text-slate-300">
-                        <li>> Compute: 214 TOPS (INT8) — highest TOPS/W in M.2 form factor (2025)</li>
+                        <li>> Compute: 214 TOPS (INT8) — highest TOPS/W in M.2 form factor (2026)</li>
                         <li>> Power: 6–8W @ ~27–33 TOPS/W</li>
                         <li>> Memory: 1GB on-module DRAM</li>
                         <li>> Interface: PCIe Gen-3 x4 (M-Key 2280)</li>
@@ -217,7 +248,7 @@ export default `
                         <li>> Compute: 4 TOPS</li>
                         <li>> Power: 2W</li>
                         <li>> Interface: USB 3.0 or PCIe M.2</li>
-                        <li>> Reality Check: The pioneer of cheap edge AI. Hardware unchanged since 2019; ecosystem stagnated — TFLite only, no PyTorch or ONNX path. 4 TOPS cannot run YOLO11n at real-time speeds. <span class="text-red-400">Not recommended for new designs.</span> The Hailo-8L (13 TOPS, ~$25, M.2 A+E key) is the direct modern replacement at similar cost.</li>
+                        <li>> Reality Check: The pioneer of cheap edge AI. Hardware unchanged since 2019; ecosystem stagnated — TFLite only, no PyTorch or ONNX path. 4 TOPS cannot run YOLO26n at real-time speeds. <span class="text-red-400">Not recommended for new designs.</span> The Hailo-8L (13 TOPS, ~$25, M.2 A+E key) is the direct modern replacement at similar cost.</li>
                     </ul>
                 </div>
             </div>
@@ -241,7 +272,7 @@ export default `
                         <li>> ISP: 48MP dual-camera, HDR</li>
                         <li>> RKNN Toolkit2: v2.3+ (Apr 2025) — pip-installable, ARM64 native. Supports ONNX, TFLite, PyTorch export paths.</li>
                         <li>> Price: SBC boards ~$80–$150</li>
-                        <li>> Reality Check: Best price-to-performance for budget builds. Toolchain maturity lags TensorRT — operator coverage gaps exist for Transformer-based models. Best use: YOLO11n/s at 30+ fps as sole inference workload, or as host CPU while a Hailo-8 M.2 handles vision.</li>
+                        <li>> Reality Check: Best price-to-performance for budget builds. Toolchain maturity lags TensorRT — operator coverage gaps exist for Transformer-based models. Best use: YOLO26n/s at 30+ fps as sole inference workload, or as host CPU while a Hailo-8 M.2 handles vision.</li>
                     </ul>
                 </div>
                 <div class="bg-slate-900 p-4 rounded border border-sky-700">
@@ -320,6 +351,16 @@ export default `
     ============================================================ -->
     <h3>4.3 AI Compute Comparison Table</h3>
     <p>The TOPS (Tera Operations Per Second) figure is the most-cited — and most misleading — benchmark in edge AI marketing. A 100-TOPS chip can be bottlenecked to 20-TOPS effective throughput by an insufficient memory bus. Check GB/s first, TOPS second. FP16 TOPS is typically 50% of INT8 TOPS on the same chip.</p>
+
+    <div class="bg-slate-900 p-4 rounded border-l-4 border-rose-500 mb-6">
+        <strong class="text-rose-400 block mb-1">Three ways a TOPS number lies to you</strong>
+        <ol class="text-slate-300 text-sm space-y-1 list-decimal list-inside">
+            <li><strong class="text-white">Different arithmetic.</strong> Hailo-10H quotes INT4, Hailo-8 quotes INT8, NVIDIA Orin quotes <em>sparse</em> INT8 (roughly 2× the dense figure on suitable models), and Thor quotes FP4 TFLOPS. "40 TOPS" on one datasheet and "40 TOPS" on another can differ by 4× in real work.</li>
+            <li><strong class="text-white">Peak vs. sustained.</strong> Peak assumes perfect utilization at large batch size. Drones run batch size 1 on a live video stream, which typically realizes only 30–60% of peak — and less on models with many small layers.</li>
+            <li><strong class="text-white">Compute vs. memory bound.</strong> Transformer and VLM workloads are usually bandwidth-bound, not MAC-bound. That is why the Orin Nano Super's jump from 68 to 102 GB/s mattered more in practice than its TOPS headline.</li>
+        </ol>
+        <p class="text-slate-400 text-xs mt-2">The only number that settles an argument is your own model, exported through your own toolchain, benchmarked on the actual module at the actual power mode, with the thermal solution you intend to fly. Everything before that is a shortlist, not a decision.</p>
+    </div>
 
     <div class="overflow-x-auto my-6">
         <table class="w-full text-sm text-left">
@@ -472,6 +513,15 @@ export default `
                     <td class="p-3 text-xs">Research, commercial enterprise, high-redundancy missions</td>
                     <td class="p-3 font-mono">~$350</td>
                 </tr>
+                <tr class="bg-slate-900 hover:bg-slate-700/50">
+                    <td class="p-3 text-purple-400 font-medium">Pixhawk 6X Pro</td>
+                    <td class="p-3 font-mono text-xs">STM32H753 @480MHz</td>
+                    <td class="p-3 text-xs">3x, including an <strong class="text-purple-300">ADIS16470 industrial IMU</strong> (&plusmn;40g)</td>
+                    <td class="p-3 text-xs">2x (redundant, separate buses)</td>
+                    <td class="p-3 text-xs">2x CAN FD + Ethernet</td>
+                    <td class="p-3 text-xs">GNSS-denied endurance, heavy vibration, precision survey — the industrial IMU on a standard FMUv6X board</td>
+                    <td class="p-3 font-mono">~$500+</td>
+                </tr>
                 <tr class="bg-slate-800 hover:bg-slate-700/50">
                     <td class="p-3 text-sky-400 font-medium">Cube Orange+</td>
                     <td class="p-3 font-mono text-xs">STM32H753 @480MHz</td>
@@ -550,6 +600,10 @@ export default `
                 </ul>
             </div>
         </div>
+        <div class="mt-4 bg-slate-900 p-4 rounded border-l-4 border-emerald-500">
+            <strong class="text-emerald-400 block mb-1 text-sm">You no longer have to choose between them</strong>
+            <p class="text-slate-400 text-xs">Until recently, putting an ADIS16470 on an airframe meant a bespoke defense-grade autopilot. The <strong class="text-slate-200">Pixhawk 6X Pro</strong> integrates an ADIS16470 alongside the conventional MEMS units on a standard FMUv6X board, so the redundancy stack now spans two orders of magnitude of sensor quality on one controller. That matters more than the spec sheet suggests: the EKF can cross-check a cheap high-rate MEMS gyro against a low-drift industrial one, which catches a failing sensor far faster than voting among three near-identical parts that tend to fail in similar ways. The 6X Pro also replaced foam IMU isolation with a purpose-formulated silicone core — foam compresses and ages, and stale vibration isolation is a leading cause of "the EKF got worse after 200 flight hours and nobody changed anything."</p>
+        </div>
     </div>
 
     <!-- ============================================================
@@ -557,6 +611,11 @@ export default `
     ============================================================ -->
     <h3>4.5 Perception Sensors — Cameras</h3>
     <p>Camera choice depends on what the companion computer needs to do: stereo depth for obstacle avoidance, RGB for detection, or both. All modern stereo cameras embed an IMU for visual-inertial odometry (VIO) — check IMU quality before purchasing.</p>
+
+    <div class="bg-slate-900 p-4 rounded border-l-4 border-sky-500 mb-6">
+        <strong class="text-sky-400 block mb-1">Vendor note: RealSense is no longer Intel</strong>
+        <p class="text-slate-400 text-sm">RealSense completed its spin-out from Intel in July 2025 as an independent company backed by a $50M Series A (with Intel Capital and MediaTek among the investors), and now operates at <code>realsenseai.com</code>. This ended several years of genuine uncertainty about whether the D400 line would survive — a risk that led many robotics teams to design RealSense out of their platforms. The line is now actively developed again, and RealSense announced a collaboration with NVIDIA covering Jetson Thor, Isaac Sim, and the Holoscan Sensor Bridge. <strong class="text-slate-200">Practical implication:</strong> older documentation, SDK links, and support channels still point at Intel domains and are progressively going stale — check the current vendor site before you file a driver bug against the wrong organization.</p>
+    </div>
 
     <div class="overflow-x-auto my-6">
         <table class="w-full text-sm text-left">
@@ -739,7 +798,7 @@ export default `
                     <td class="p-3 text-xs">Multi-constellation</td>
                     <td class="p-3 text-xs">Integrated</td>
                     <td class="p-3 text-xs font-mono">—</td>
-                    <td class="p-3 text-xs"><span class="text-amber-400">Blue UAS Framework listed (2025)</span> — NDAA-compliant. Purpose-built for DoD procurement without supply chain concerns.</td>
+                    <td class="p-3 text-xs"><span class="text-amber-400">Blue UAS Framework listed (2026)</span> — NDAA-compliant. Purpose-built for DoD procurement without supply chain concerns.</td>
                 </tr>
             </tbody>
         </table>
@@ -749,7 +808,13 @@ export default `
          4.8 BLUE UAS & DOD COMPLIANCE
     ============================================================ -->
     <h3>4.8 Blue UAS &amp; DoD Hardware Compliance</h3>
-    <p>The <a href="https://www.diu.mil/blue-uas-cleared-list" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">Blue UAS Cleared List</a> (Defense Innovation Unit) is the DoD's registry of cyber-vetted, NDAA-compliant drone platforms and components. As of late 2025, it lists 39+ complete systems and 165+ certified components. Understanding the framework is essential for any drone program involving government contracts.</p>
+    <p>The Blue UAS Cleared List is the DoD's registry of cyber-vetted, NDAA-compliant drone platforms and components — 39+ complete systems and 165+ certified components. Understanding the framework is essential for any drone program involving government contracts, and increasingly for commercial ones too.</p>
+
+    <div class="bg-slate-900 p-4 rounded border-l-4 border-rose-500 mb-6">
+        <strong class="text-rose-400 block mb-1">Two things changed since this list was a DoD-only concern</strong>
+        <p class="text-slate-400 text-sm mb-2"><strong class="text-slate-200">1. Ownership moved.</strong> The Blue UAS list transitioned from DIU to the <strong class="text-slate-200">Defense Contract Management Agency (DCMA)</strong> on 3 December 2025. The DCMA Blue List portal is now authoritative; the legacy DIU page is not. Skydio X10, R10, and Dock for X10 were added in July 2026.</p>
+        <p class="text-slate-400 text-sm"><strong class="text-slate-200">2. It became a commercial gatekeeper.</strong> In December 2025 the FCC added all foreign-produced UAS and UAS critical components to its Covered List, blocking new equipment authorizations. In July 2026 the FCC exempted equipment on the DCMA Blue list, and equipment assembled domestically with ≥65% U.S. component value. Blue UAS listing is therefore no longer just a procurement advantage — for many parts it is now the practical route to lawful U.S. sale.</p>
+    </div>
 
     <div class="bg-[#0f172a] border border-amber-800/60 rounded-xl p-6 mb-8">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
@@ -759,11 +824,11 @@ export default `
                     <li>> Section 848 FY20 NDAA + American Security Drone Act 2024 prohibit DoD purchase of drones containing components from listed adversary nations (China, Russia, Iran, North Korea)</li>
                     <li>> A system with non-compliant GPS, ESC, or FC is disqualified regardless of US-made airframe</li>
                     <li>> November 2025 DefenseScoop investigation: some Blue UAS platforms contain Chinese-made motors — loophole under review. Validate full supply chain, not just primary components.</li>
-                    <li>> Blue UAS list transitions to DCMA oversight (from DIU) — check current status before procurement</li>
+                    <li>> Blue UAS list moved to DCMA oversight (Dec 2025) — always verify against the DCMA portal, not cached vendor claims, before procurement</li>
                 </ul>
             </div>
             <div>
-                <strong class="text-purple-400 block mb-3">Blue UAS Framework Listed Components (2025)</strong>
+                <strong class="text-purple-400 block mb-3">Blue UAS Framework Listed Components (2026)</strong>
                 <ul class="space-y-1 font-mono text-xs text-slate-300">
                     <li>> <span class="text-purple-400">Compute:</span> Auterion Skynode S (FC + mission computer)</li>
                     <li>> <span class="text-purple-400">Flight Control:</span> ARK Electronics Flight Controller</li>
@@ -811,7 +876,7 @@ export default `
             <div class="space-y-3">
                 <div class="bg-slate-900 p-4 rounded border-l-4 border-emerald-500">
                     <strong class="text-emerald-400 block mb-1">Budget &lt;$300 / airframe &lt;300g payload</strong>
-                    <p class="text-slate-300 font-mono text-xs">&rarr; Raspberry Pi 5 + Hailo-8L M.2 (13 TOPS @1.5W)<br>&rarr; Single inference stream (YOLO11n/s at &gt;30 fps)<br>&rarr; MAVLink over UART to Pixhawk 6C<br>&rarr; ZED 2i or OAK-D Pro for depth</p>
+                    <p class="text-slate-300 font-mono text-xs">&rarr; Raspberry Pi 5 + Hailo-8L M.2 (13 TOPS @1.5W)<br>&rarr; Single inference stream (YOLO26n/s at &gt;30 fps)<br>&rarr; MAVLink over UART to Pixhawk 6C<br>&rarr; ZED 2i or OAK-D Pro for depth</p>
                 </div>
                 <div class="bg-slate-900 p-4 rounded border-l-4 border-sky-500">
                     <strong class="text-sky-400 block mb-1">Sub-5kg airframe, multiple concurrent models</strong>

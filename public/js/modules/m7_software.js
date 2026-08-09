@@ -111,7 +111,7 @@ build_engine("yolo11s.onnx", "yolo11s_int8.engine", fp16=True, int8=True)</code>
                 </tr>
             </thead>
             <tbody>
-                <tr class="border-b border-slate-800"><td class="p-3 border border-slate-700 text-emerald-400">INT8</td><td class="p-3 border border-slate-700">8-bit 2s complement</td><td class="p-3 border border-slate-700">YOLO11 / RT-DETR on Orin — best latency/accuracy tradeoff for ConvNets</td></tr>
+                <tr class="border-b border-slate-800"><td class="p-3 border border-slate-700 text-emerald-400">INT8</td><td class="p-3 border border-slate-700">8-bit 2s complement</td><td class="p-3 border border-slate-700">YOLO26 / RT-DETR on Orin — best latency/accuracy tradeoff for ConvNets</td></tr>
                 <tr class="border-b border-slate-800"><td class="p-3 border border-slate-700 text-sky-400">FP8 (E4M3)</td><td class="p-3 border border-slate-700">8-bit float</td><td class="p-3 border border-slate-700">Transformer encoder layers. No optimized FP8 kernels for depthwise convolutions — stick to INT8 for backbone</td></tr>
                 <tr class="border-b border-slate-800"><td class="p-3 border border-slate-700 text-amber-400">INT4</td><td class="p-3 border border-slate-700">4-bit, block quantized</td><td class="p-3 border border-slate-700">Weight-only quant for large GEMM layers. Memory-bandwidth-bound ops only</td></tr>
                 <tr><td class="p-3 border border-slate-700 text-purple-400">FP4 (NVFP4)</td><td class="p-3 border border-slate-700">4-bit float, block-16</td><td class="p-3 border border-slate-700">Blackwell GPU only (Jetson Thor / GB200). Not available on Orin (Ampere)</td></tr>
@@ -120,7 +120,7 @@ build_engine("yolo11s.onnx", "yolo11s_int8.engine", fp16=True, int8=True)</code>
     </div>
 
     <div class="bg-slate-800/50 border border-amber-700/40 rounded-xl p-5 text-sm mb-8">
-        <strong class="text-amber-400 block mb-2">Benchmark: YOLO11s on Jetson Orin NX (16GB, JetPack 6.2, TRT 10.3)</strong>
+        <strong class="text-amber-400 block mb-2">Benchmark: YOLO26s on Jetson Orin NX (16GB, JetPack 6.2, TRT 10.3)</strong>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 font-mono text-xs text-slate-300 mt-3">
             <div class="bg-slate-900 p-3 rounded border border-slate-700"><div class="text-slate-400 mb-1">PyTorch FP32</div><div class="text-2xl text-amber-400">~18 FPS</div><div class="text-slate-500">~14W GPU</div></div>
             <div class="bg-slate-900 p-3 rounded border border-slate-700"><div class="text-slate-400 mb-1">TRT FP16</div><div class="text-2xl text-sky-400">~52 FPS</div><div class="text-slate-500">~10W GPU</div></div>
@@ -171,6 +171,24 @@ print(f"Output shape: {outputs[0].shape}")</code></pre>
     <h3>7.3 ROS 2 — Humble vs. Jazzy: Choosing Your LTS</h3>
     <p>ROS 2 has two active Long-Term Support releases targeting production drone programs. The right choice depends on your hardware, JetPack version, and whether you're starting fresh or maintaining existing code.</p>
 
+    <div class="bg-slate-800/60 border border-sky-700/60 rounded-xl p-5 mb-6">
+        <h4 class="text-sky-400 font-bold text-base mt-0 mb-3">The Full Release Picture as of August 2026</h4>
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs">
+                <thead class="text-slate-400 border-b border-slate-700">
+                    <tr><th class="p-2 text-left">Distribution</th><th class="p-2 text-left">Released</th><th class="p-2 text-left">Ubuntu</th><th class="p-2 text-left">Support ends</th><th class="p-2 text-left">Verdict for airframe work</th></tr>
+                </thead>
+                <tbody class="text-slate-300 divide-y divide-slate-800">
+                    <tr><td class="p-2 text-emerald-400 font-semibold">Humble Hawksbill</td><td class="p-2">May 2022 (LTS)</td><td class="p-2">22.04</td><td class="p-2">May 2027</td><td class="p-2">Still the safest target for JetPack 6.x Orin hardware, but the clock is now short — under a year of support left. Do not start new programs here.</td></tr>
+                    <tr><td class="p-2 text-emerald-400 font-semibold">Jazzy Jalisco</td><td class="p-2">May 2024 (LTS)</td><td class="p-2">24.04</td><td class="p-2">May 2029</td><td class="p-2"><strong class="text-emerald-400">The default choice in 2026.</strong> Matches JetPack 7 / Ubuntu 24.04 natively, and runs in containers on JetPack 6 hosts. Longest practical runway against shipping silicon.</td></tr>
+                    <tr><td class="p-2 text-amber-400 font-semibold">Kilted Kaiju</td><td class="p-2">May 2025</td><td class="p-2">24.04</td><td class="p-2">Nov 2026 (non-LTS)</td><td class="p-2">Non-LTS, expiring within months. Useful only to preview features. Never ship an aircraft on it.</td></tr>
+                    <tr><td class="p-2 text-sky-400 font-semibold">Lyrical Luth</td><td class="p-2">May 2026 (LTS)</td><td class="p-2">26.04</td><td class="p-2">May 2031</td><td class="p-2">The newest LTS and eventually the right answer — but it needs Ubuntu 26.04, and <strong class="text-white">no shipping Jetson BSP is on 26.04 yet</strong>. Track it; do not port to it on-airframe in 2026.</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="text-slate-400 text-xs mt-3"><strong class="text-slate-200">The governing constraint is not ROS, it is the vendor BSP.</strong> Jetson modules ship a specific L4T/Ubuntu combination, and the CUDA, TensorRT, and camera drivers are built against it. Newer ROS distributions become usable on a Jetson only after NVIDIA ships a JetPack on the matching Ubuntu base — which is why Lyrical, despite being the newest LTS with the longest support window, is not yet the pragmatic on-aircraft choice. The standard mitigation is to containerize: run a Jazzy image on whatever host the BSP dictates, and keep your application decoupled from the base OS. Teams that instead try to force a newer Ubuntu onto the module reliably lose weeks to broken GPU drivers.</p>
+    </div>
+
     <figure class="my-6">
         <img src="images/m7_ros2_architecture.png" alt="ROS 2 layered architecture showing client libraries, RCL, RMW, and DDS middleware layers" class="rounded-lg w-full">
         <figcaption class="text-gray-400 text-sm text-center mt-2">ROS 2 layered architecture: user code calls rclcpp/rclpy → RCL → RMW abstraction → DDS vendor (FastDDS, CycloneDDS, Connext). Source: <a href="https://docs.ros.org/en/rolling/Concepts/Advanced/About-Internal-Interfaces.html" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300">ROS 2 Documentation</a></figcaption>
@@ -189,7 +207,7 @@ print(f"Output shape: {outputs[0].shape}")</code></pre>
             </thead>
             <tbody class="divide-y divide-slate-700">
                 <tr class="bg-slate-800"><td class="p-3 text-slate-300 font-mono text-xs">Ubuntu base</td><td class="p-3 text-slate-300 text-xs">Ubuntu 22.04</td><td class="p-3 text-emerald-400 text-xs">Ubuntu 24.04</td><td class="p-3 text-slate-400 text-xs">Jazzy requires L4T r36.4+ / JetPack 7 on Orin; Humble runs on JetPack 6.x</td></tr>
-                <tr class="bg-slate-900"><td class="p-3 text-slate-300 font-mono text-xs">Isaac ROS support</td><td class="p-3 text-emerald-400 text-xs">Full (Isaac ROS 3.x)</td><td class="p-3 text-emerald-400 text-xs">Full (JetPack 7+ / Isaac ROS 4.x)</td><td class="p-3 text-slate-400 text-xs">As of mid-2025, Humble + JetPack 6 is the shipping target; Jazzy is next-gen</td></tr>
+                <tr class="bg-slate-900"><td class="p-3 text-slate-300 font-mono text-xs">Isaac ROS support</td><td class="p-3 text-emerald-400 text-xs">Full (Isaac ROS 3.x)</td><td class="p-3 text-emerald-400 text-xs">Full (JetPack 7+ / Isaac ROS 4.x)</td><td class="p-3 text-slate-400 text-xs">As of 2026, Jazzy is the primary target; Humble remains supported until May 2027</td></tr>
                 <tr class="bg-slate-800"><td class="p-3 text-slate-300 font-mono text-xs">Default DDS</td><td class="p-3 text-slate-300 text-xs">FastDDS (eProsima)</td><td class="p-3 text-slate-300 text-xs">FastDDS (eProsima)</td><td class="p-3 text-slate-400 text-xs">CycloneDDS recommended for drone workloads on both — lower latency, simpler config</td></tr>
                 <tr class="bg-slate-900"><td class="p-3 text-slate-300 font-mono text-xs">Executor WaitSet</td><td class="p-3 text-amber-400 text-xs">Partial</td><td class="p-3 text-emerald-400 text-xs">Full rclcpp::WaitSet integration — reduces alloc/dealloc churn per spin</td><td class="p-3 text-slate-400 text-xs">Lower jitter on IMU/camera callback threads in Jazzy</td></tr>
                 <tr class="bg-slate-800"><td class="p-3 text-slate-300 font-mono text-xs">Service recording (rosbag2)</td><td class="p-3 text-red-400 text-xs">Topics only</td><td class="p-3 text-emerald-400 text-xs">Services + topics + metadata self-contained</td><td class="p-3 text-slate-400 text-xs">Record full mission service calls for post-flight replay debugging</td></tr>
@@ -210,14 +228,14 @@ print(f"Output shape: {outputs[0].shape}")</code></pre>
                     <li>You are deploying on Jetson Orin with JetPack 6.x today</li>
                     <li>You need Isaac ROS 3.x packages (cuVSLAM, nvblox, object detection)</li>
                     <li>You have existing MAVROS or third-party packages only built for Humble</li>
-                    <li>Your program ships in 2025 — Humble is the proven production target</li>
+                    <li>You are maintaining an existing fleet already on Humble and cannot requalify before May 2027</li>
                 </ul>
             </div>
             <div class="bg-slate-900 p-4 rounded border border-sky-700/50">
                 <strong class="text-sky-400 block mb-2">Choose Jazzy if:</strong>
                 <ul class="space-y-1 text-xs list-disc list-inside text-slate-400">
                     <li>You are targeting Jetson Thor or next-gen hardware with JetPack 7</li>
-                    <li>Your program ships in 2026+ and you want full EOL through 2029</li>
+                    <li>Your program ships in 2026 or later — this is the default for new work</li>
                     <li>You need service recording in rosbag2 from day one</li>
                     <li>All your dependencies have Jazzy builds (check before committing)</li>
                 </ul>
@@ -400,7 +418,7 @@ int main(int argc, char** argv) {
         </div>
         <div class="bg-slate-900 p-4 rounded border border-slate-700">
             <strong class="text-sky-400 block mb-1">isaac_ros_object_detection</strong>
-            <p class="text-slate-300">TensorRT-backed inference node. Drop in YOLO11 .engine file via model_file_path parameter. Node handles NitrosImage → pre-process → TRT infer → Detection2DArray publish. Supports YOLOv8, RT-DETR, DetectNet, and Grounding DINO (language-guided detection).</p>
+            <p class="text-slate-300">TensorRT-backed inference node. Drop in YOLO26 .engine file via model_file_path parameter. Node handles NitrosImage → pre-process → TRT infer → Detection2DArray publish. Supports YOLOv8, RT-DETR, DetectNet, and Grounding DINO (language-guided detection).</p>
         </div>
         <div class="bg-slate-900 p-4 rounded border border-slate-700">
             <strong class="text-sky-400 block mb-1">isaac_ros_nvblox</strong>
@@ -452,7 +470,7 @@ ros2 launch isaac_ros_visual_slam isaac_ros_visual_slam.launch.py \
     gyro_noise_density:=0.000244 \
     accel_noise_density:=0.001862
 
-# Launch YOLO11 object detection with NITROS zero-copy pipeline
+# Launch YOLO26 object detection with NITROS zero-copy pipeline
 ros2 launch isaac_ros_yolov8 isaac_ros_yolov8_visualize.launch.py \
     model_file_path:=/workspaces/yolo11s_int8.engine \
     input_binding_names:=['images'] \
